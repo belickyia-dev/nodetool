@@ -2332,5 +2332,34 @@ export const migrations: MigrationDef[] = [
       // no-op: the lifted documents are the canonical copy now, and pushing
       // them back onto workflows would resurrect the storage this removes.
     }
+  },
+
+  // ── Create personas table ─────────────────────────────────────────────
+  {
+    version: "20260728_000001",
+    name: "create_personas",
+    createsTables: ["nodetool_personas"],
+    modifiesTables: [],
+    async up(db) {
+      await db.execute(`
+        CREATE TABLE IF NOT EXISTS nodetool_personas (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL,
+          name TEXT NOT NULL DEFAULT '',
+          avatar_asset_id TEXT,
+          platform_accounts TEXT NOT NULL DEFAULT '{}',
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        )
+      `);
+      await db.execute(`
+        CREATE INDEX IF NOT EXISTS idx_personas_user_id
+        ON nodetool_personas (user_id)
+      `);
+    },
+    async down(db) {
+      await db.execute("DROP INDEX IF EXISTS idx_personas_user_id");
+      await db.execute("DROP TABLE IF EXISTS nodetool_personas");
+    }
   }
 ];

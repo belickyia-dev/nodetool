@@ -17,6 +17,7 @@ export * as settings from "./settings.js";
 export * as storage from "./storage.js";
 export * as threads from "./threads.js";
 export * as threadMemories from "./thread-memories.js";
+export * as personas from "./personas.js";
 export * as users from "./users.js";
 export * as sketch from "./sketch.js";
 export * as storyboards from "./storyboards.js";

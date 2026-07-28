@@ -43,6 +43,7 @@ import DefaultModelsMenu from "./DefaultModelsMenu";
 import MCPSettingsMenu from "./MCPSettingsMenu";
 import BrowserExtensionSettingsMenu from "./BrowserExtensionSettingsMenu";
 import VaultsSettings from "./VaultsSettings";
+import PersonasSettings from "./PersonasSettings";
 import { useNotificationStore } from "../../stores/NotificationStore";
 import { useState, useCallback, useEffect, useRef } from "react";
 import SettingsSidebar from "./SettingsSidebar";
@@ -491,8 +492,8 @@ function SettingsPage() {
 
   // Tab 2: Integrations sidebar folders — Configuration mirrors the panel
   // top-to-bottom: the registry meta-sections (Local Model Servers, Search
-  // Provider, …) then Folders; Servers (localhost) and the Nodetool API token
-  // (hosted) follow.
+  // Provider, …) then Folders; Publishing (Personas); Servers (localhost);
+  // and the Nodetool API token (hosted).
   const integrationsSidebarSections = useMemo(() => {
     const configItems = [
       ...getDisplayedSettingGroups(remoteSettings ?? []),
@@ -500,6 +501,10 @@ function SettingsPage() {
     ];
     return [
       { category: "Configuration", items: configItems },
+      {
+        category: "Publishing",
+        items: [{ id: "personas", label: "Personas" }]
+      },
       ...(isLocalhost
         ? [
             {
@@ -1069,6 +1074,9 @@ function SettingsPage() {
                     Folders
                   </Text>
                   <FoldersSettings />
+
+                  {/* Publishing: Personas for social media workflows. */}
+                  <PersonasSettings />
 
                   {/* Servers (localhost only): MCP + Browser Extension. */}
                   {isLocalhost && (

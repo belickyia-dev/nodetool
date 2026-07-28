@@ -19,6 +19,7 @@ import { fontsRouter } from "./routers/fonts.js";
 import { storageRouter } from "./routers/storage.js";
 import { threadsRouter } from "./routers/threads.js";
 import { threadMemoriesRouter } from "./routers/thread-memories.js";
+import { personasRouter } from "./routers/personas.js";
 import { sketchRouter } from "./routers/sketch.js";
 import { storyboardsRouter } from "./routers/storyboards.js";
 import { applicationsRouter } from "./routers/applications.js";
@@ -56,6 +57,7 @@ export const appRouter = router({
   storage: storageRouter,
   threads: threadsRouter,
   threadMemories: threadMemoriesRouter,
+  personas: personasRouter,
   timeline: timelineRouter,
   users: usersRouter,
   worker: workerRouter,

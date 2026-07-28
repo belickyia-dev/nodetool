@@ -43,7 +43,8 @@ export {
   workerInstances,
   triggerInputs,
   runInboxMessages,
-  triggerRegistrations
+  triggerRegistrations,
+  personas
 } from "./schema/index.js";
 
 // ── Drizzle Schema (PostgreSQL) ─────────────────────────────────────
@@ -84,6 +85,9 @@ export { Asset } from "./asset.js";
 export { Message } from "./message.js";
 
 export { Thread } from "./thread.js";
+
+export { Persona } from "./persona.js";
+export type { PlatformAccounts, PersonaResponse } from "./persona.js";
 
 export { ThreadMemory } from "./thread-memory.js";
 export type {
