@@ -3,9 +3,9 @@
   "access": "public",
   "created_at": "2025-10-12T22:16:23.220272",
   "updated_at": "2026-07-17T12:00:00.000Z",
-  "name": "Meeting Transcript Summarizer",
+  "name": "Суммаризатор транскриптов встреч",
   "tool_name": null,
-  "description": "Summarize a meeting from a recording or a pasted transcript — either input works, and action items come back as structured rows instead of another paragraph to scan.",
+  "description": "Автоматически создавайте краткие резюме из транскриптов совещаний.",
   "tags": [
     "audio",
     "llm",

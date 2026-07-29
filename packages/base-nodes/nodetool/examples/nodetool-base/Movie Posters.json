@@ -3,9 +3,9 @@
   "access": "private",
   "created_at": "2026-06-21T13:57:24.787Z",
   "updated_at": "2026-06-21T22:36:58.355Z",
-  "name": "Movie Posters",
+  "name": "Киноафиши",
   "tool_name": null,
-  "description": "Turn a title, genre, and visual style into finished theatrical one-sheet posters. An art-direction agent first writes a key-art brief (positioning, palette, typography), which drives every generated poster — the differentiator is the agent-authored creative strategy, not a raw prompt.",
+  "description": "Генерируйте кинематографичные постеры для вашего фильма или идеи.",
   "tags": [
     "start",
     "image",

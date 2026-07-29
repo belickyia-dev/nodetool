@@ -1093,6 +1093,17 @@ function getCreateSchemaSql(): string {
     );
     CREATE INDEX IF NOT EXISTS "idx_thread_memory_thread_created" ON "nodetool_thread_memories" ("thread_id", "created_at");
     CREATE INDEX IF NOT EXISTS "idx_thread_memory_user" ON "nodetool_thread_memories" ("user_id");
+
+    CREATE TABLE IF NOT EXISTS "nodetool_personas" (
+      "id" text PRIMARY KEY NOT NULL,
+      "user_id" text NOT NULL,
+      "name" text NOT NULL DEFAULT '',
+      "avatar_asset_id" text,
+      "platform_accounts" text NOT NULL DEFAULT '{}',
+      "created_at" text NOT NULL,
+      "updated_at" text NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS "idx_personas_user_id" ON "nodetool_personas" ("user_id");
   `;
 }
 

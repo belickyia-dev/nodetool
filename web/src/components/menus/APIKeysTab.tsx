@@ -295,6 +295,13 @@ const PROVIDER_META: ProviderMeta[] = [
     icon: meshyColorIcon
   },
   {
+    key: "ZERNIO_API_KEY",
+    name: "Zernio",
+    description: "Social media publishing for Instagram, TikTok, YouTube, Pinterest.",
+    section: "media",
+    docsUrl: "https://api.zernio.com/"
+  },
+  {
     key: "RODIN_API_KEY",
     name: "Rodin",
     description: "Rodin AI 3D model generation.",

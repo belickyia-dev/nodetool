@@ -530,6 +530,11 @@ export {
   LIB_HTTP_NODES
 } from "@nodetool-ai/integration-nodes/nodes/lib-http";
 export {
+  ZernioGetAccountsNode,
+  ZernioPublishVideoNode,
+  LIB_SOCIAL_PUBLISH_NODES
+} from "@nodetool-ai/integration-nodes/nodes/lib-social-publish";
+export {
   GraphQLQueryLibNode,
   GraphQLQueryWithAuthLibNode,
   GraphQLIntrospectionLibNode,
@@ -811,6 +816,7 @@ import { LIB_DOCX_NODES } from "@nodetool-ai/document-nodes/nodes/lib-docx";
 import { LIB_BEAUTIFULSOUP_NODES } from "@nodetool-ai/text-nodes/nodes/lib-html-parse";
 import { LIB_BROWSER_NODES } from "@nodetool-ai/automation-nodes/nodes/lib-browser";
 import { LIB_HTTP_NODES } from "@nodetool-ai/integration-nodes/nodes/lib-http";
+import { LIB_SOCIAL_PUBLISH_NODES } from "@nodetool-ai/integration-nodes/nodes/lib-social-publish";
 import { LIB_GRAPHQL_NODES } from "@nodetool-ai/integration-nodes/nodes/lib-graphql";
 import { LIB_MAIL_NODES } from "@nodetool-ai/integration-nodes/nodes/lib-mail";
 import { LIB_TWILIO_NODES } from "@nodetool-ai/integration-nodes/nodes/lib-twilio";
@@ -904,6 +910,7 @@ export const ALL_BASE_NODES: readonly NodeClass[] = [
   ...LIB_BEAUTIFULSOUP_NODES,
   ...LIB_BROWSER_NODES,
   ...LIB_HTTP_NODES,
+  ...LIB_SOCIAL_PUBLISH_NODES,
   ...LIB_GRAPHQL_NODES,
   ...LIB_MAIL_NODES,
   ...LIB_TWILIO_NODES,

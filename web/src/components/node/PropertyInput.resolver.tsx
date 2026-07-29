@@ -40,6 +40,7 @@ import VideoListProperty from "../properties/VideoListProperty";
 import AudioListProperty from "../properties/AudioListProperty";
 import TextListProperty from "../properties/TextListProperty";
 import InferenceProviderModelSelect from "../properties/InferenceProviderModelSelect";
+import PersonaProperty from "../properties/PersonaProperty";
 import {
   MediaAspectRatioImageProperty,
   MediaAspectRatioVideoProperty,
@@ -114,6 +115,8 @@ function customComponentForType(
       return MediaDurationProperty;
     case "media_strength":
       return MediaStrengthProperty;
+    case "persona_id":
+      return PersonaProperty;
     default:
       return null;
   }

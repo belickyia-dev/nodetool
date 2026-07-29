@@ -3,9 +3,9 @@
   "access": "public",
   "created_at": "2026-07-18T00:00:00.000000",
   "updated_at": "2026-07-18T00:00:00.000000",
-  "name": "Script to Screen",
+  "name": "От сценария к экрану",
   "tool_name": null,
-  "description": "Full production spine: a Director agent turns your brief into a direction document (characters, style bible, shot list, narration, music). A style frame anchors every keyframe for consistency, keyframes form a cheap storyboard you can approve before video spend, then each shot is animated, cut together, and mixed with voiceover and music.",
+  "description": "Превратите текстовый сценарий в визуальную раскадровку с генерацией кадров.",
   "tags": [
     "video",
     "generation",

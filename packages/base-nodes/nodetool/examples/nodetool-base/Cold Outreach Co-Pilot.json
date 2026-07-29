@@ -3,9 +3,9 @@
   "access": "public",
   "created_at": "2026-06-27T13:51:16.189Z",
   "updated_at": "2026-06-27T23:00:04.049Z",
-  "name": "Cold Outreach Co-Pilot",
+  "name": "Помощник холодных продаж",
   "tool_name": null,
-  "description": "An autonomous agent researches a prospect on the web and drafts a personalized cold email — opening with a real, specific detail — as structured fields (subject, body, follow-up) instead of one prose blob, ready to drop straight into a CRM or email tool.",
+  "description": "Автоматизируйте создание персонализированных писем для холодных продаж на основе информации о компании и контакте.",
   "tags": [
     "agents",
     "sales",

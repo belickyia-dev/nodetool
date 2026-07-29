@@ -8,6 +8,8 @@ import EditIcon from "@mui/icons-material/Edit";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import PinterestIcon from "@mui/icons-material/Pinterest";
+import FacebookIcon from "@mui/icons-material/Facebook";
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import {
   Text,
   EditorButton,
@@ -40,6 +42,21 @@ const TikTokIcon: React.FC<{ fontSize?: "small" | "medium" | "inherit" }> = ({
   </svg>
 );
 
+/** Twitter/X icon — not in MUI icons. */
+const TwitterIcon: React.FC<{ fontSize?: "small" | "medium" | "inherit" }> = ({
+  fontSize = "small"
+}) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    width={fontSize === "small" ? 20 : 24}
+    height={fontSize === "small" ? 20 : 24}
+  >
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
+
 /** Count how many platform accounts are bound. */
 const countPlatforms = (accounts: PlatformAccounts): number => {
   let count = 0;
@@ -47,6 +64,9 @@ const countPlatforms = (accounts: PlatformAccounts): number => {
   if (accounts.tiktok) count++;
   if (accounts.youtube) count++;
   if (accounts.pinterest) count++;
+  if (accounts.twitter) count++;
+  if (accounts.facebook) count++;
+  if (accounts.linkedin) count++;
   return count;
 };
 
@@ -150,6 +170,23 @@ const PersonaCard: React.FC<PersonaCardProps> = ({ persona, onEdit, onDelete }) 
                   sx={{ color: theme.vars.palette.text.secondary }}
                 />
               )}
+              {persona.platformAccounts.twitter && (
+                <Box sx={{ color: theme.vars.palette.text.secondary }}>
+                  <TwitterIcon fontSize="small" />
+                </Box>
+              )}
+              {persona.platformAccounts.facebook && (
+                <FacebookIcon
+                  fontSize="small"
+                  sx={{ color: theme.vars.palette.text.secondary }}
+                />
+              )}
+              {persona.platformAccounts.linkedin && (
+                <LinkedInIcon
+                  fontSize="small"
+                  sx={{ color: theme.vars.palette.text.secondary }}
+                />
+              )}
               <Text
                 size="small"
                 sx={{ color: theme.vars.palette.text.secondary }}
@@ -214,6 +251,9 @@ const PersonaFormDialog: React.FC<PersonaFormDialogProps> = ({
   const [youtube, setYoutube] = useState("");
   const [pinterest, setPinterest] = useState("");
   const [pinterestBoardId, setPinterestBoardId] = useState("");
+  const [twitter, setTwitter] = useState("");
+  const [facebook, setFacebook] = useState("");
+  const [linkedin, setLinkedin] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -225,6 +265,9 @@ const PersonaFormDialog: React.FC<PersonaFormDialogProps> = ({
         setYoutube(persona.platformAccounts.youtube ?? "");
         setPinterest(persona.platformAccounts.pinterest ?? "");
         setPinterestBoardId(persona.platformAccounts.pinterestBoardId ?? "");
+        setTwitter(persona.platformAccounts.twitter ?? "");
+        setFacebook(persona.platformAccounts.facebook ?? "");
+        setLinkedin(persona.platformAccounts.linkedin ?? "");
       } else {
         setName("");
         setInstagram("");
@@ -232,6 +275,9 @@ const PersonaFormDialog: React.FC<PersonaFormDialogProps> = ({
         setYoutube("");
         setPinterest("");
         setPinterestBoardId("");
+        setTwitter("");
+        setFacebook("");
+        setLinkedin("");
       }
     }
   }, [open, persona]);
@@ -249,7 +295,10 @@ const PersonaFormDialog: React.FC<PersonaFormDialogProps> = ({
           ...(pinterest.trim() ? { pinterest: pinterest.trim() } : {}),
           ...(pinterestBoardId.trim()
             ? { pinterestBoardId: pinterestBoardId.trim() }
-            : {})
+            : {}),
+          ...(twitter.trim() ? { twitter: twitter.trim() } : {}),
+          ...(facebook.trim() ? { facebook: facebook.trim() } : {}),
+          ...(linkedin.trim() ? { linkedin: linkedin.trim() } : {})
         }
       });
       onClose();
@@ -317,6 +366,27 @@ const PersonaFormDialog: React.FC<PersonaFormDialogProps> = ({
               placeholder="e.g., board_12345"
             />
           )}
+          <TextInput
+            label="Twitter/X Account ID"
+            value={twitter}
+            onChange={(e) => setTwitter(e.target.value)}
+            autoComplete="off"
+            placeholder="e.g., acc_twitter_12345"
+          />
+          <TextInput
+            label="Facebook Account ID"
+            value={facebook}
+            onChange={(e) => setFacebook(e.target.value)}
+            autoComplete="off"
+            placeholder="e.g., acc_facebook_12345"
+          />
+          <TextInput
+            label="LinkedIn Account ID"
+            value={linkedin}
+            onChange={(e) => setLinkedin(e.target.value)}
+            autoComplete="off"
+            placeholder="e.g., acc_linkedin_12345"
+          />
         </FlexColumn>
       </DialogContent>
       <DialogActions>

@@ -3,9 +3,9 @@
   "access": "public",
   "created_at": "2026-07-17T00:00:00.000000",
   "updated_at": "2026-07-17T00:00:00.000000",
-  "name": "Model Arena",
+  "name": "Арена моделей",
   "tool_name": null,
-  "description": "One brief, three frontier models, answered side by side. The same prompt fans out to OpenAI, Anthropic, and Google in a single pass, each answering in the same structure — so you compare reasoning, not formatting. Swap the model on any lane to build your own bracket.",
+  "description": "Сравнивайте результаты разных AI-моделей на одном и том же запросе.",
   "tags": [
     "comparison",
     "llm",

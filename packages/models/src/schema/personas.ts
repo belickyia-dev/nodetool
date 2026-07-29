@@ -19,7 +19,8 @@ export const personas = sqliteTable(
     /**
      * JSON object containing platform account IDs.
      * Structure: { instagram?: string, tiktok?: string, youtube?: string,
-     *              pinterest?: string, pinterestBoardId?: string }
+     *              pinterest?: string, pinterestBoardId?: string,
+     *              twitter?: string, facebook?: string, linkedin?: string }
      */
     platform_accounts: text("platform_accounts").notNull().default("{}"),
     created_at: text("created_at").notNull(),

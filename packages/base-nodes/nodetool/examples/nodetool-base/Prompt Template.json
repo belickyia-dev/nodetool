@@ -3,9 +3,9 @@
   "access": "private",
   "created_at": "2026-07-17T00:00:00.000Z",
   "updated_at": "2026-07-17T00:00:00.000Z",
-  "name": "Prompt Template",
+  "name": "Шаблон промпта",
   "tool_name": null,
-  "description": "The starter pattern behind almost every NodeTool workflow: typed inputs fill a reusable prompt template, an LLM answers it, the output renders. Explains a topic for any audience — swap the prompt to reuse the pattern for anything.",
+  "description": "Базовый шаблон для создания собственных воркфлоу с промптами.",
   "tags": [
     "start",
     "beginner",

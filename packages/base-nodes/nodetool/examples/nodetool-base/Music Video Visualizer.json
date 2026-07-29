@@ -3,9 +3,9 @@
   "access": "private",
   "created_at": "2026-07-08T10:44:16.057Z",
   "updated_at": "2026-07-08T10:44:38.859Z",
-  "name": "Music Video Visualizer",
+  "name": "Визуализатор музыкальных клипов",
   "tool_name": null,
-  "description": "Turn any song into a mood-matched music video. Whisper transcribes the lyrics, an LLM creative director reads the emotional arc, writes one image prompt per frame, FLUX renders every frame, and they are stitched back to your original audio. Differentiator: a full transcribe → analyze → fan-out → render → reassemble media pipeline in a single graph — no chat box can do this. Cost note: generates one image per frame (default 8) plus a Whisper transcription, so a run costs several fal-ai calls.",
+  "description": "Создавайте визуальные эффекты и анимации, синхронизированные с музыкой.",
   "tags": [
     "video",
     "audio",

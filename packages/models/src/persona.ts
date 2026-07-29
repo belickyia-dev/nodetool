@@ -16,6 +16,9 @@ export interface PlatformAccounts {
   youtube?: string;
   pinterest?: string;
   pinterestBoardId?: string;
+  twitter?: string;
+  facebook?: string;
+  linkedin?: string;
 }
 
 export interface PersonaResponse {

@@ -3,9 +3,9 @@
   "access": "public",
   "created_at": "2026-07-01T00:00:00.000000",
   "updated_at": "2026-07-01T00:00:00.000000",
-  "name": "Podcast Repurposing Studio",
+  "name": "Студия переформатирования подкастов",
   "tool_name": null,
-  "description": "Drop in one podcast episode and ship the whole content pack: episode titles and show notes, a newsletter edition, five social posts, and quote cards rendered as square images. Whisper transcribes once; four writer branches fan out from the transcript.",
+  "description": "Превратите подкаст в статьи, посты для соцсетей и короткие видео.",
   "tags": [
     "podcast",
     "audio",

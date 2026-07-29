@@ -7,7 +7,10 @@ export const platformAccounts = z.object({
   tiktok: z.string().optional(),
   youtube: z.string().optional(),
   pinterest: z.string().optional(),
-  pinterestBoardId: z.string().optional()
+  pinterestBoardId: z.string().optional(),
+  twitter: z.string().optional(),
+  facebook: z.string().optional(),
+  linkedin: z.string().optional()
 });
 export type PlatformAccountsSchema = z.infer<typeof platformAccounts>;
 

@@ -3,9 +3,9 @@
   "access": "public",
   "created_at": "2026-07-17T12:00:00.000Z",
   "updated_at": "2026-07-17T12:00:00.000Z",
-  "name": "Research Agent",
+  "name": "Исследовательский агент",
   "tool_name": null,
-  "description": "Give it a topic and an audience; the agent runs real web searches, opens the best sources, and streams back a cited markdown briefing. Differentiator: genuine multi-step tool use (search + browse) with inline citations — not a single prompt call.",
+  "description": "AI-агент для глубокого исследования темы с поиском и анализом источников.",
   "tags": [
     "agent",
     "research",

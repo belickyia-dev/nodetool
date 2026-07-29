@@ -3,9 +3,9 @@
   "access": "public",
   "created_at": "2025-11-22T16:54:18.095690",
   "updated_at": "2026-07-17T12:00:00.000Z",
-  "name": "Research Paper Summarizer",
+  "name": "Суммаризатор научных статей",
   "tool_name": null,
-  "description": "Search a curated index of transformer papers by topic, fetch the matches, and have two agents extract findings and technical methodology into one report.",
+  "description": "Автоматическое создание кратких резюме научных публикаций.",
   "tags": [
     "research"
   ],

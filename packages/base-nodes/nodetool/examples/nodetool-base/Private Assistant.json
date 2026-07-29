@@ -3,9 +3,9 @@
   "access": "public",
   "created_at": "2026-07-17T00:00:00.000Z",
   "updated_at": "2026-07-17T00:00:00.000Z",
-  "name": "Private Assistant",
+  "name": "Личный ассистент",
   "tool_name": null,
-  "description": "Ask questions about your own notes and documents — fully local, no API keys. Runs end-to-end on a local Ollama model, so the text never leaves your machine. Requires Ollama running with a model pulled (default: llama3.2 — run `ollama pull llama3.2`).",
+  "description": "AI-ассистент для выполнения повседневных задач и ответов на вопросы.",
   "tags": [
     "local",
     "privacy",

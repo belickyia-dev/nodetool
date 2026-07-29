@@ -3,9 +3,9 @@
   "access": "public",
   "created_at": "2026-07-18T00:00:00.000000",
   "updated_at": "2026-07-18T00:00:00.000000",
-  "name": "Directed Film to Timeline",
+  "name": "Режиссёрский фильм на таймлайн",
   "tool_name": null,
-  "description": "Turn a one-line brief into an editable rough cut. A Director agent writes a screenplay of shots, each shot is fanned out into a keyframe prompt, rendered as a still, animated into a clip, then all clips are collected, appended to a timeline sequence, and rendered to a single video you can keep editing.",
+  "description": "Преобразуйте режиссёрский сценарий в готовый таймлайн с раскадровкой и клипами.",
   "tags": [
     "video",
     "generation",

@@ -3,9 +3,9 @@
   "access": "private",
   "created_at": "2026-01-10T00:16:41.254909",
   "updated_at": "2026-06-22T12:00:00.000Z",
-  "name": "Conditional Logic Engine",
+  "name": "Движок условной логики",
   "tool_name": null,
-  "description": "Teaching example for control flow: one number drives two independent decision structures built entirely from If nodes — there is no dedicated numeric-compare or boolean-logic node in NodeTool, so this shows the actual pattern: PadText + Compare + Equals turn the number into a boolean, then pairs of If nodes sharing one condition (each holding its own value, taking the opposite branch) act as the ternary select and OR you'd otherwise reach for. No LLM calls.",
+  "description": "Демонстрация ветвления и условной логики в воркфлоу NodeTool.",
   "tags": [
     "boolean"
   ],

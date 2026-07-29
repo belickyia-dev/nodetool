@@ -132,6 +132,22 @@ const wireEntity = (entity: Entity) => ({
 const hasReferenceImage = (entities: Entity[]): boolean =>
   entities.some((e) => (e.reference_images?.length ?? 0) > 0);
 
+/**
+ * Kling video models only support 5 or 10 second durations for image-to-video.
+ * Clamps an arbitrary duration to the nearest valid Kling value.
+ */
+const clampDurationForKling = (
+  duration: number | undefined,
+  modelId: string | undefined
+): number | undefined => {
+  if (duration === undefined) return undefined;
+  // Check if the model is a Kling model
+  const isKling = modelId?.toLowerCase().includes("kling") ?? false;
+  if (!isKling) return duration;
+  // Kling only supports 5 or 10 seconds
+  return duration <= 7.5 ? 5 : 10;
+};
+
 export interface UseGenerateShotResult {
   generateKeyframe: (boardId: string, shot: Shot) => Promise<void>;
   generateClip: (boardId: string, shot: Shot) => Promise<void>;
@@ -276,7 +292,10 @@ export const useGenerateShot = (): UseGenerateShotResult => {
               boardEntities(board?.entityIds)
             ).map(wireEntity),
             aspect_ratio: aspectRatio,
-            duration: shot.duration_seconds,
+            duration: clampDurationForKling(
+              shot.duration_seconds,
+              board?.videoModel?.id
+            ),
             // Board-level clip model; omitted = the node's default model.
             ...(board?.videoModel ? { model: board.videoModel } : {})
           },

@@ -3,9 +3,9 @@
   "access": "public",
   "created_at": "2026-07-01T00:00:00.000000",
   "updated_at": "2026-07-01T00:00:00.000000",
-  "name": "SEO Content Engine",
+  "name": "Движок SEO-контента",
   "tool_name": null,
-  "description": "One topic in, a keyword-targeted article batch out — each article lands as typed fields (title, meta description, keywords, body) instead of one markdown blob, ready to paste straight into a CMS. A strategist agent plans the topic cluster, a list generator turns it into briefs, and every brief becomes a full article with an editorial hero image.",
+  "description": "Создавайте SEO-оптимизированный контент с ключевыми словами и метаданными.",
   "tags": [
     "seo",
     "content",

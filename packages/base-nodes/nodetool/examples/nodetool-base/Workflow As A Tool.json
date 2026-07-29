@@ -3,9 +3,9 @@
   "access": "public",
   "created_at": "2026-07-17T09:00:00.000Z",
   "updated_at": "2026-07-17T09:00:00.000Z",
-  "name": "Workflow As A Tool",
+  "name": "Воркфлоу как инструмент",
   "tool_name": null,
-  "description": "Composition demo: an orchestrator agent delegates to two specialist sub-agents wired in as callable tools via control edges — Research (Gemini) gathers the facts, Copy Editor (Claude) polishes the draft, and the manager (GPT-5 mini) decides when to call each. Shows how a self-contained unit of work becomes a tool another agent can invoke, all inside one graph.",
+  "description": "Демонстрация использования одного воркфлоу как инструмента в другом.",
   "tags": [
     "agents",
     "composition",

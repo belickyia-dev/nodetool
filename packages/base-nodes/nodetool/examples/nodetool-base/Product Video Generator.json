@@ -3,9 +3,9 @@
   "access": "private",
   "created_at": "2026-06-21T16:03:52.969Z",
   "updated_at": "2026-06-21T16:55:51.256Z",
-  "name": "Product Video Generator",
+  "name": "Генератор видео продукта",
   "tool_name": null,
-  "description": "Turn a campaign brief, audience, features, and a product photo into a realistic 16:9 launch video — an agent writes the motion prompt, then Veo animates the shot. Cost note: Veo is a paid per-second video model, so this run costs noticeably more than an image-only template.",
+  "description": "Автоматически создавайте презентационные видео для вашего продукта.",
   "tags": [
     "business",
     "data",

@@ -3,9 +3,9 @@
   "access": "public",
   "created_at": "2026-07-01T00:00:00.000000",
   "updated_at": "2026-07-01T00:00:00.000000",
-  "name": "Ad Creative Factory",
+  "name": "Фабрика рекламных креативов",
   "tool_name": null,
-  "description": "Turn one product photo and one offer into a batch of ready-to-test vertical video ads. A strategist agent plans a persona × angle test matrix, a structured data generator emits one variant row per cell — persona, angle, and spoken hook as separate fields, not a prose blob — and every row's hook becomes a staged product scene, an animated 9:16 clip, and a voiceover mixed on top.",
+  "description": "Превратите одно фото продукта и одно предложение в пакет готовых к тестированию вертикальных видеороликов. Агент-стратег планирует матрицу тестов персона × угол, генератор структурированных данных выдаёт одну строку варианта на ячейку — персона, угол и произносимый хук как отдельные поля — и хук каждой строки становится сценой с продуктом, анимированным клипом 9:16 и наложенным голосом.",
   "tags": [
     "marketing",
     "advertising",

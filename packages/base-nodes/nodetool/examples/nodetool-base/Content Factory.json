@@ -1,0 +1,993 @@
+{
+  "id": "content_factory",
+  "access": "public",
+  "created_at": "2026-07-28T00:00:00.000000",
+  "updated_at": "2026-07-28T00:00:00.000000",
+  "name": "Контент-фабрика",
+  "tool_name": null,
+  "description": "Массовое производство контента: статьи, посты, изображения — из одного исходного материала.",
+  "tags": [
+    "marketing",
+    "social-media",
+    "images",
+    "parallel",
+    "content-factory",
+    "example"
+  ],
+  "thumbnail": null,
+  "thumbnail_url": null,
+  "graph": {
+    "edges": [
+      {
+        "id": "e_idea_to_prompt1",
+        "source": "idea",
+        "sourceHandle": "output",
+        "target": "prompt_1",
+        "targetHandle": "IDEA",
+        "ui_properties": {
+          "className": "str"
+        },
+        "edge_type": "data"
+      },
+      {
+        "id": "e_idea_to_prompt2",
+        "source": "idea",
+        "sourceHandle": "output",
+        "target": "prompt_2",
+        "targetHandle": "IDEA",
+        "ui_properties": {
+          "className": "str"
+        },
+        "edge_type": "data"
+      },
+      {
+        "id": "e_idea_to_prompt3",
+        "source": "idea",
+        "sourceHandle": "output",
+        "target": "prompt_3",
+        "targetHandle": "IDEA",
+        "ui_properties": {
+          "className": "str"
+        },
+        "edge_type": "data"
+      },
+      {
+        "id": "e_idea_to_prompt4",
+        "source": "idea",
+        "sourceHandle": "output",
+        "target": "prompt_4",
+        "targetHandle": "IDEA",
+        "ui_properties": {
+          "className": "str"
+        },
+        "edge_type": "data"
+      },
+      {
+        "id": "e_idea_to_prompt5",
+        "source": "idea",
+        "sourceHandle": "output",
+        "target": "prompt_5",
+        "targetHandle": "IDEA",
+        "ui_properties": {
+          "className": "str"
+        },
+        "edge_type": "data"
+      },
+      {
+        "id": "e_persona1_name_to_prompt1",
+        "source": "persona_1_name",
+        "sourceHandle": "output",
+        "target": "prompt_1",
+        "targetHandle": "NAME",
+        "ui_properties": {
+          "className": "str"
+        },
+        "edge_type": "data"
+      },
+      {
+        "id": "e_persona2_name_to_prompt2",
+        "source": "persona_2_name",
+        "sourceHandle": "output",
+        "target": "prompt_2",
+        "targetHandle": "NAME",
+        "ui_properties": {
+          "className": "str"
+        },
+        "edge_type": "data"
+      },
+      {
+        "id": "e_persona3_name_to_prompt3",
+        "source": "persona_3_name",
+        "sourceHandle": "output",
+        "target": "prompt_3",
+        "targetHandle": "NAME",
+        "ui_properties": {
+          "className": "str"
+        },
+        "edge_type": "data"
+      },
+      {
+        "id": "e_persona4_name_to_prompt4",
+        "source": "persona_4_name",
+        "sourceHandle": "output",
+        "target": "prompt_4",
+        "targetHandle": "NAME",
+        "ui_properties": {
+          "className": "str"
+        },
+        "edge_type": "data"
+      },
+      {
+        "id": "e_persona5_name_to_prompt5",
+        "source": "persona_5_name",
+        "sourceHandle": "output",
+        "target": "prompt_5",
+        "targetHandle": "NAME",
+        "ui_properties": {
+          "className": "str"
+        },
+        "edge_type": "data"
+      },
+      {
+        "id": "e_prompt1_to_gen1",
+        "source": "prompt_1",
+        "sourceHandle": "output",
+        "target": "gen_1",
+        "targetHandle": "prompt",
+        "ui_properties": {
+          "className": "str"
+        },
+        "edge_type": "data"
+      },
+      {
+        "id": "e_prompt2_to_gen2",
+        "source": "prompt_2",
+        "sourceHandle": "output",
+        "target": "gen_2",
+        "targetHandle": "prompt",
+        "ui_properties": {
+          "className": "str"
+        },
+        "edge_type": "data"
+      },
+      {
+        "id": "e_prompt3_to_gen3",
+        "source": "prompt_3",
+        "sourceHandle": "output",
+        "target": "gen_3",
+        "targetHandle": "prompt",
+        "ui_properties": {
+          "className": "str"
+        },
+        "edge_type": "data"
+      },
+      {
+        "id": "e_prompt4_to_gen4",
+        "source": "prompt_4",
+        "sourceHandle": "output",
+        "target": "gen_4",
+        "targetHandle": "prompt",
+        "ui_properties": {
+          "className": "str"
+        },
+        "edge_type": "data"
+      },
+      {
+        "id": "e_prompt5_to_gen5",
+        "source": "prompt_5",
+        "sourceHandle": "output",
+        "target": "gen_5",
+        "targetHandle": "prompt",
+        "ui_properties": {
+          "className": "str"
+        },
+        "edge_type": "data"
+      },
+      {
+        "id": "e_face1_to_gen1",
+        "source": "persona_1_face",
+        "sourceHandle": "output",
+        "target": "gen_1",
+        "targetHandle": "image",
+        "ui_properties": {
+          "className": "image"
+        },
+        "edge_type": "data"
+      },
+      {
+        "id": "e_face2_to_gen2",
+        "source": "persona_2_face",
+        "sourceHandle": "output",
+        "target": "gen_2",
+        "targetHandle": "image",
+        "ui_properties": {
+          "className": "image"
+        },
+        "edge_type": "data"
+      },
+      {
+        "id": "e_face3_to_gen3",
+        "source": "persona_3_face",
+        "sourceHandle": "output",
+        "target": "gen_3",
+        "targetHandle": "image",
+        "ui_properties": {
+          "className": "image"
+        },
+        "edge_type": "data"
+      },
+      {
+        "id": "e_face4_to_gen4",
+        "source": "persona_4_face",
+        "sourceHandle": "output",
+        "target": "gen_4",
+        "targetHandle": "image",
+        "ui_properties": {
+          "className": "image"
+        },
+        "edge_type": "data"
+      },
+      {
+        "id": "e_face5_to_gen5",
+        "source": "persona_5_face",
+        "sourceHandle": "output",
+        "target": "gen_5",
+        "targetHandle": "image",
+        "ui_properties": {
+          "className": "image"
+        },
+        "edge_type": "data"
+      },
+      {
+        "id": "e_gen1_to_preview1",
+        "source": "gen_1",
+        "sourceHandle": "output",
+        "target": "preview_1",
+        "targetHandle": "value",
+        "ui_properties": {
+          "className": "image"
+        },
+        "edge_type": "data"
+      },
+      {
+        "id": "e_gen2_to_preview2",
+        "source": "gen_2",
+        "sourceHandle": "output",
+        "target": "preview_2",
+        "targetHandle": "value",
+        "ui_properties": {
+          "className": "image"
+        },
+        "edge_type": "data"
+      },
+      {
+        "id": "e_gen3_to_preview3",
+        "source": "gen_3",
+        "sourceHandle": "output",
+        "target": "preview_3",
+        "targetHandle": "value",
+        "ui_properties": {
+          "className": "image"
+        },
+        "edge_type": "data"
+      },
+      {
+        "id": "e_gen4_to_preview4",
+        "source": "gen_4",
+        "sourceHandle": "output",
+        "target": "preview_4",
+        "targetHandle": "value",
+        "ui_properties": {
+          "className": "image"
+        },
+        "edge_type": "data"
+      },
+      {
+        "id": "e_gen5_to_preview5",
+        "source": "gen_5",
+        "sourceHandle": "output",
+        "target": "preview_5",
+        "targetHandle": "value",
+        "ui_properties": {
+          "className": "image"
+        },
+        "edge_type": "data"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "comment",
+        "type": "nodetool.workflows.base_node.Comment",
+        "data": {
+          "comment": "# Content Factory\n\nScale neuro-photo content production across **5 parallel lanes**. One prompt generates 5 unique images with different faces — avoiding duplicate-content shadowbanning across multiple social media accounts.\n\n**Pipeline:** Idea prompt + 5 face references → 5 parallel ImageToImage generations → 5 unique results\n\n**Use case:** Multi-account Instagram/Pinterest content where each account needs unique imagery from the same concept.\n\n**Try this:** Upload 5 different face photos, write one transformation prompt, and generate 5 unique results for 5 accounts."
+        },
+        "ui_properties": {
+          "position": {
+            "x": 40,
+            "y": -280
+          },
+          "zIndex": 0,
+          "width": 520,
+          "height": 220,
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "idea",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "idea",
+          "value": "Transform into a stunning portrait with soft golden hour lighting, professional photography style, warm tones, slight bokeh background",
+          "description": "The transformation idea — applied to all 5 faces"
+        },
+        "ui_properties": {
+          "position": {
+            "x": 50,
+            "y": 40
+          },
+          "zIndex": 0,
+          "width": 320,
+          "title": "Idea / Prompt",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "persona_1_name",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "persona_1_name",
+          "value": "Nika",
+          "description": "Name for persona 1 (account 1)"
+        },
+        "ui_properties": {
+          "position": {
+            "x": 50,
+            "y": 280
+          },
+          "zIndex": 0,
+          "width": 160,
+          "title": "Persona 1 Name",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "persona_1_face",
+        "type": "nodetool.input.ImageInput",
+        "data": {
+          "name": "persona_1_face",
+          "value": {
+            "type": "image",
+            "uri": "",
+            "asset_id": null,
+            "data": null,
+            "metadata": null
+          },
+          "description": "Face reference for persona 1"
+        },
+        "ui_properties": {
+          "position": {
+            "x": 220,
+            "y": 280
+          },
+          "zIndex": 0,
+          "width": 200,
+          "title": "Persona 1 Face",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "persona_2_name",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "persona_2_name",
+          "value": "Lena",
+          "description": "Name for persona 2 (account 2)"
+        },
+        "ui_properties": {
+          "position": {
+            "x": 50,
+            "y": 500
+          },
+          "zIndex": 0,
+          "width": 160,
+          "title": "Persona 2 Name",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "persona_2_face",
+        "type": "nodetool.input.ImageInput",
+        "data": {
+          "name": "persona_2_face",
+          "value": {
+            "type": "image",
+            "uri": "",
+            "asset_id": null,
+            "data": null,
+            "metadata": null
+          },
+          "description": "Face reference for persona 2"
+        },
+        "ui_properties": {
+          "position": {
+            "x": 220,
+            "y": 500
+          },
+          "zIndex": 0,
+          "width": 200,
+          "title": "Persona 2 Face",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "persona_3_name",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "persona_3_name",
+          "value": "Katya",
+          "description": "Name for persona 3 (account 3)"
+        },
+        "ui_properties": {
+          "position": {
+            "x": 50,
+            "y": 720
+          },
+          "zIndex": 0,
+          "width": 160,
+          "title": "Persona 3 Name",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "persona_3_face",
+        "type": "nodetool.input.ImageInput",
+        "data": {
+          "name": "persona_3_face",
+          "value": {
+            "type": "image",
+            "uri": "",
+            "asset_id": null,
+            "data": null,
+            "metadata": null
+          },
+          "description": "Face reference for persona 3"
+        },
+        "ui_properties": {
+          "position": {
+            "x": 220,
+            "y": 720
+          },
+          "zIndex": 0,
+          "width": 200,
+          "title": "Persona 3 Face",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "persona_4_name",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "persona_4_name",
+          "value": "Olya",
+          "description": "Name for persona 4 (account 4)"
+        },
+        "ui_properties": {
+          "position": {
+            "x": 50,
+            "y": 940
+          },
+          "zIndex": 0,
+          "width": 160,
+          "title": "Persona 4 Name",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "persona_4_face",
+        "type": "nodetool.input.ImageInput",
+        "data": {
+          "name": "persona_4_face",
+          "value": {
+            "type": "image",
+            "uri": "",
+            "asset_id": null,
+            "data": null,
+            "metadata": null
+          },
+          "description": "Face reference for persona 4"
+        },
+        "ui_properties": {
+          "position": {
+            "x": 220,
+            "y": 940
+          },
+          "zIndex": 0,
+          "width": 200,
+          "title": "Persona 4 Face",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "persona_5_name",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "persona_5_name",
+          "value": "Masha",
+          "description": "Name for persona 5 (account 5)"
+        },
+        "ui_properties": {
+          "position": {
+            "x": 50,
+            "y": 1160
+          },
+          "zIndex": 0,
+          "width": 160,
+          "title": "Persona 5 Name",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "persona_5_face",
+        "type": "nodetool.input.ImageInput",
+        "data": {
+          "name": "persona_5_face",
+          "value": {
+            "type": "image",
+            "uri": "",
+            "asset_id": null,
+            "data": null,
+            "metadata": null
+          },
+          "description": "Face reference for persona 5"
+        },
+        "ui_properties": {
+          "position": {
+            "x": 220,
+            "y": 1160
+          },
+          "zIndex": 0,
+          "width": 200,
+          "title": "Persona 5 Face",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "prompt_1",
+        "type": "nodetool.text.Prompt",
+        "data": {
+          "prompt": "{{ IDEA }}\n\nKeep the face of {{ NAME }} as the main subject. Preserve facial identity and features. Vertical 9:16 aspect ratio suitable for Instagram Reels and Stories."
+        },
+        "ui_properties": {
+          "position": {
+            "x": 500,
+            "y": 260
+          },
+          "zIndex": 0,
+          "width": 280,
+          "height": 180,
+          "title": "Prompt (Persona 1)",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {
+          "IDEA": "",
+          "NAME": "Nika"
+        },
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "prompt_2",
+        "type": "nodetool.text.Prompt",
+        "data": {
+          "prompt": "{{ IDEA }}\n\nKeep the face of {{ NAME }} as the main subject. Preserve facial identity and features. Vertical 9:16 aspect ratio suitable for Instagram Reels and Stories."
+        },
+        "ui_properties": {
+          "position": {
+            "x": 500,
+            "y": 480
+          },
+          "zIndex": 0,
+          "width": 280,
+          "height": 180,
+          "title": "Prompt (Persona 2)",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {
+          "IDEA": "",
+          "NAME": "Lena"
+        },
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "prompt_3",
+        "type": "nodetool.text.Prompt",
+        "data": {
+          "prompt": "{{ IDEA }}\n\nKeep the face of {{ NAME }} as the main subject. Preserve facial identity and features. Vertical 9:16 aspect ratio suitable for Instagram Reels and Stories."
+        },
+        "ui_properties": {
+          "position": {
+            "x": 500,
+            "y": 700
+          },
+          "zIndex": 0,
+          "width": 280,
+          "height": 180,
+          "title": "Prompt (Persona 3)",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {
+          "IDEA": "",
+          "NAME": "Katya"
+        },
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "prompt_4",
+        "type": "nodetool.text.Prompt",
+        "data": {
+          "prompt": "{{ IDEA }}\n\nKeep the face of {{ NAME }} as the main subject. Preserve facial identity and features. Vertical 9:16 aspect ratio suitable for Instagram Reels and Stories."
+        },
+        "ui_properties": {
+          "position": {
+            "x": 500,
+            "y": 920
+          },
+          "zIndex": 0,
+          "width": 280,
+          "height": 180,
+          "title": "Prompt (Persona 4)",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {
+          "IDEA": "",
+          "NAME": "Olya"
+        },
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "prompt_5",
+        "type": "nodetool.text.Prompt",
+        "data": {
+          "prompt": "{{ IDEA }}\n\nKeep the face of {{ NAME }} as the main subject. Preserve facial identity and features. Vertical 9:16 aspect ratio suitable for Instagram Reels and Stories."
+        },
+        "ui_properties": {
+          "position": {
+            "x": 500,
+            "y": 1140
+          },
+          "zIndex": 0,
+          "width": 280,
+          "height": 180,
+          "title": "Prompt (Persona 5)",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {
+          "IDEA": "",
+          "NAME": "Masha"
+        },
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "gen_1",
+        "type": "nodetool.image.ImageToImage",
+        "data": {
+          "model": {
+            "type": "image_model",
+            "provider": "huggingface_fal_ai",
+            "id": "fal-ai/flux/schnell",
+            "name": "FLUX.1 Schnell",
+            "path": null,
+            "supported_tasks": []
+          },
+          "negative_prompt": "blurry, low quality, distorted face, bad anatomy",
+          "strength": 0.75,
+          "aspect_ratio": "9:16",
+          "resolution": "1K",
+          "scheduler": ""
+        },
+        "ui_properties": {
+          "position": {
+            "x": 850,
+            "y": 240
+          },
+          "zIndex": 0,
+          "width": 320,
+          "height": 300,
+          "title": "Generate (Persona 1: Nika)",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "gen_2",
+        "type": "nodetool.image.ImageToImage",
+        "data": {
+          "model": {
+            "type": "image_model",
+            "provider": "huggingface_fal_ai",
+            "id": "fal-ai/flux/schnell",
+            "name": "FLUX.1 Schnell",
+            "path": null,
+            "supported_tasks": []
+          },
+          "negative_prompt": "blurry, low quality, distorted face, bad anatomy",
+          "strength": 0.75,
+          "aspect_ratio": "9:16",
+          "resolution": "1K",
+          "scheduler": ""
+        },
+        "ui_properties": {
+          "position": {
+            "x": 850,
+            "y": 460
+          },
+          "zIndex": 0,
+          "width": 320,
+          "height": 300,
+          "title": "Generate (Persona 2: Lena)",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "gen_3",
+        "type": "nodetool.image.ImageToImage",
+        "data": {
+          "model": {
+            "type": "image_model",
+            "provider": "huggingface_fal_ai",
+            "id": "fal-ai/flux/schnell",
+            "name": "FLUX.1 Schnell",
+            "path": null,
+            "supported_tasks": []
+          },
+          "negative_prompt": "blurry, low quality, distorted face, bad anatomy",
+          "strength": 0.75,
+          "aspect_ratio": "9:16",
+          "resolution": "1K",
+          "scheduler": ""
+        },
+        "ui_properties": {
+          "position": {
+            "x": 850,
+            "y": 680
+          },
+          "zIndex": 0,
+          "width": 320,
+          "height": 300,
+          "title": "Generate (Persona 3: Katya)",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "gen_4",
+        "type": "nodetool.image.ImageToImage",
+        "data": {
+          "model": {
+            "type": "image_model",
+            "provider": "huggingface_fal_ai",
+            "id": "fal-ai/flux/schnell",
+            "name": "FLUX.1 Schnell",
+            "path": null,
+            "supported_tasks": []
+          },
+          "negative_prompt": "blurry, low quality, distorted face, bad anatomy",
+          "strength": 0.75,
+          "aspect_ratio": "9:16",
+          "resolution": "1K",
+          "scheduler": ""
+        },
+        "ui_properties": {
+          "position": {
+            "x": 850,
+            "y": 900
+          },
+          "zIndex": 0,
+          "width": 320,
+          "height": 300,
+          "title": "Generate (Persona 4: Olya)",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "gen_5",
+        "type": "nodetool.image.ImageToImage",
+        "data": {
+          "model": {
+            "type": "image_model",
+            "provider": "huggingface_fal_ai",
+            "id": "fal-ai/flux/schnell",
+            "name": "FLUX.1 Schnell",
+            "path": null,
+            "supported_tasks": []
+          },
+          "negative_prompt": "blurry, low quality, distorted face, bad anatomy",
+          "strength": 0.75,
+          "aspect_ratio": "9:16",
+          "resolution": "1K",
+          "scheduler": ""
+        },
+        "ui_properties": {
+          "position": {
+            "x": 850,
+            "y": 1120
+          },
+          "zIndex": 0,
+          "width": 320,
+          "height": 300,
+          "title": "Generate (Persona 5: Masha)",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "preview_1",
+        "type": "nodetool.workflows.base_node.Preview",
+        "data": {
+          "name": "result_persona_1"
+        },
+        "ui_properties": {
+          "position": {
+            "x": 1250,
+            "y": 260
+          },
+          "zIndex": 0,
+          "width": 280,
+          "height": 320,
+          "title": "Result: Nika",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "preview_2",
+        "type": "nodetool.workflows.base_node.Preview",
+        "data": {
+          "name": "result_persona_2"
+        },
+        "ui_properties": {
+          "position": {
+            "x": 1250,
+            "y": 480
+          },
+          "zIndex": 0,
+          "width": 280,
+          "height": 320,
+          "title": "Result: Lena",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "preview_3",
+        "type": "nodetool.workflows.base_node.Preview",
+        "data": {
+          "name": "result_persona_3"
+        },
+        "ui_properties": {
+          "position": {
+            "x": 1250,
+            "y": 700
+          },
+          "zIndex": 0,
+          "width": 280,
+          "height": 320,
+          "title": "Result: Katya",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "preview_4",
+        "type": "nodetool.workflows.base_node.Preview",
+        "data": {
+          "name": "result_persona_4"
+        },
+        "ui_properties": {
+          "position": {
+            "x": 1250,
+            "y": 920
+          },
+          "zIndex": 0,
+          "width": 280,
+          "height": 320,
+          "title": "Result: Olya",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "preview_5",
+        "type": "nodetool.workflows.base_node.Preview",
+        "data": {
+          "name": "result_persona_5"
+        },
+        "ui_properties": {
+          "position": {
+            "x": 1250,
+            "y": 1140
+          },
+          "zIndex": 0,
+          "width": 280,
+          "height": 320,
+          "title": "Result: Masha",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      }
+    ]
+  },
+  "input_schema": null,
+  "output_schema": null,
+  "settings": {},
+  "package_name": "nodetool-base",
+  "path": null,
+  "run_mode": "workflow",
+  "workspace_id": null,
+  "required_providers": null,
+  "required_models": null,
+  "html_app": null,
+  "etag": null
+}

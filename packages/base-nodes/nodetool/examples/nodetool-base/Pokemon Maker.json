@@ -3,9 +3,9 @@
   "access": "private",
   "created_at": "2026-01-18T08:52:36.769859",
   "updated_at": "2026-06-22T12:00:00.000Z",
-  "name": "Pokemon Maker",
+  "name": "Создатель покемонов",
   "tool_name": null,
-  "description": "Turn any mix of real animals into a gallery of original collectible creatures. A style dropdown restyles the whole batch, so one Run yields four cohesive variant designs instead of a single image.",
+  "description": "Генерируйте уникальных покемонов с описанием способностей и статистикой.",
   "tags": [
     "example"
   ],

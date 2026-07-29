@@ -3,9 +3,9 @@
   "access": "private",
   "created_at": "2026-01-10T00:37:56.360348",
   "updated_at": "2026-06-22T12:00:00.000Z",
-  "name": "Brand Asset Generator",
+  "name": "Генератор брендовых материалов",
   "tool_name": null,
-  "description": "Turn a brand name and vibe into a whole social kit in one run: the graph fans out to two branches at once — a streamed gallery of four on-brand, text-overlaid social images (Instagram, LinkedIn, X, product launch) and a one-page brand brief (voice, palette, tagline options). Differentiator: structured multi-asset outputs from a single fan-out graph. Uses fal-ai flux/schnell for images (paid) and gpt-5-mini for text.",
+  "description": "Создавайте согласованные брендовые материалы — логотипы, баннеры и визуальный контент — на основе описания бренда.",
   "tags": [
     "brand-asset",
     "branding",

@@ -3,9 +3,9 @@
   "access": "public",
   "created_at": "2025-10-12T22:10:36.637867",
   "updated_at": "2026-06-22T12:00:00.000Z",
-  "name": "Transcribe Audio",
+  "name": "Транскрипция аудио",
   "tool_name": null,
-  "description": "Instant Whisper transcription: drop in an audio clip, get a clean text transcript back — one step, auto-runs on upload.",
+  "description": "Преобразуйте аудиозапись в текст с высокой точностью.",
   "tags": [
     "start",
     "audio",

@@ -3,9 +3,9 @@
   "access": "private",
   "created_at": "2026-06-25T12:00:00.000Z",
   "updated_at": "2026-07-17T12:00:00.000Z",
-  "name": "Hook & Thumbnail Factory",
+  "name": "Фабрика хуков и миниатюр",
   "tool_name": null,
-  "description": "One video topic in, a full thumbnail pack out: scroll-stopping hook lines plus a color-graded, ready-to-post thumbnail for each. The differentiator is the fan-out — one hook stream drives a whole gallery of matching images in a single run. Uses fal-ai/flux/schnell (cheap, fast).",
+  "description": "Генерируйте цепляющие заголовки и миниатюры для видеоконтента.",
   "tags": [
     "image",
     "content",
