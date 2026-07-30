@@ -420,3 +420,8 @@ sec(
   "Deployment",
   "Bearer auth token for securing NodeTool server endpoints in deployment. If unset, bearer auth is disabled."
 );
+sec(
+  "ZERNIO_API_KEY",
+  "Zernio",
+  "Zernio API key for social media publishing to Instagram, TikTok, YouTube, and Pinterest. Get yours at https://zernio.com/"
+);
