@@ -56,7 +56,7 @@ export type GetInput = z.infer<typeof getInput>;
 export const createInput = z.object({
   name: z.string().min(1),
   content_type: z.string().min(1),
-  parent_id: z.string().min(1),
+  parent_id: z.string().optional(),
   workflow_id: z.string().nullable().optional(),
   node_id: z.string().nullable().optional(),
   job_id: z.string().nullable().optional(),
@@ -87,7 +87,7 @@ export type UploadTarget = z.infer<typeof uploadTarget>;
 export const createUploadInput = z.object({
   name: z.string().min(1),
   content_type: z.string().min(1),
-  parent_id: z.string().min(1),
+  parent_id: z.string().optional(),
   /** Declared byte size, checked against the upload cap before minting. */
   size: z.number().int().nonnegative(),
   workflow_id: z.string().nullable().optional(),
