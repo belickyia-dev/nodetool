@@ -39,6 +39,9 @@ cd electron && npm run lint
 npm run dev          # Backend (tsx --watch) + web Vite server
 npm run dev:server   # Backend only
 npm run electron:dev # Electron dev (auto-rebuilds native modules)
+
+# Remotion render server (required for Hook Video workflows)
+npx tsx demo/server.ts   # Renders video templates on :3333
 ```
 
 ### Prerequisites
@@ -92,8 +95,10 @@ electron/           # Electron 39 desktop app
 mobile/             # React Native / Expo (documents open one-per-screen, no tabs;
                     # edits come through the chat agent's ui_* tools —
                     # see mobile/ARCHITECTURE.md § Documents)
-demo/               # Remotion harness for product-demo videos (replays recorded
-                    # graph-UI "casts"; see demo/README.md and web/src/demo/)
+demo/               # Remotion video rendering service + product-demo harness
+                    # server.ts: HTTP render service for HookReveal and other templates
+                    # Start with: npx tsx demo/server.ts (runs on :3333)
+                    # Required for RemotionRenderNode in workflows
 ```
 
 ### Package Dependency Order
