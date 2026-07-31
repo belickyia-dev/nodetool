@@ -2868,6 +2868,168 @@ export class LipSyncNode extends BaseNode {
   }
 }
 
+/**
+ * Renders a video using the Remotion render service.
+ *
+ * Calls the local Remotion HTTP server (default: http://localhost:3333)
+ * to render a template with the given props. Requires the Remotion server
+ * to be running: `npm run server --prefix demo`
+ */
+export class RemotionRenderNode extends BaseNode {
+  static readonly nodeType = "nodetool.video.RemotionRender";
+  static readonly title = "Remotion Render";
+  static readonly description =
+    "Render a video using Remotion templates. Requires the Remotion render service to be running.\n    video, render, remotion, template, hook, reveal, montage";
+  static readonly metadataOutputTypes = {
+    output: "video"
+  };
+  static readonly inputFields = [
+    "template",
+    "before_image",
+    "after_image",
+    "hook_text",
+    "duration_frames",
+    "fps",
+    "width",
+    "height",
+    "server_url"
+  ];
+
+  @prop({
+    type: "str",
+    default: "HookReveal",
+    title: "Template",
+    description: "Remotion template name (e.g., HookReveal)."
+  })
+  declare template: string;
+
+  @prop({
+    type: "image",
+    default: { type: "image" },
+    title: "Before Image",
+    description: "Image shown with blur and hook text (for HookReveal template)."
+  })
+  declare before_image: ImageRef;
+
+  @prop({
+    type: "image",
+    default: { type: "image" },
+    title: "After Image",
+    description: "Image revealed after transition (for HookReveal template)."
+  })
+  declare after_image: ImageRef;
+
+  @prop({
+    type: "str",
+    default: "Wait for it...",
+    title: "Hook Text",
+    description: "Text overlay on the before image."
+  })
+  declare hook_text: string;
+
+  @prop({
+    type: "int",
+    default: 90,
+    title: "Duration (frames)",
+    description: "Total video duration in frames.",
+    min: 1,
+    max: 1800
+  })
+  declare duration_frames: number;
+
+  @prop({
+    type: "int",
+    default: 30,
+    title: "FPS",
+    description: "Frames per second.",
+    min: 1,
+    max: 60
+  })
+  declare fps: number;
+
+  @prop({
+    type: "int",
+    default: 1080,
+    title: "Width",
+    description: "Video width in pixels.",
+    min: 100,
+    max: 4096
+  })
+  declare width: number;
+
+  @prop({
+    type: "int",
+    default: 1920,
+    title: "Height",
+    description: "Video height in pixels.",
+    min: 100,
+    max: 4096
+  })
+  declare height: number;
+
+  @prop({
+    type: "str",
+    default: "http://localhost:3333",
+    title: "Server URL",
+    description: "URL of the Remotion render service."
+  })
+  declare server_url: string;
+
+  async process(context?: ProcessingContext): Promise<Record<string, unknown>> {
+    // Convert images to data URLs for Remotion
+    const beforeBytes = await imageBytesAsync(this.before_image, context);
+    const afterBytes = await imageBytesAsync(this.after_image, context);
+
+    if (beforeBytes.length === 0) {
+      throw new Error("Before image is required for HookReveal template.");
+    }
+    if (afterBytes.length === 0) {
+      throw new Error("After image is required for HookReveal template.");
+    }
+
+    // Create base64 data URLs
+    const beforeUrl = `data:image/png;base64,${Buffer.from(beforeBytes).toString("base64")}`;
+    const afterUrl = `data:image/png;base64,${Buffer.from(afterBytes).toString("base64")}`;
+
+    const requestBody = {
+      template: this.template,
+      props: {
+        beforeUrl,
+        afterUrl,
+        hookText: this.hook_text
+      },
+      durationInFrames: this.duration_frames,
+      fps: this.fps,
+      width: this.width,
+      height: this.height
+    };
+
+    // Call Remotion render service
+    const response = await fetch(`${this.server_url}/render`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Remotion render failed: ${response.status} ${errorText}`);
+    }
+
+    const result = await response.json() as { videoUrl: string; durationMs: number };
+
+    // Fetch the rendered video
+    const videoResponse = await fetch(`${this.server_url}${result.videoUrl}`);
+    if (!videoResponse.ok) {
+      throw new Error(`Failed to fetch rendered video: ${videoResponse.status}`);
+    }
+
+    const videoBytes = new Uint8Array(await videoResponse.arrayBuffer());
+
+    return { output: videoRef(videoBytes) };
+  }
+}
+
 export const VIDEO_NODES = [
   TextToVideoNode,
   ImageToVideoNode,
@@ -2899,5 +3061,6 @@ export const VIDEO_NODES = [
   ExtractFrameVideoNode,
   GetVideoInfoNode,
   VideoToVideoNode,
-  LipSyncNode
+  LipSyncNode,
+  RemotionRenderNode
 ] as const;

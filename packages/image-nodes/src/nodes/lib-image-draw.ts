@@ -196,6 +196,9 @@ function createDrawNode(desc: Desc): NodeClass {
         const x = num((this as any).x, 0);
         const y = num((this as any).y, 0);
         const size = Math.min(512, Math.max(1, num((this as any).size, 12)));
+        const maxWidth = num((this as any).max_width, 0);
+        const verticalAlign = String((this as any).vertical_align ?? "top");
+        const lineSpacing = num((this as any).line_spacing, 1.2);
         const colorVal = (this as any).color ?? "#000000";
         const color =
           colorVal &&
@@ -203,6 +206,16 @@ function createDrawNode(desc: Desc): NodeClass {
           "value" in (colorVal as object)
             ? String((colorVal as Record<string, unknown>).value)
             : String(colorVal as string);
+        const strokeColorVal = (this as any).stroke_color;
+        const strokeColor =
+          strokeColorVal &&
+          typeof strokeColorVal === "object" &&
+          "value" in (strokeColorVal as object)
+            ? String((strokeColorVal as Record<string, unknown>).value)
+            : strokeColorVal
+              ? String(strokeColorVal as string)
+              : null;
+        const strokeWidth = Math.max(0, num((this as any).stroke_width, 0));
         const fontVal = (this as any).font;
         const fontFamily =
           fontVal &&
@@ -211,6 +224,7 @@ function createDrawNode(desc: Desc): NodeClass {
             ? String((fontVal as Record<string, unknown>).name)
             : "sans-serif";
         const align = String((this as any).align ?? "left");
+        const blurBackground = Math.max(0, num((this as any).blur_background, 0));
 
         if (!IS_NODE) {
           // Browser: rasterize the text onto the image with OffscreenCanvas.
@@ -220,14 +234,73 @@ function createDrawNode(desc: Desc): NodeClass {
           const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
           const ctx = canvas.getContext("2d");
           if (!ctx) throw new Error("OffscreenCanvas 2D context unavailable");
+
+          // Apply blur to background if requested
+          if (blurBackground > 0) {
+            ctx.filter = `blur(${blurBackground}px)`;
+          }
           ctx.drawImage(bitmap, 0, 0);
+          ctx.filter = "none"; // Reset filter for text
           bitmap.close();
           ctx.font = `${size}px ${fontFamily}`;
-          ctx.fillStyle = color;
           ctx.textAlign =
             align === "center" ? "center" : align === "right" ? "right" : "left";
           ctx.textBaseline = "alphabetic";
-          ctx.fillText(text, x, y + size);
+
+          // Word wrap: split text into lines that fit within maxWidth
+          const effectiveMaxWidth = maxWidth > 0 ? maxWidth : canvas.width - x * 2;
+          const words = text.split(/\s+/);
+          const lines: string[] = [];
+          let currentLine = "";
+
+          for (const word of words) {
+            const testLine = currentLine ? `${currentLine} ${word}` : word;
+            const metrics = ctx.measureText(testLine);
+            if (metrics.width > effectiveMaxWidth && currentLine) {
+              lines.push(currentLine);
+              currentLine = word;
+            } else {
+              currentLine = testLine;
+            }
+          }
+          if (currentLine) lines.push(currentLine);
+
+          // Calculate vertical position based on alignment
+          const lineHeight = size * lineSpacing;
+          const totalHeight = lines.length * lineHeight;
+          let startY: number;
+          if (verticalAlign === "middle") {
+            startY = (canvas.height - totalHeight) / 2 + size;
+          } else if (verticalAlign === "bottom") {
+            startY = canvas.height - totalHeight + size;
+          } else {
+            startY = y + size;
+          }
+
+          // Calculate horizontal position for centering
+          let drawX: number;
+          if (align === "center") {
+            drawX = canvas.width / 2;
+          } else if (align === "right") {
+            drawX = canvas.width - x;
+          } else {
+            drawX = x;
+          }
+
+          // Draw each line
+          for (let i = 0; i < lines.length; i++) {
+            const lineY = startY + i * lineHeight;
+            // Draw stroke first (behind fill) for viral-style outlined text
+            if (strokeColor && strokeWidth > 0) {
+              ctx.strokeStyle = strokeColor;
+              ctx.lineWidth = strokeWidth;
+              ctx.lineJoin = "round";
+              ctx.strokeText(lines[i], drawX, lineY);
+            }
+            ctx.fillStyle = color;
+            ctx.fillText(lines[i], drawX, lineY);
+          }
+
           const blob = await canvas.convertToBlob({ type: "image/png" });
           return {
             output: toBase64Ref(new Uint8Array(await blob.arrayBuffer()), baseObj)
@@ -239,14 +312,73 @@ function createDrawNode(desc: Desc): NodeClass {
         if (!sharp) throw new Error(SHARP_UNAVAILABLE_MESSAGE);
         const textAnchor =
           align === "center" ? "middle" : align === "right" ? "end" : "start";
-        const escapedText = escapeXmlAttr(text);
         const md = await sharp(baseBytes).metadata();
         const svgWidth = md.width ?? 512;
         const svgHeight = md.height ?? 512;
-        // Every interpolated attribute is escaped — a quote in color/font would
-        // otherwise break out of the attribute and inject SVG markup into sharp.
-        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${svgWidth}" height="${svgHeight}"><text x="${x}" y="${y + size}" font-size="${size}" fill="${escapeXmlAttr(color)}" font-family="${escapeXmlAttr(fontFamily)}" text-anchor="${escapeXmlAttr(textAnchor)}">${escapedText}</text></svg>`;
-        const out = await sharp(baseBytes)
+
+        // Word wrap for SVG: approximate character width as 0.6 * size for most fonts
+        const effectiveMaxWidth = maxWidth > 0 ? maxWidth : svgWidth - x * 2;
+        const avgCharWidth = size * 0.55;
+        const maxCharsPerLine = Math.max(1, Math.floor(effectiveMaxWidth / avgCharWidth));
+        const words = text.split(/\s+/);
+        const lines: string[] = [];
+        let currentLine = "";
+
+        for (const word of words) {
+          const testLine = currentLine ? `${currentLine} ${word}` : word;
+          if (testLine.length > maxCharsPerLine && currentLine) {
+            lines.push(currentLine);
+            currentLine = word;
+          } else {
+            currentLine = testLine;
+          }
+        }
+        if (currentLine) lines.push(currentLine);
+
+        // Calculate vertical position
+        const lineHeight = size * lineSpacing;
+        const totalHeight = lines.length * lineHeight;
+        let startY: number;
+        if (verticalAlign === "middle") {
+          startY = (svgHeight - totalHeight) / 2 + size;
+        } else if (verticalAlign === "bottom") {
+          startY = svgHeight - totalHeight + size;
+        } else {
+          startY = y + size;
+        }
+
+        // Calculate horizontal position for centering
+        let drawX: number;
+        if (align === "center") {
+          drawX = svgWidth / 2;
+        } else if (align === "right") {
+          drawX = svgWidth - x;
+        } else {
+          drawX = x;
+        }
+
+        // Build SVG with tspan elements for each line
+        const strokeAttrs =
+          strokeColor && strokeWidth > 0
+            ? ` stroke="${escapeXmlAttr(strokeColor)}" stroke-width="${strokeWidth}" stroke-linejoin="round" paint-order="stroke fill"`
+            : "";
+
+        const tspans = lines
+          .map((line, i) => {
+            const lineY = startY + i * lineHeight;
+            return `<tspan x="${drawX}" y="${lineY}">${escapeXmlAttr(line)}</tspan>`;
+          })
+          .join("");
+
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${svgWidth}" height="${svgHeight}"><text font-size="${size}" fill="${escapeXmlAttr(color)}" font-family="${escapeXmlAttr(fontFamily)}" text-anchor="${escapeXmlAttr(textAnchor)}"${strokeAttrs}>${tspans}</text></svg>`;
+
+        // Apply blur to background if requested, then composite text
+        let pipeline = sharp(baseBytes);
+        if (blurBackground > 0) {
+          // Sharp blur uses sigma, roughly blurBackground / 2 gives similar visual result
+          pipeline = pipeline.blur(Math.max(0.3, blurBackground / 2));
+        }
+        const out = await pipeline
           .composite([{ input: Buffer.from(svg) }])
           .png()
           .toBuffer();
@@ -444,7 +576,30 @@ const DESCRIPTORS: readonly Desc[] = [
             value: "#000000"
           },
           title: "Color",
-          description: "The font color."
+          description: "The font color (fill)."
+        }
+      },
+      {
+        name: "stroke_color",
+        options: {
+          type: "color",
+          default: {
+            type: "color",
+            value: "#000000"
+          },
+          title: "Stroke Color",
+          description: "The outline/stroke color. Set stroke_width > 0 to enable."
+        }
+      },
+      {
+        name: "stroke_width",
+        options: {
+          type: "int",
+          default: 0,
+          title: "Stroke Width",
+          description: "The outline/stroke width in pixels. 0 = no stroke.",
+          min: 0,
+          max: 50
         }
       },
       {
@@ -454,6 +609,49 @@ const DESCRIPTORS: readonly Desc[] = [
           default: "left",
           title: "Align",
           values: ["left", "center", "right"]
+        }
+      },
+      {
+        name: "vertical_align",
+        options: {
+          type: "enum",
+          default: "top",
+          title: "Vertical Align",
+          description: "Vertical alignment of text block.",
+          values: ["top", "middle", "bottom"]
+        }
+      },
+      {
+        name: "max_width",
+        options: {
+          type: "int",
+          default: 0,
+          title: "Max Width",
+          description: "Maximum width before text wraps to next line. 0 = auto (full image width minus margins).",
+          min: 0,
+          max: 4096
+        }
+      },
+      {
+        name: "line_spacing",
+        options: {
+          type: "float",
+          default: 1.2,
+          title: "Line Spacing",
+          description: "Line height multiplier (1.0 = no extra spacing, 1.2 = 20% extra).",
+          min: 0.5,
+          max: 3.0
+        }
+      },
+      {
+        name: "blur_background",
+        options: {
+          type: "int",
+          default: 0,
+          title: "Blur Background",
+          description: "Blur the background image before adding text (0 = no blur, 10-30 = viral hook effect).",
+          min: 0,
+          max: 50
         }
       },
       {
