@@ -21,7 +21,7 @@ const styles = (_theme: Theme) =>
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "transparent",
-    padding: "0",
+    padding: "0 0 12px 0",
     margin: "auto auto 0 auto", // Center horizontally, push to bottom
     flexShrink: 0,
 

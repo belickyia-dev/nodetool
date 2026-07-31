@@ -20,6 +20,7 @@ type PropertyValidationStore = {
   ) => void;
   clearWorkflow: (workflowId: string) => void;
   clearNode: (workflowId: string, nodeId: string) => void;
+  clearProperty: (workflowId: string, nodeId: string, property: string) => void;
   getError: (
     workflowId: string,
     nodeId: string,
@@ -61,6 +62,15 @@ const usePropertyValidationStore = create<PropertyValidationStore>(
         for (const k in state.errors) {
           if (!k.startsWith(prefix)) next[k as Key] = state.errors[k as Key];
         }
+        return { errors: next };
+      });
+    },
+    clearProperty: (workflowId: string, nodeId: string, property: string) => {
+      set((state) => {
+        const k = key(workflowId, nodeId, property);
+        if (!(k in state.errors)) return state;
+        const next = { ...state.errors };
+        delete next[k];
         return { errors: next };
       });
     },

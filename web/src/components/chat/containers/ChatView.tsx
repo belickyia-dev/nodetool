@@ -43,7 +43,8 @@ const styles = (theme: Theme) =>
       flexDirection: "row",
       overflow: "hidden",
       minHeight: 0,
-      padding: theme.spacing(0, 0, 6, 6)
+      padding: theme.spacing(0, 0, 0, 6),
+      paddingBottom: "env(safe-area-inset-bottom, 0px)"
     },
     ".chat-main": {
       flex: 1,

@@ -12,6 +12,7 @@ import { CHAT_TUTORIALS, chatTutorialFrames } from "./chatTutorials";
 import { TimelineTutorial } from "./TimelineTutorial";
 import { TIMELINE_TUTORIALS, timelineTutorialFrames } from "./timelineTutorials";
 import { PROMO_DURATION_FRAMES, PROMO_FPS, Promo } from "./promo/Promo";
+import { HookReveal, type HookRevealProps } from "./templates/HookReveal";
 import type { DemoCast } from "@web-demo";
 
 const WIDTH = 1920;
@@ -127,6 +128,21 @@ export const Root: React.FC = () => {
         width={2250}
         height={1500}
         durationInFrames={PROMO_DURATION_FRAMES}
+      />
+
+      {/* HookReveal template for viral content — blurred hook → reveal */}
+      <Composition
+        id="HookReveal"
+        component={HookReveal}
+        defaultProps={{
+          beforeUrl: "",
+          afterUrl: "",
+          hookText: "Wait for it...",
+        } as HookRevealProps}
+        fps={30}
+        width={1080}
+        height={1920}
+        durationInFrames={90}
       />
     </>
   );

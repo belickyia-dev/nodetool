@@ -321,9 +321,9 @@ export interface GlobalChatState extends ChatPiSlice {
 function buildDefaultLanguageModel(): LanguageModel {
   return {
     type: "language_model",
-    provider: "empty",
-    id: DEFAULT_MODEL,
-    name: DEFAULT_MODEL
+    provider: "openrouter",
+    id: "google/gemini-2.0-flash-001",
+    name: "Gemini 2.0 Flash"
   };
 }
 

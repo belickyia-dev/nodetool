@@ -441,8 +441,28 @@ export function normalizeGraphForKernel(graph: WorkflowGraph): KernelGraph {
   const nodes = (graph.nodes ?? []).map((raw) => {
     const node = raw as Record<string, unknown>;
     if (node.properties === undefined && node.data !== undefined) {
-      const { data, ...rest } = node;
-      return { ...rest, properties: data };
+      const data = node.data as Record<string, unknown>;
+      const { data: _data, ...rest } = node;
+      // The frontend stores properties nested as data.properties — extract them.
+      // Also carry over dynamic_properties and dynamic_inputs if present.
+      const properties =
+        data.properties && typeof data.properties === "object"
+          ? (data.properties as Record<string, unknown>)
+          : data;
+      const dynamic_properties =
+        data.dynamic_properties && typeof data.dynamic_properties === "object"
+          ? data.dynamic_properties
+          : undefined;
+      const dynamic_inputs =
+        data.dynamic_inputs && typeof data.dynamic_inputs === "object"
+          ? data.dynamic_inputs
+          : undefined;
+      return {
+        ...rest,
+        properties,
+        ...(dynamic_properties ? { dynamic_properties } : {}),
+        ...(dynamic_inputs ? { dynamic_inputs } : {})
+      };
     }
     return node;
   });

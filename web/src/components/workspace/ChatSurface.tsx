@@ -174,7 +174,7 @@ const ChatSurface = ({ refId, active }: ChatSurfaceProps) => {
   }
 
   return (
-    <FlexColumn fullWidth fullHeight sx={{ minHeight: 0, overflow: "hidden" }}>
+    <FlexColumn fullWidth fullHeight sx={{ minHeight: 0, overflow: "hidden", pb: "40px" }}>
       <ChatView
         threadId={refId}
         status={(() => {

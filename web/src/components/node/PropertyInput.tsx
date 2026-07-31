@@ -36,6 +36,7 @@ import type { PropertyProps } from "./PropertyInput.types";
 import DynamicSlotTypePicker from "./DynamicSlotTypePicker";
 import { normalizeDynamicSlot, slotType } from "../../utils/dynamicSlots";
 import { isSchemaDrivenDynamicNode } from "../../utils/dynamicSlotTypes";
+import usePropertyValidationStore from "../../stores/PropertyValidationStore";
 
 export type { PropertyProps } from "./PropertyInput.types";
 
@@ -237,8 +238,15 @@ const PropertyInput: React.FC<PropertyInputProps> = ({
     propertyName: property.name
   });
 
+  const clearProperty = usePropertyValidationStore((s) => s.clearProperty);
+
   const onChange = useCallback(
     (value: unknown) => {
+      // Clear validation error for this property when it changes
+      if (data.workflow_id) {
+        clearProperty(data.workflow_id, id, property.name);
+      }
+
       if (onValueChange) {
         onValueChange(value);
         return;
@@ -277,6 +285,8 @@ const PropertyInput: React.FC<PropertyInputProps> = ({
       onPropertyChange();
     },
     [
+      clearProperty,
+      data.workflow_id,
       findNode,
       id,
       isDynamicProperty,
