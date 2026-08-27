@@ -301,8 +301,28 @@ export class ApifyInstagramScraperNode extends BaseNode {
       scrapeLikes: Boolean(this.scrape_likes ?? false)
     };
 
-    if (usernames.length > 0) runInput.usernames = usernames;
-    if (hashtags.length > 0) runInput.hashtags = hashtags;
+    // Convert usernames and hashtags to directUrls format (Apify's current API requirement)
+    const directUrls: string[] = [];
+    for (const username of usernames) {
+      // Handle both raw username and full URL
+      if (username.startsWith("http")) {
+        directUrls.push(username);
+      } else {
+        directUrls.push(`https://www.instagram.com/${username.replace(/^@/, "")}/`);
+      }
+    }
+    for (const hashtag of hashtags) {
+      // Handle both raw hashtag and full URL
+      if (hashtag.startsWith("http")) {
+        directUrls.push(hashtag);
+      } else {
+        directUrls.push(
+          `https://www.instagram.com/explore/tags/${hashtag.replace(/^#/, "")}/`
+        );
+      }
+    }
+
+    if (directUrls.length > 0) runInput.directUrls = directUrls;
 
     const items = await runActor(
       apiKey,
