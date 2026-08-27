@@ -249,6 +249,74 @@ and bundles `nodetool.mcpb` as an extra resource (`electron-builder.json`).
 (falling back to reveal-in-folder when no handler is registered). The button is
 desktop-only — it's hidden in the browser/remote UI.
 
+### MCP for Remote Server (via SSH tunnel)
+
+To connect Claude Code to a NodeTool server running on a remote host (e.g., PI server at `62.181.50.59`), use an SSH tunnel to avoid exposing the MCP endpoint publicly.
+
+**Setup:**
+
+1. **Create SSH tunnel** (forwards local port to remote server):
+   ```bash
+   ssh -L 7777:localhost:7777 pi -N -f
+   ```
+
+2. **Install MCP pointing to localhost**:
+   ```bash
+   npm run dev:nodetool -- mcp install --url "http://127.0.0.1:7777/mcp" --claude
+   ```
+
+3. **Restart Claude Code** to pick up the new MCP config.
+
+**For persistent tunnel**, add to `~/.ssh/config`:
+```
+Host pi
+  HostName 62.181.50.59
+  User pi
+  LocalForward 7777 localhost:7777
+```
+
+Now any `ssh pi` connection automatically forwards port 7777.
+
+### Deploying to PI Server
+
+The PI server runs NodeTool from source via PM2 (not Docker). Deployment workflow:
+
+```bash
+# 1. Push changes to main
+git push origin main
+
+# 2. Pull and rebuild on PI
+ssh pi "cd /opt/apps/nodetool && git pull"
+ssh pi "export PATH=\"\$HOME/.local/share/fnm/node-versions/v22.22.1/installation/bin:\$PATH\" && cd /opt/apps/nodetool && npm run build:packages"
+
+# 3. Restart the server via PM2
+ssh pi "export PATH=\"\$HOME/.local/share/fnm/node-versions/v22.22.1/installation/bin:\$PATH\" && cd /opt/apps/nodetool && pm2 restart nodetool"
+
+# 4. Verify
+ssh pi "curl -s http://localhost:7777/api/health"
+```
+
+**One-liner deploy:**
+```bash
+ssh pi "cd /opt/apps/nodetool && git pull && export PATH=\"\$HOME/.local/share/fnm/node-versions/v22.22.1/installation/bin:\$PATH\" && npm run build:packages && pm2 restart nodetool"
+```
+
+**Logs:**
+```bash
+ssh pi "pm2 logs nodetool --lines 50"
+ssh pi "tail -f /opt/apps/nodetool/logs/out.log"
+```
+
+**Environment variables:** Stored in `/opt/apps/nodetool/.env` (API keys, secrets).
+
+**Available MCP tools** (~86 total):
+- `list_workflows`, `get_workflow`, `create_workflow`, `run_workflow`
+- `list_nodes`, `search_nodes`, `get_node_info`, `run_node`
+- `list_assets`, `get_asset`, `save_asset`
+- `generate_image`, `generate_video`, `generate_speech`
+- `web_search`, `browser`, `take_screenshot`
+- `plan_workflow_graph`, `validate_workflow`, `debug_workflow`
+
 ### nodetool run (DSL Workflows)
 
 ```bash
