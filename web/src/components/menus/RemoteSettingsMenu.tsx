@@ -79,6 +79,11 @@ const META_SECTION_GROUPS: ReadonlyArray<{
     label: "Data & Storage",
     groups: ["NodeSupabase", "Supabase"]
   },
+  {
+    key: "scraping",
+    label: "Scraping",
+    groups: ["Apify"]
+  },
   { key: "other", label: "Other", groups: [] }
 ];
 
@@ -201,6 +206,7 @@ const SETTING_LINKS: Record<string, string> = {
   DATA_FOR_SEO_LOGIN: "https://app.dataforseo.com/api-dashboard",
   BRAVE_API_KEY: "https://api-dashboard.search.brave.com/",
   APIFY_API_KEY: "https://console.apify.com/account/integrations",
+  APIFY_API_TOKEN: "https://console.apify.com/account/integrations",
   KIMI_API_KEY: "https://platform.moonshot.ai/console/api-keys",
   AKI_API_KEY: "https://aki.io"
 };
@@ -220,6 +226,7 @@ const SETTING_BUTTON_TITLES: Record<string, string> = {
   DATA_FOR_SEO_LOGIN: "Get DataForSEO Credentials",
   BRAVE_API_KEY: "Get Brave API Key",
   APIFY_API_KEY: "Get Apify API Key",
+  APIFY_API_TOKEN: "Get Apify API Token",
   KIMI_API_KEY: "Get Moonshot API Key",
   AKI_API_KEY: "Get AKI.IO API Key"
 };
@@ -239,6 +246,7 @@ const SETTING_TOOLTIPS: Record<string, string> = {
   DATA_FOR_SEO_LOGIN: "Go to DataForSEO dashboard",
   BRAVE_API_KEY: "Go to Brave Search API dashboard",
   APIFY_API_KEY: "Go to Apify console integrations page",
+  APIFY_API_TOKEN: "Go to Apify console integrations page",
   KIMI_API_KEY: "Go to Moonshot (Kimi) platform API keys page",
   AKI_API_KEY: "Go to AKI.IO to sign up and get your API key"
 };

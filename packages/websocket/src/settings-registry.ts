@@ -352,6 +352,11 @@ sec(
   "Apify API key for web search via Google Search Scraper. Get yours at https://console.apify.com/account/integrations"
 );
 sec(
+  "APIFY_API_TOKEN",
+  "Apify",
+  "Apify API token for scraping nodes (Instagram, TikTok, YouTube, Twitter). Get yours at https://console.apify.com/account/integrations"
+);
+sec(
   "BRAVE_API_KEY",
   "Search",
   "Brave Search API key for web search. Get yours at https://api-dashboard.search.brave.com/"
