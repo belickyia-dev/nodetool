@@ -167,6 +167,7 @@ const StoryboardAgentPanel = ({ boardId }: StoryboardAgentPanelProps) => {
           onNewChat={handleNewChat}
           requireToolSupport
           hideModePicker
+          hideRails
           noMessagesPlaceholder={welcomePlaceholder}
         />
       </div>

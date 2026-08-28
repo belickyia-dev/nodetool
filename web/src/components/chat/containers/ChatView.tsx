@@ -178,6 +178,13 @@ type ChatViewProps = {
    * (e.g. a workspace chat tab) that may not be `currentThreadId`.
    */
   threadId?: string | null;
+  /**
+   * Hide the right-rail sidebars (TodoSidebar, ThreadMemorySidebar) even when
+   * the viewport is wide enough. Use when ChatView is embedded in a narrow
+   * panel (e.g. StoryboardAgentPanel, editor side panels) where the rails
+   * would overflow.
+   */
+  hideRails?: boolean;
 };
 
 // Stable empty-array sentinel so the Zustand selector below returns the same
@@ -218,7 +225,8 @@ const ChatView = ({
   hideModePicker,
   useExternalComposer = false,
   showConversationHeader = false,
-  threadId
+  threadId,
+  hideRails = false
 }: ChatViewProps) => {
   const theme = useTheme();
   const cssStyles = useMemo(() => styles(theme), [theme]);
@@ -270,8 +278,9 @@ const ChatView = ({
   );
   // The two rails are 280px and 300px of fixed width. Below `md` they leave
   // the conversation itself almost no room, so they drop out entirely on
-  // phones and narrow panels.
-  const railsFit = useMediaQuery(theme.breakpoints.up("md"));
+  // phones and narrow panels. Also hidden when embedded in a narrow container
+  // (hideRails) regardless of viewport width.
+  const railsFit = useMediaQuery(theme.breakpoints.up("md")) && !hideRails;
   const showTodoSidebar = railsFit && todos.length > 0;
 
   return (
