@@ -239,19 +239,17 @@ export class ApifyInstagramScraperNode extends BaseNode {
 
   @prop({
     type: "list[str]",
-    default: null,
+    default: [],
     title: "Usernames",
-    description: "List of Instagram usernames to scrape",
-    required: true
+    description: "List of Instagram usernames to scrape (at least one of usernames or hashtags required)"
   })
   declare usernames: any;
 
   @prop({
     type: "list[str]",
-    default: null,
+    default: [],
     title: "Hashtags",
-    description: "List of hashtags to scrape",
-    required: true
+    description: "List of hashtags to scrape (at least one of usernames or hashtags required)"
   })
   declare hashtags: any;
 
