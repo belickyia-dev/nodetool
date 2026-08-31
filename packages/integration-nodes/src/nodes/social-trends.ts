@@ -582,19 +582,38 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
           // Navigate to hashtag page
           await cdpGoto(client, tagUrl, 30000);
 
-          // Wait longer for initial page load
-          await new Promise((r) => setTimeout(r, 5000));
+          // Wait for the page to be interactive and videos to load
+          // TikTok uses heavy JS, so we need to wait for it to finish
+          let attempts = 0;
+          const maxAttempts = 10;
+          let foundLinks = 0;
 
-          // Scroll down to load more videos
-          for (let i = 0; i < scrollCount; i++) {
+          while (attempts < maxAttempts && foundLinks === 0) {
+            await new Promise((r) => setTimeout(r, 2000));
+
+            // Try scrolling to trigger lazy loading
             await cdpEvaluate(client, () => {
-              window.scrollBy(0, 800);
+              window.scrollBy(0, 500);
             });
-            await new Promise((r) => setTimeout(r, 1000));
+
+            foundLinks = await cdpEvaluate<number>(client, () =>
+              document.querySelectorAll('a[href*="/video/"]').length
+            );
+
+            attempts++;
+            console.log(`TikTok attempt ${attempts}/${maxAttempts}: found ${foundLinks} video links`);
           }
 
-          // Wait for content to load after scrolling
-          await new Promise((r) => setTimeout(r, 2000));
+          // Additional scrolls if we found some videos
+          if (foundLinks > 0) {
+            for (let i = 0; i < scrollCount; i++) {
+              await cdpEvaluate(client, () => {
+                window.scrollBy(0, 800);
+              });
+              await new Promise((r) => setTimeout(r, 1000));
+            }
+            await new Promise((r) => setTimeout(r, 2000));
+          }
 
           // Debug: Get page info
           const pageDebug = await cdpEvaluate<{
