@@ -593,152 +593,141 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
             await new Promise((r) => setTimeout(r, 2000));
           }
 
-          // Debug: log page title and URL to understand what page we're on
-          const pageInfo = await cdpEvaluate<{ title: string; url: string; bodyLength: number }>(
-            client,
-            () => ({
-              title: document.title,
-              url: window.location.href,
-              bodyLength: document.body?.innerHTML?.length ?? 0
-            })
-          );
-          console.log(`TikTok page: ${pageInfo.title} | URL: ${pageInfo.url} | Body length: ${pageInfo.bodyLength}`);
-
-          // Extract video data from the page
-          const videos = await cdpEvaluate<TikTokScrapedVideo[]>(client, () => {
-            const items: TikTokScrapedVideo[] = [];
-
-            // TikTok uses various selectors for video cards - try multiple approaches
-            const videoCards = document.querySelectorAll(
-              '[data-e2e="challenge-item"], [data-e2e="user-post-item"], [class*="DivItemContainer"], [class*="DivVideoFeedV2"], div[class*="video-feed-item"], div[class*="tiktok-x"] a[href*="/video/"]'
-            );
-
-            // If no cards found, try finding video links directly
-            if (videoCards.length === 0) {
-              const videoLinks = document.querySelectorAll('a[href*="/@"][href*="/video/"]');
-              for (const link of videoLinks) {
-                const href = (link as HTMLAnchorElement).href;
-                const videoIdMatch = href.match(/\/video\/(\d+)/);
-                if (!videoIdMatch) continue;
-
-                const authorMatch = href.match(/@([^/]+)/);
-                items.push({
-                  id: videoIdMatch[1],
-                  url: href,
-                  author: authorMatch ? authorMatch[1] : "unknown",
-                  description: "",
-                  views: 0,
-                  likes: 0,
-                  comments: 0,
-                  shares: 0,
-                  createTime: 0
-                });
+          // Step 1: Collect video links from hashtag page
+          const videoLinks = await cdpEvaluate<string[]>(client, () => {
+            const links: string[] = [];
+            document.querySelectorAll('a[href*="/video/"]').forEach((a) => {
+              const href = (a as HTMLAnchorElement).href;
+              if (href && !links.includes(href)) {
+                links.push(href);
               }
-              return items;
-            }
-
-            for (const card of videoCards) {
-              try {
-                // Try to extract video link
-                const linkEl = card.querySelector('a[href*="/video/"]') as HTMLAnchorElement | null;
-                if (!linkEl) continue;
-
-                const href = linkEl.href;
-                const videoIdMatch = href.match(/\/video\/(\d+)/);
-                if (!videoIdMatch) continue;
-
-                const videoId = videoIdMatch[1];
-
-                // Extract author from URL
-                const authorMatch = href.match(/@([^/]+)/);
-                const author = authorMatch ? authorMatch[1] : "unknown";
-
-                // Extract description
-                const descEl = card.querySelector(
-                  '[data-e2e="video-desc"], [class*="desc"], [class*="caption"]'
-                );
-                const description = descEl?.textContent?.trim() ?? "";
-
-                // Extract stats - TikTok shows abbreviated numbers like "1.2M"
-                const parseCount = (text: string | null | undefined): number => {
-                  if (!text) return 0;
-                  const clean = text.trim().toLowerCase();
-                  const num = parseFloat(clean.replace(/[^\d.]/g, ""));
-                  if (isNaN(num)) return 0;
-                  if (clean.includes("m")) return Math.round(num * 1000000);
-                  if (clean.includes("k")) return Math.round(num * 1000);
-                  return Math.round(num);
-                };
-
-                // Look for stats in various formats
-                const statsText = card.textContent ?? "";
-                const viewsEl = card.querySelector(
-                  '[data-e2e="video-views"], [class*="play-count"], [class*="view-count"]'
-                );
-                const likesEl = card.querySelector(
-                  '[data-e2e="like-count"], [class*="like-count"]'
-                );
-
-                // Extract numbers from stats
-                let views = parseCount(viewsEl?.textContent);
-                const likes = parseCount(likesEl?.textContent);
-
-                // If no views found, estimate from likes (typical ratio ~20:1)
-                if (views === 0 && likes > 0) {
-                  views = likes * 20;
-                }
-
-                items.push({
-                  id: videoId,
-                  url: href,
-                  author,
-                  description: description.slice(0, 200),
-                  views,
-                  likes,
-                  comments: 0, // Not visible on hashtag page
-                  shares: 0, // Not visible on hashtag page
-                  createTime: 0 // Will be estimated
-                });
-              } catch {
-                // Skip problematic cards
-              }
-            }
-
-            return items;
+            });
+            return links;
           });
 
-          // Process extracted videos
-          for (const video of videos) {
-            // Estimate creation time based on position (newer first)
-            // TikTok hashtag pages show recent videos, assume within maxDays
-            const estimatedHoursAgo = Math.random() * maxDays * 24;
+          console.log(`TikTok #${tag}: found ${videoLinks.length} video links`);
 
-            if (video.views === 0 && video.likes === 0) continue;
+          // Step 2: Visit each video to get detailed stats
+          const videosToProcess = videoLinks.slice(0, limit);
+          for (const videoUrl of videosToProcess) {
+            if (results.length >= limit) break;
 
-            const { engagementRate, velocity, viralityScore } = calculateMetrics(
-              video.views,
-              video.likes,
-              video.comments,
-              estimatedHoursAgo || 24 // Default to 24 hours if unknown
-            );
+            try {
+              await cdpGoto(client, videoUrl, 15000);
+              await new Promise((r) => setTimeout(r, 2000));
 
-            results.push({
-              platform: "tiktok",
-              url: video.url,
-              author: video.author,
-              description: video.description,
-              views: video.views,
-              likes: video.likes,
-              comments: video.comments,
-              shares: video.shares,
-              hours_ago: Math.round(estimatedHoursAgo * 10) / 10,
-              engagement_rate: engagementRate,
-              velocity,
-              virality_score: viralityScore,
-              is_video: true
-            });
+              // Extract video details from video page
+              const details = await cdpEvaluate<{
+                author: string;
+                description: string;
+                views: number;
+                likes: number;
+                comments: number;
+                shares: number;
+                timeText: string;
+              }>(client, () => {
+                const parseCount = (str: string | null | undefined): number => {
+                  if (!str) return 0;
+                  const s = str.toLowerCase().trim();
+                  const num = parseFloat(s.replace(/[^\d.kmKM]/g, ""));
+                  if (isNaN(num)) return 0;
+                  if (s.includes("m") || s.includes("м")) return Math.round(num * 1000000);
+                  if (s.includes("k") || s.includes("к") || s.includes("тыс")) return Math.round(num * 1000);
+                  return parseInt(s.replace(/\D/g, "")) || 0;
+                };
 
-            if (results.length >= limit * hashtags.length) break;
+                // Author
+                const authorEl = document.querySelector(
+                  '[data-e2e="browse-username"], [data-e2e="video-author-uniqueid"]'
+                );
+                const author = authorEl?.textContent?.replace("@", "").trim() ?? "unknown";
+
+                // Description
+                const descEl = document.querySelector(
+                  '[data-e2e="browse-video-desc"], [data-e2e="video-desc"]'
+                );
+                const description = descEl?.textContent ?? "";
+
+                // Stats
+                const likeEl = document.querySelector(
+                  '[data-e2e="like-count"], [data-e2e="browse-like-count"]'
+                );
+                const commentEl = document.querySelector(
+                  '[data-e2e="comment-count"], [data-e2e="browse-comment-count"]'
+                );
+                const shareEl = document.querySelector('[data-e2e="share-count"]');
+                const viewEl = document.querySelector('[data-e2e="video-views"]');
+
+                let views = parseCount(viewEl?.textContent);
+                const likes = parseCount(likeEl?.textContent);
+                const comments = parseCount(commentEl?.textContent);
+                const shares = parseCount(shareEl?.textContent);
+
+                // Estimate views from likes if not available
+                if (views === 0 && likes > 0) {
+                  views = likes * 30;
+                }
+
+                // Find time text
+                let timeText = "";
+                document.querySelectorAll('[class*="SpanOtherInfos"], span').forEach((el) => {
+                  const t = el.textContent ?? "";
+                  if (t.match(/\d+\s*(час|hour|дн|day|нед|week|мин|min|д\.)/i)) {
+                    timeText = t;
+                  }
+                });
+
+                return { author, description: description.slice(0, 200), views, likes, comments, shares, timeText };
+              });
+
+              // Skip if no engagement
+              if (details.likes === 0 && details.comments === 0) continue;
+
+              // Parse time
+              let hoursAgo = 24;
+              const timeText = (details.timeText || "").toLowerCase();
+              if (timeText.includes("мин") || timeText.includes("min")) {
+                const digits = timeText.replace(/\D/g, "");
+                hoursAgo = digits ? Math.max(parseInt(digits) / 60, 0.5) : 0.5;
+              } else if (timeText.includes("час") || timeText.includes("hour") || timeText.includes("ч")) {
+                const digits = timeText.replace(/\D/g, "");
+                hoursAgo = digits ? parseInt(digits) : 1;
+              } else if (timeText.includes("дн") || timeText.includes("day") || timeText.includes("д")) {
+                const digits = timeText.replace(/\D/g, "");
+                hoursAgo = digits ? parseInt(digits) * 24 : 24;
+              } else if (timeText.includes("нед") || timeText.includes("week")) {
+                const digits = timeText.replace(/\D/g, "");
+                hoursAgo = digits ? parseInt(digits) * 24 * 7 : 168;
+              }
+
+              // Skip if too old
+              if (hoursAgo > maxDays * 24) continue;
+
+              const { engagementRate, velocity, viralityScore } = calculateMetrics(
+                details.views,
+                details.likes,
+                details.comments,
+                hoursAgo
+              );
+
+              results.push({
+                platform: "tiktok",
+                url: videoUrl,
+                author: details.author,
+                description: details.description,
+                views: details.views,
+                likes: details.likes,
+                comments: details.comments,
+                shares: details.shares,
+                hours_ago: Math.round(hoursAgo * 10) / 10,
+                engagement_rate: engagementRate,
+                velocity,
+                virality_score: viralityScore,
+                is_video: true
+              });
+            } catch (err) {
+              console.error(`Error processing video ${videoUrl}:`, err);
+            }
           }
         } catch (err) {
           console.error(`Error fetching #${tag}:`, err);
