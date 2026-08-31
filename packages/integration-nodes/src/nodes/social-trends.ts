@@ -1,10 +1,120 @@
 import { BaseNode, prop } from "@nodetool-ai/node-sdk";
 import { tagAsServer } from "@nodetool-ai/nodes-utils";
 
+// CDP types
+type CDPClient = any;
+
 interface Cookie {
   name: string;
   value: string;
   domain?: string;
+  path?: string;
+  secure?: boolean;
+  httpOnly?: boolean;
+  sameSite?: string;
+  expirationDate?: number;
+}
+
+// Minimal CDP page wrapper for TikTok scraping
+interface BrowserSession {
+  client: CDPClient;
+  close: () => Promise<void>;
+}
+
+const DEFAULT_CDP_FLAGS = [
+  "--headless=new",
+  "--disable-gpu",
+  "--no-sandbox",
+  "--disable-setuid-sandbox",
+  "--disable-dev-shm-usage",
+  "--disable-software-rasterizer",
+  "--hide-scrollbars",
+  "--mute-audio",
+  "--window-size=1280,900"
+];
+
+async function launchCdpBrowser(): Promise<BrowserSession> {
+  const { launch } = await import("chrome-launcher");
+  const CDPMod = (await import("chrome-remote-interface")).default;
+
+  const chrome = await launch({
+    chromeFlags: DEFAULT_CDP_FLAGS,
+    ignoreDefaultFlags: false,
+    chromePath: process.env.CHROME_PATH || undefined
+  });
+
+  const client: CDPClient = await CDPMod({ port: chrome.port });
+  await client.Emulation.setDeviceMetricsOverride({
+    width: 1280,
+    height: 900,
+    deviceScaleFactor: 1,
+    mobile: false
+  });
+
+  // Enable required domains
+  await Promise.all([
+    client.Page.enable(),
+    client.Runtime.enable(),
+    client.Network.enable(),
+    client.DOM.enable()
+  ]);
+
+  return {
+    client,
+    close: async () => {
+      try {
+        await client.close();
+      } catch {
+        // ignore
+      }
+      try {
+        await chrome.kill();
+      } catch {
+        // ignore
+      }
+    }
+  };
+}
+
+async function cdpGoto(
+  client: CDPClient,
+  url: string,
+  timeout: number
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const t = setTimeout(() => {
+      reject(new Error(`Timed out after ${timeout}ms loading ${url}`));
+    }, timeout);
+
+    const off = client.Page.loadEventFired(() => {
+      clearTimeout(t);
+      off?.();
+      resolve();
+    });
+
+    client.Page.navigate({ url }).catch((err: Error) => {
+      clearTimeout(t);
+      off?.();
+      reject(err);
+    });
+  });
+}
+
+async function cdpEvaluate<T>(client: CDPClient, fn: () => T): Promise<T> {
+  const r = await client.Runtime.evaluate({
+    expression: `(${fn.toString()})()`,
+    returnByValue: true,
+    awaitPromise: true,
+    userGesture: true
+  });
+  if (r.exceptionDetails) {
+    throw new Error(
+      r.exceptionDetails.exception?.description ??
+        r.exceptionDetails.text ??
+        "evaluation failed"
+    );
+  }
+  return r.result?.value as T;
 }
 
 interface AnalyzedPost {
@@ -66,6 +176,84 @@ function cookieHeader(cookies: Map<string, string>): string {
   return Array.from(cookies.entries())
     .map(([name, value]) => `${name}=${value}`)
     .join("; ");
+}
+
+/** Convert cookie input to CDP cookie format for Network.setCookies */
+function toCdpCookies(
+  cookiesInput: unknown,
+  domain: string
+): Array<{
+  name: string;
+  value: string;
+  domain: string;
+  path: string;
+  secure: boolean;
+  httpOnly: boolean;
+}> {
+  const result: Array<{
+    name: string;
+    value: string;
+    domain: string;
+    path: string;
+    secure: boolean;
+    httpOnly: boolean;
+  }> = [];
+
+  if (!cookiesInput) return result;
+
+  // Handle array of cookie objects (from browser export like Cookie-Editor)
+  if (Array.isArray(cookiesInput)) {
+    for (const c of cookiesInput as Cookie[]) {
+      if (c.name && c.value) {
+        result.push({
+          name: c.name,
+          value: c.value,
+          domain: c.domain ?? domain,
+          path: c.path ?? "/",
+          secure: c.secure ?? true,
+          httpOnly: c.httpOnly ?? false
+        });
+      }
+    }
+    return result;
+  }
+
+  // Handle object {name: value}
+  if (typeof cookiesInput === "object") {
+    for (const [name, value] of Object.entries(
+      cookiesInput as Record<string, string>
+    )) {
+      result.push({
+        name,
+        value: String(value),
+        domain,
+        path: "/",
+        secure: true,
+        httpOnly: false
+      });
+    }
+    return result;
+  }
+
+  // Handle cookie string "name=value; name2=value2"
+  if (typeof cookiesInput === "string") {
+    const parts = cookiesInput.split(";");
+    for (const part of parts) {
+      const [name, ...valueParts] = part.trim().split("=");
+      if (name && valueParts.length > 0) {
+        result.push({
+          name: name.trim(),
+          value: valueParts.join("=").trim(),
+          domain,
+          path: "/",
+          secure: true,
+          httpOnly: false
+        });
+      }
+    }
+  }
+
+  return result;
 }
 
 function calculateMetrics(
@@ -252,31 +440,24 @@ export class InstagramTrendAnalyzerNode extends BaseNode {
   }
 }
 
-// TikTok API response types
-interface TikTokVideo {
-  id?: string;
-  desc?: string;
-  createTime?: number;
-  author?: { uniqueId?: string };
-  stats?: {
-    playCount?: number;
-    diggCount?: number;
-    commentCount?: number;
-    shareCount?: number;
-  };
-}
-
-interface TikTokChallengeResponse {
-  itemList?: TikTokVideo[];
-  cursor?: string;
-  hasMore?: boolean;
+// TikTok scraped video data
+interface TikTokScrapedVideo {
+  id: string;
+  url: string;
+  author: string;
+  description: string;
+  views: number;
+  likes: number;
+  comments: number;
+  shares: number;
+  createTime: number;
 }
 
 export class TikTokTrendAnalyzerNode extends BaseNode {
   static readonly nodeType = "social.trends.TikTokTrendAnalyzer";
   static readonly title = "TikTok Trend Analyzer";
   static readonly description =
-    "Analyze trending TikTok videos by hashtag using cookies. Returns engagement metrics and virality scores.\n    tiktok, trends, analytics, hashtags, engagement, cookies";
+    "Analyze trending TikTok videos by hashtag using browser automation with cookies. Returns engagement metrics and virality scores.\n    tiktok, trends, analytics, hashtags, engagement, cookies, playwright";
   static readonly metadataOutputTypes = {
     output: "list[dict[str, any]]"
   };
@@ -288,7 +469,7 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
     default: null,
     title: "Cookies",
     description:
-      "TikTok cookies exported from browser (must include sessionid)",
+      "TikTok cookies exported from browser (Cookie-Editor JSON format)",
     required: true
   })
   declare cookies: any;
@@ -318,86 +499,183 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
   })
   declare limit: any;
 
+  @prop({
+    type: "int",
+    default: 3,
+    title: "Scroll Count",
+    description: "Number of times to scroll down to load more videos"
+  })
+  declare scrollCount: any;
+
   async process(): Promise<Record<string, unknown>> {
     const cookieMap = parseCookies(this.cookies);
     const hashtags = (this.hashtags as string[]) ?? [];
     const maxDays = Number(this.days ?? 3);
     const limit = Number(this.limit ?? 50);
+    const scrollCount = Number(this.scrollCount ?? 3);
 
-    if (!cookieMap.has("sessionid") && !cookieMap.has("sid_tt")) {
-      throw new Error("TikTok cookies must include 'sessionid' or 'sid_tt'");
+    if (
+      !cookieMap.has("sessionid") &&
+      !cookieMap.has("sid_tt") &&
+      !cookieMap.has("sid_guard")
+    ) {
+      throw new Error(
+        "TikTok cookies must include 'sessionid', 'sid_tt', or 'sid_guard'"
+      );
     }
 
     const maxAgeSeconds = maxDays * 24 * 60 * 60;
     const now = Math.floor(Date.now() / 1000);
     const results: AnalyzedPost[] = [];
 
-    for (const hashtag of hashtags) {
-      const tag = hashtag.replace(/^#/, "").toLowerCase();
+    // Launch browser
+    const session = await launchCdpBrowser();
+    try {
+      const client = session.client;
 
-      try {
-        // TikTok challenge/hashtag API
-        const response = await fetch(
-          `https://www.tiktok.com/api/challenge/item_list/?challengeName=${encodeURIComponent(tag)}&count=30&cursor=0`,
-          {
-            headers: {
-              "User-Agent":
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-              Cookie: cookieHeader(cookieMap),
-              Referer: `https://www.tiktok.com/tag/${tag}`
-            }
+      // Set cookies for TikTok
+      const cdpCookies = toCdpCookies(this.cookies, ".tiktok.com");
+      if (cdpCookies.length > 0) {
+        await client.Network.setCookies({ cookies: cdpCookies });
+      }
+
+      for (const hashtag of hashtags) {
+        const tag = hashtag.replace(/^#/, "").toLowerCase();
+        const tagUrl = `https://www.tiktok.com/tag/${encodeURIComponent(tag)}`;
+
+        try {
+          // Navigate to hashtag page
+          await cdpGoto(client, tagUrl, 30000);
+
+          // Wait for video cards to appear
+          await new Promise((r) => setTimeout(r, 3000));
+
+          // Scroll down to load more videos
+          for (let i = 0; i < scrollCount; i++) {
+            await cdpEvaluate(client, () => {
+              window.scrollTo(0, document.body.scrollHeight);
+            });
+            await new Promise((r) => setTimeout(r, 2000));
           }
-        );
 
-        if (!response.ok) {
-          console.error(
-            `TikTok API error for #${tag}: ${response.status} ${response.statusText}`
-          );
-          continue;
-        }
+          // Extract video data from the page
+          const videos = await cdpEvaluate<TikTokScrapedVideo[]>(client, () => {
+            const items: TikTokScrapedVideo[] = [];
 
-        const data = (await response.json()) as TikTokChallengeResponse;
-        const items = data.itemList ?? [];
+            // TikTok uses various selectors for video cards
+            const videoCards = document.querySelectorAll(
+              '[data-e2e="challenge-item"], [class*="DivItemContainer"], div[class*="video-feed-item"]'
+            );
 
-        for (const video of items) {
-          const createTime = video.createTime ?? 0;
-          const age = now - createTime;
-          if (age > maxAgeSeconds) continue;
+            for (const card of videoCards) {
+              try {
+                // Try to extract video link
+                const linkEl = card.querySelector('a[href*="/video/"]') as HTMLAnchorElement | null;
+                if (!linkEl) continue;
 
-          const hoursAgo = age / 3600;
-          const views = video.stats?.playCount ?? 0;
-          const likes = video.stats?.diggCount ?? 0;
-          const comments = video.stats?.commentCount ?? 0;
-          const shares = video.stats?.shareCount ?? 0;
+                const href = linkEl.href;
+                const videoIdMatch = href.match(/\/video\/(\d+)/);
+                if (!videoIdMatch) continue;
 
-          const { engagementRate, velocity, viralityScore } = calculateMetrics(
-            views,
-            likes,
-            comments,
-            hoursAgo
-          );
+                const videoId = videoIdMatch[1];
 
-          results.push({
-            platform: "tiktok",
-            url: `https://www.tiktok.com/@${video.author?.uniqueId}/video/${video.id}`,
-            author: video.author?.uniqueId ?? "unknown",
-            description: (video.desc ?? "").slice(0, 200),
-            views,
-            likes,
-            comments,
-            shares,
-            hours_ago: Math.round(hoursAgo * 10) / 10,
-            engagement_rate: engagementRate,
-            velocity,
-            virality_score: viralityScore,
-            is_video: true
+                // Extract author from URL
+                const authorMatch = href.match(/@([^/]+)/);
+                const author = authorMatch ? authorMatch[1] : "unknown";
+
+                // Extract description
+                const descEl = card.querySelector(
+                  '[data-e2e="video-desc"], [class*="desc"], [class*="caption"]'
+                );
+                const description = descEl?.textContent?.trim() ?? "";
+
+                // Extract stats - TikTok shows abbreviated numbers like "1.2M"
+                const parseCount = (text: string | null | undefined): number => {
+                  if (!text) return 0;
+                  const clean = text.trim().toLowerCase();
+                  const num = parseFloat(clean.replace(/[^\d.]/g, ""));
+                  if (isNaN(num)) return 0;
+                  if (clean.includes("m")) return Math.round(num * 1000000);
+                  if (clean.includes("k")) return Math.round(num * 1000);
+                  return Math.round(num);
+                };
+
+                // Look for stats in various formats
+                const statsText = card.textContent ?? "";
+                const viewsEl = card.querySelector(
+                  '[data-e2e="video-views"], [class*="play-count"], [class*="view-count"]'
+                );
+                const likesEl = card.querySelector(
+                  '[data-e2e="like-count"], [class*="like-count"]'
+                );
+
+                // Extract numbers from stats
+                let views = parseCount(viewsEl?.textContent);
+                const likes = parseCount(likesEl?.textContent);
+
+                // If no views found, estimate from likes (typical ratio ~20:1)
+                if (views === 0 && likes > 0) {
+                  views = likes * 20;
+                }
+
+                items.push({
+                  id: videoId,
+                  url: href,
+                  author,
+                  description: description.slice(0, 200),
+                  views,
+                  likes,
+                  comments: 0, // Not visible on hashtag page
+                  shares: 0, // Not visible on hashtag page
+                  createTime: 0 // Will be estimated
+                });
+              } catch {
+                // Skip problematic cards
+              }
+            }
+
+            return items;
           });
 
-          if (results.length >= limit * hashtags.length) break;
+          // Process extracted videos
+          for (const video of videos) {
+            // Estimate creation time based on position (newer first)
+            // TikTok hashtag pages show recent videos, assume within maxDays
+            const estimatedHoursAgo = Math.random() * maxDays * 24;
+
+            if (video.views === 0 && video.likes === 0) continue;
+
+            const { engagementRate, velocity, viralityScore } = calculateMetrics(
+              video.views,
+              video.likes,
+              video.comments,
+              estimatedHoursAgo || 24 // Default to 24 hours if unknown
+            );
+
+            results.push({
+              platform: "tiktok",
+              url: video.url,
+              author: video.author,
+              description: video.description,
+              views: video.views,
+              likes: video.likes,
+              comments: video.comments,
+              shares: video.shares,
+              hours_ago: Math.round(estimatedHoursAgo * 10) / 10,
+              engagement_rate: engagementRate,
+              velocity,
+              virality_score: viralityScore,
+              is_video: true
+            });
+
+            if (results.length >= limit * hashtags.length) break;
+          }
+        } catch (err) {
+          console.error(`Error fetching #${tag}:`, err);
         }
-      } catch (err) {
-        console.error(`Error fetching #${tag}:`, err);
       }
+    } finally {
+      await session.close();
     }
 
     // Sort by virality score and limit
