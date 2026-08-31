@@ -450,14 +450,41 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
         console.log(`TikTok: analyzing #${tag}...`);
 
         try {
-          await page.goto(tagUrl);
+          await page.goto(tagUrl, { waitUntil: "networkidle" });
           await page.waitForTimeout(4000);
+
+          // Save screenshot for debugging
+          try {
+            await page.screenshot({ path: `/tmp/tiktok-${tag}.png`, fullPage: false });
+            console.log(`TikTok: saved screenshot to /tmp/tiktok-${tag}.png`);
+          } catch (e) {
+            console.log(`TikTok: failed to save screenshot: ${e}`);
+          }
+
+          // Debug: Take a screenshot and log the page state
+          const pageInfo = await page.evaluate(() => ({
+            title: document.title,
+            url: window.location.href,
+            bodyText: document.body?.textContent?.slice(0, 500) ?? "",
+            allLinks: document.querySelectorAll("a").length,
+            videoLinks: document.querySelectorAll('a[href*="/video/"]').length
+          }));
+          console.log(
+            `TikTok page: title="${pageInfo.title}" links=${pageInfo.allLinks} videos=${pageInfo.videoLinks}`
+          );
+          console.log(`TikTok bodyText preview: ${pageInfo.bodyText.slice(0, 200)}`);
 
           // Scroll to load more videos
           for (let i = 0; i < scrollCount; i++) {
             await page.evaluate(() => window.scrollBy(0, 800));
             await page.waitForTimeout(800);
           }
+
+          // Check again after scrolling
+          const afterScroll = await page.evaluate(
+            () => document.querySelectorAll('a[href*="/video/"]').length
+          );
+          console.log(`TikTok after ${scrollCount} scrolls: ${afterScroll} video links`);
 
           // Collect video links
           const videoLinks = await page.evaluate(() => {
