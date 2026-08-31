@@ -116,13 +116,15 @@ async function cdpGoto(
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const t = setTimeout(() => {
-      reject(new Error(`Timed out after ${timeout}ms loading ${url}`));
+      // Don't reject on timeout, just resolve - TikTok may never fully load
+      resolve();
     }, timeout);
 
-    const off = client.Page.loadEventFired(() => {
+    const off = client.Page.domContentEventFired(() => {
       clearTimeout(t);
       off?.();
-      resolve();
+      // Wait extra time for dynamic content
+      setTimeout(resolve, 3000);
     });
 
     client.Page.navigate({ url }).catch((err: Error) => {
@@ -591,14 +593,49 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
             await new Promise((r) => setTimeout(r, 2000));
           }
 
+          // Debug: log page title and URL to understand what page we're on
+          const pageInfo = await cdpEvaluate<{ title: string; url: string; bodyLength: number }>(
+            client,
+            () => ({
+              title: document.title,
+              url: window.location.href,
+              bodyLength: document.body?.innerHTML?.length ?? 0
+            })
+          );
+          console.log(`TikTok page: ${pageInfo.title} | URL: ${pageInfo.url} | Body length: ${pageInfo.bodyLength}`);
+
           // Extract video data from the page
           const videos = await cdpEvaluate<TikTokScrapedVideo[]>(client, () => {
             const items: TikTokScrapedVideo[] = [];
 
-            // TikTok uses various selectors for video cards
+            // TikTok uses various selectors for video cards - try multiple approaches
             const videoCards = document.querySelectorAll(
-              '[data-e2e="challenge-item"], [class*="DivItemContainer"], div[class*="video-feed-item"]'
+              '[data-e2e="challenge-item"], [data-e2e="user-post-item"], [class*="DivItemContainer"], [class*="DivVideoFeedV2"], div[class*="video-feed-item"], div[class*="tiktok-x"] a[href*="/video/"]'
             );
+
+            // If no cards found, try finding video links directly
+            if (videoCards.length === 0) {
+              const videoLinks = document.querySelectorAll('a[href*="/@"][href*="/video/"]');
+              for (const link of videoLinks) {
+                const href = (link as HTMLAnchorElement).href;
+                const videoIdMatch = href.match(/\/video\/(\d+)/);
+                if (!videoIdMatch) continue;
+
+                const authorMatch = href.match(/@([^/]+)/);
+                items.push({
+                  id: videoIdMatch[1],
+                  url: href,
+                  author: authorMatch ? authorMatch[1] : "unknown",
+                  description: "",
+                  views: 0,
+                  likes: 0,
+                  comments: 0,
+                  shares: 0,
+                  createTime: 0
+                });
+              }
+              return items;
+            }
 
             for (const card of videoCards) {
               try {
