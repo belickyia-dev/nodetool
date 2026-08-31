@@ -5,7 +5,7 @@ import { useSearchParams } from "react-router-dom";
 import {
   useMediaQuery
 } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
+import { useTheme, useColorScheme } from "@mui/material/styles";
 import WarningIcon from "@mui/icons-material/Warning";
 import { useSettingsStore } from "../../stores/SettingsStore";
 import useAuth from "../../stores/useAuth";
@@ -99,6 +99,12 @@ const TIME_FORMAT_OPTIONS = [
   { value: "24h", label: "24h" }
 ] as const;
 
+const THEME_MODE_OPTIONS = [
+  { value: "system", label: "System" },
+  { value: "dark", label: "Dark" },
+  { value: "light", label: "Light" }
+] as const;
+
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -157,6 +163,7 @@ const SearchItem = React.memo(function SearchItem({
 function SettingsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const session = useAuth((state) => state.session);
+  const { mode, setMode } = useColorScheme();
 
   const tabSubtitle = (tab: number): string => {
     switch (tab) {
@@ -396,6 +403,13 @@ function SettingsPage() {
       setTimeFormat(value === "12h" ? "12h" : "24h");
     },
     [setTimeFormat]
+  );
+
+  const handleThemeModeChange = useCallback(
+    (value: string) => {
+      setMode(value as "system" | "dark" | "light");
+    },
+    [setMode]
   );
   const copyAuthToken = async () => {
     const accessToken = session?.access_token;
@@ -1030,6 +1044,18 @@ function SettingsPage() {
                       >
                         Appearance
                       </Text>
+                      <SearchItem
+                        search={generalSearch}
+                        keywords="appearance theme mode dark light system color scheme"
+                      >
+                        <SelectField
+                          label="Theme"
+                          value={mode ?? "system"}
+                          onChange={handleThemeModeChange}
+                          options={THEME_MODE_OPTIONS}
+                          description="Choose your preferred color scheme. System follows your OS settings."
+                        />
+                      </SearchItem>
                       <SearchItem
                         search={generalSearch}
                         keywords="appearance time format 12h 24h"

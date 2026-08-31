@@ -599,8 +599,8 @@ const AppWrapper = ({ configReady }: { configReady: Promise<unknown> }) => {
   return (
     <React.StrictMode>
       <TRPCProvider>
-        <InitColorSchemeScript attribute="class" defaultMode="dark" />
-        <ThemeProvider theme={ThemeNodetool} defaultMode="dark">
+        <InitColorSchemeScript attribute="class" defaultMode="light" />
+        <ThemeProvider theme={ThemeNodetool} defaultMode="light">
           <CssBaseline />
           <MobileClassProvider>
             <MenuProvider>
