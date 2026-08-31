@@ -1,0 +1,220 @@
+{
+  "id": "",
+  "access": "private",
+  "created_at": "2026-08-08T12:00:00.000Z",
+  "updated_at": "2026-08-08T12:00:00.000Z",
+  "name": "PixUp Auto Hook",
+  "tool_name": null,
+  "description": "Автоматическая генерация хуков для Instagram Reels. Анализирует изображение, создаёт цепляющий текст в стиле конкурентов, рендерит HookReveal видео (blur → reveal).",
+  "tags": [
+    "video",
+    "social",
+    "agents",
+    "remotion",
+    "example"
+  ],
+  "thumbnail": null,
+  "thumbnail_url": null,
+  "graph": {
+    "edges": [
+      {
+        "id": "edge-1",
+        "source": "image_input",
+        "sourceHandle": "output",
+        "target": "hook_generator",
+        "targetHandle": "image"
+      },
+      {
+        "id": "edge-2",
+        "source": "prompt_input",
+        "sourceHandle": "output",
+        "target": "format_prompt",
+        "targetHandle": "prompt"
+      },
+      {
+        "id": "edge-3",
+        "source": "title_input",
+        "sourceHandle": "output",
+        "target": "format_prompt",
+        "targetHandle": "title"
+      },
+      {
+        "id": "edge-4",
+        "source": "format_prompt",
+        "sourceHandle": "output",
+        "target": "hook_generator",
+        "targetHandle": "prompt"
+      },
+      {
+        "id": "edge-5",
+        "source": "image_input",
+        "sourceHandle": "output",
+        "target": "remotion_render",
+        "targetHandle": "before_image"
+      },
+      {
+        "id": "edge-6",
+        "source": "image_input",
+        "sourceHandle": "output",
+        "target": "remotion_render",
+        "targetHandle": "after_image"
+      },
+      {
+        "id": "edge-7",
+        "source": "hook_generator",
+        "sourceHandle": "text",
+        "target": "remotion_render",
+        "targetHandle": "hook_text"
+      },
+      {
+        "id": "edge-8",
+        "source": "remotion_render",
+        "sourceHandle": "output",
+        "target": "output_video",
+        "targetHandle": "value"
+      },
+      {
+        "id": "edge-9",
+        "source": "hook_generator",
+        "sourceHandle": "text",
+        "target": "output_hook",
+        "targetHandle": "value"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "comment-intro",
+        "type": "nodetool.workflows.base_node.Comment",
+        "data": {
+          "comment": "# 🎬 PixUp Auto Hook Generator\n\nАвтоматическая генерация хуков для Instagram Reels в стиле русскоязычных AI-фото аккаунтов.\n\n**Pipeline:** Изображение + prompt + title → LLM анализ → Hook текст → Remotion HookReveal видео\n\n**Примеры хуков:**\n- \"Смотри до конца 👀\"\n- \"Вот результат 👇\"\n- \"Спорим, не знал... 😏\"\n\n**Требуется:** Remotion сервер на порту 3333\n```\nnpx tsx demo/server.ts\n```"
+        },
+        "ui_properties": {
+          "position": { "x": 0, "y": -250 },
+          "width": 500,
+          "height": 220
+        }
+      },
+      {
+        "id": "image_input",
+        "type": "nodetool.input.ImageInput",
+        "data": {
+          "name": "image",
+          "description": "AI-сгенерированное изображение"
+        },
+        "ui_properties": {
+          "position": { "x": 0, "y": 50 },
+          "width": 300,
+          "title": "📷 Изображение"
+        }
+      },
+      {
+        "id": "prompt_input",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "prompt",
+          "value": "девушка в стиле киберпанк, неоновый свет",
+          "description": "Промпт генерации изображения"
+        },
+        "ui_properties": {
+          "position": { "x": 0, "y": 250 },
+          "width": 300,
+          "title": "✏️ Промпт"
+        }
+      },
+      {
+        "id": "title_input",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "title",
+          "value": "Киберпанк портрет",
+          "description": "Заголовок поста"
+        },
+        "ui_properties": {
+          "position": { "x": 0, "y": 400 },
+          "width": 300,
+          "title": "📝 Заголовок"
+        }
+      },
+      {
+        "id": "format_prompt",
+        "type": "nodetool.text.FormatText",
+        "data": {
+          "template": "Создай hook-текст для AI-фото.\n\nОписание изображения: {prompt}\nЗаголовок поста: {title}\n\nИзображение прикреплено. Проанализируй его и создай интригующий hook.\n\nОтветь ТОЛЬКО текстом хука (1-5 слов + эмодзи):"
+        },
+        "ui_properties": {
+          "position": { "x": 350, "y": 300 },
+          "width": 350,
+          "title": "📋 Формат промпта"
+        }
+      },
+      {
+        "id": "hook_generator",
+        "type": "nodetool.agents.Agent",
+        "data": {
+          "model": {
+            "type": "language_model",
+            "provider": "anthropic",
+            "id": "claude-sonnet-4-20250514",
+            "name": "Claude Sonnet 4",
+            "path": null,
+            "supported_tasks": []
+          },
+          "mode": "loop",
+          "system": "Ты — эксперт по созданию вирусных Instagram Reels в стиле русскоязычных AI-фото аккаунтов.\n\nТвоя задача: создать короткий hook-текст (1-5 слов + эмодзи) для видео с AI-фото.\n\nСТИЛЬ ТЕКСТА:\n- Интригующий, вызывает желание досмотреть\n- Эмоциональный, но не кликбейтный\n- Использует вопросы или незаконченные фразы\n- Включает 1-2 эмодзи\n\nПРИМЕРЫ ХОРОШИХ ХУКОВ:\n- \"Смотри до конца 👀\"\n- \"Вот результат 👇\"\n- \"Как это сделать? 🤔\"\n- \"Спорим, не знал... 😏\"\n- \"Подожди 3 секунды ⏰\"\n- \"Это нейросеть 🤖\"\n- \"Было vs Стало 🔥\"\n\nПРАВИЛА:\n1. Текст на русском языке\n2. Максимум 5 слов (без учёта эмодзи)\n3. Должен создавать интригу\n4. Не повторяй заголовок буквально\n5. Отвечай ТОЛЬКО текстом хука",
+          "max_tokens": 100,
+          "max_turns": 1
+        },
+        "ui_properties": {
+          "position": { "x": 400, "y": 50 },
+          "width": 400,
+          "height": 200,
+          "title": "🤖 Генератор хуков"
+        }
+      },
+      {
+        "id": "remotion_render",
+        "type": "nodetool.video.RemotionRender",
+        "data": {
+          "template": "HookReveal",
+          "duration_frames": 90,
+          "fps": 30,
+          "width": 1080,
+          "height": 1920,
+          "server_url": "http://localhost:3333"
+        },
+        "ui_properties": {
+          "position": { "x": 900, "y": 100 },
+          "width": 350,
+          "height": 250,
+          "title": "🎬 Remotion HookReveal"
+        }
+      },
+      {
+        "id": "output_video",
+        "type": "nodetool.output.VideoOutput",
+        "data": {
+          "name": "video",
+          "description": "Готовое видео для Reels"
+        },
+        "ui_properties": {
+          "position": { "x": 1350, "y": 100 },
+          "width": 300,
+          "title": "📹 Видео"
+        }
+      },
+      {
+        "id": "output_hook",
+        "type": "nodetool.output.StringOutput",
+        "data": {
+          "name": "hook_text",
+          "description": "Сгенерированный хук"
+        },
+        "ui_properties": {
+          "position": { "x": 1350, "y": 300 },
+          "width": 300,
+          "title": "💬 Хук текст"
+        }
+      }
+    ]
+  }
+}

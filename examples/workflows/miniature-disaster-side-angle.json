@@ -1,0 +1,289 @@
+{
+  "id": "",
+  "access": "private",
+  "created_at": "2026-08-01T12:00:00.000Z",
+  "updated_at": "2026-08-01T12:00:00.000Z",
+  "name": "Miniature Disaster SIDE ANGLE",
+  "tool_name": null,
+  "description": "Вариант 2: Стартовое фото с БОКОВОГО ракурса, как в оригинале. Камера сбоку бассейна, миниатюра вдали сбоку.",
+  "tags": [
+    "viral",
+    "instagram",
+    "miniature",
+    "disaster",
+    "side-angle",
+    "wonderfulworldai"
+  ],
+  "thumbnail": null,
+  "thumbnail_url": null,
+  "graph": {
+    "edges": [
+      {
+        "id": "e_city_to_prompt",
+        "source": "input_city",
+        "sourceHandle": "output",
+        "target": "image_prompt_template",
+        "targetHandle": "city"
+      },
+      {
+        "id": "e_disaster_to_prompt",
+        "source": "input_disaster",
+        "sourceHandle": "output",
+        "target": "image_prompt_template",
+        "targetHandle": "disaster"
+      },
+      {
+        "id": "e_prompt_to_image",
+        "source": "image_prompt_template",
+        "sourceHandle": "output",
+        "target": "text_to_image",
+        "targetHandle": "prompt"
+      },
+      {
+        "id": "e_image_to_video",
+        "source": "text_to_image",
+        "sourceHandle": "output",
+        "target": "image_to_video",
+        "targetHandle": "image"
+      },
+      {
+        "id": "e_city_to_motion",
+        "source": "input_city",
+        "sourceHandle": "output",
+        "target": "motion_prompt_template",
+        "targetHandle": "city"
+      },
+      {
+        "id": "e_disaster_to_motion",
+        "source": "input_disaster",
+        "sourceHandle": "output",
+        "target": "motion_prompt_template",
+        "targetHandle": "disaster"
+      },
+      {
+        "id": "e_motion_to_video",
+        "source": "motion_prompt_template",
+        "sourceHandle": "output",
+        "target": "image_to_video",
+        "targetHandle": "prompt"
+      },
+      {
+        "id": "e_neg_to_video",
+        "source": "input_negative",
+        "sourceHandle": "output",
+        "target": "image_to_video",
+        "targetHandle": "negative_prompt"
+      },
+      {
+        "id": "e_video_to_output",
+        "source": "image_to_video",
+        "sourceHandle": "output",
+        "target": "output_video",
+        "targetHandle": "value"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "comment_intro",
+        "type": "nodetool.workflows.base_node.Comment",
+        "data": {
+          "comment": "# 🎬 Side Angle (Вариант 2)\n\n**Боковой ракурс как в оригинале!**\n\nКамера расположена СБОКУ бассейна, смотрит по диагонали. Миниатюра видна вдали СЛЕВА.\n\n**Ключевое отличие:**\n- Не симметричная композиция\n- Камера под углом ~45°\n- Есть пространство для движения"
+        },
+        "ui_properties": {
+          "position": { "x": -500, "y": 0 },
+          "width": 400,
+          "height": 240
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "input_city",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "City",
+          "value": "Miami",
+          "description": "City for the miniature: Miami, Santa Monica, Tokyo"
+        },
+        "ui_properties": {
+          "position": { "x": 0, "y": 50 },
+          "width": 280,
+          "title": "1️⃣ City"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "input_disaster",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "Disaster",
+          "value": "massive tsunami wave",
+          "description": "Type of disaster"
+        },
+        "ui_properties": {
+          "position": { "x": 0, "y": 220 },
+          "width": 280,
+          "title": "2️⃣ Disaster"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "image_prompt_template",
+        "type": "nodetool.text.Prompt",
+        "data": {
+          "prompt": "Behind-the-scenes photograph of a practical effects studio, shot from a DIAGONAL SIDE ANGLE.\n\nCAMERA POSITION: The photographer is standing at the RIGHT SIDE of a massive indoor water tank, shooting DIAGONALLY across toward the far end.\n\nRIGHT SIDE OF FRAME (foreground):\nProfessional film crew - 3-4 people wearing black 'EFFECTS CREW' t-shirts. They are positioned along the near edge of the tank, operating cinema cameras on dolly tracks. One camera on a tall jib/crane arm. Monitors and equipment visible.\n\nLEFT SIDE - THE WATER TANK:\nA long rectangular water tank. The water is COMPLETELY CALM and still. Bright blue chroma key screen covers the entire far wall with orange/red tracking markers.\n\nFAR END OF TANK - LARGE MINIATURE (important!):\nA MASSIVE detailed miniature scale model of {{ city }} SPANS THE ENTIRE WIDTH of the tank at the far end. The miniature is LARGE and impressive - detailed skyscrapers with lit windows, a pier with ferris wheel, palm trees, colorful Art Deco buildings, a beach with sand. The miniature city stretches from left edge to right edge of the tank. It fills the background.\n\nBRIGHT studio lighting from overhead film lights. The perspective creates depth - we look down the length of the tank toward the impressive miniature city.\n\nPhotorealistic behind-the-scenes documentary photograph. Diagonal composition."
+        },
+        "ui_properties": {
+          "position": { "x": 350, "y": 10 },
+          "width": 440,
+          "height": 460,
+          "title": "3️⃣ Side Angle Image"
+        },
+        "dynamic_properties": {
+          "city": "Miami",
+          "disaster": "massive tsunami wave"
+        },
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "text_to_image",
+        "type": "nodetool.image.TextToImage",
+        "data": {
+          "model": {
+            "type": "image_model",
+            "provider": "huggingface_fal_ai",
+            "id": "fal-ai/flux-pro/v1.1",
+            "name": "FLUX.1 Pro v1.1",
+            "path": null,
+            "supported_tasks": []
+          },
+          "negative_prompt": "wave, waves, water splash, action, destruction, tiny miniature, small model, miniature in corner, dark, moody, cartoon, anime",
+          "aspect_ratio": "9:16",
+          "resolution": "1K"
+        },
+        "ui_properties": {
+          "position": { "x": 860, "y": 10 },
+          "width": 360,
+          "height": 420,
+          "title": "4️⃣ Generate Side Angle"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "motion_prompt_template",
+        "type": "nodetool.text.Prompt",
+        "data": {
+          "prompt": "Animate this side-angle studio photograph. The camera will PAN and FOLLOW the action.\n\nPHASE 1 (0-2 sec): Calm anticipation. Slight camera movement. Crew ready.\n\nPHASE 2 (2-5 sec): A {{ disaster }} suddenly forms on the RIGHT side of the tank (near the camera). The wave begins traveling LEFT across the tank toward the miniature {{ city }}. Camera starts PANNING LEFT to follow the wave.\n\nPHASE 3 (5-10 sec): The wave grows massive as it travels. Camera continues tracking LEFT, following the wave. The wave CRASHES into the miniature city on the left. Spectacular destruction - buildings fall, water explodes, debris flies. Slow-motion feel.\n\nPHASE 4 (10-15 sec): Aftermath. Camera completes the pan, now looking at the destroyed flooded miniature. Crew reacts with excitement. Water continues flooding.\n\nKey: Camera MOVES from right to left, following the wave across the entire tank. Bright studio lighting throughout. 15 seconds total."
+        },
+        "ui_properties": {
+          "position": { "x": 350, "y": 510 },
+          "width": 440,
+          "height": 320,
+          "title": "5️⃣ Pan Motion"
+        },
+        "dynamic_properties": {
+          "city": "Miami",
+          "disaster": "massive tsunami wave"
+        },
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "input_negative",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "Negative Prompt",
+          "value": "static camera, no movement, dark, moody, watermarks, cartoon",
+          "description": "Elements to avoid"
+        },
+        "ui_properties": {
+          "position": { "x": 860, "y": 480 },
+          "width": 300,
+          "title": "Negative"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "image_to_video",
+        "type": "nodetool.video.ImageToVideo",
+        "data": {
+          "model": {
+            "type": "video_model",
+            "provider": "gemini",
+            "id": "veo-3.1-generate-preview",
+            "name": "Veo 3.1 Preview",
+            "path": null,
+            "supported_tasks": []
+          },
+          "aspect_ratio": "9:16",
+          "resolution": "1080p",
+          "duration": 15,
+          "timeout_seconds": 0
+        },
+        "ui_properties": {
+          "position": { "x": 1280, "y": 160 },
+          "width": 380,
+          "height": 400,
+          "title": "6️⃣ Animate (15s)"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "output_video",
+        "type": "nodetool.output.Output",
+        "data": {
+          "name": "viral_video"
+        },
+        "ui_properties": {
+          "position": { "x": 1730, "y": 260 },
+          "width": 280,
+          "title": "📹 Output"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      }
+    ]
+  },
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "city": {
+        "type": "string",
+        "default": "Miami",
+        "label": "City name"
+      },
+      "disaster": {
+        "type": "string",
+        "default": "massive tsunami wave",
+        "label": "Disaster type"
+      }
+    },
+    "required": ["city", "disaster"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "viral_video": {
+        "type": "object",
+        "properties": {
+          "uri": { "type": "string", "format": "uri" },
+          "type": { "type": "string", "const": "video" }
+        },
+        "required": ["uri", "type"],
+        "label": "Generated video"
+      }
+    },
+    "required": ["viral_video"]
+  },
+  "settings": {},
+  "package_name": null,
+  "path": null,
+  "run_mode": "workflow",
+  "workspace_id": null,
+  "required_providers": ["huggingface_fal_ai", "gemini"],
+  "required_models": null
+}

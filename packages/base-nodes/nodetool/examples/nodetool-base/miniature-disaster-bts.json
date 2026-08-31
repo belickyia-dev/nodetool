@@ -1,0 +1,294 @@
+{
+  "id": "",
+  "access": "private",
+  "created_at": "2026-08-01T12:00:00.000Z",
+  "updated_at": "2026-08-01T12:00:00.000Z",
+  "name": "Miniature Disaster BTS",
+  "tool_name": null,
+  "description": "Generate viral 'behind-the-scenes' videos of miniature disaster scenes in the style of @wonderfulworldai. Creates AI images of film crews shooting miniature cities being destroyed, then animates them.",
+  "tags": [
+    "viral",
+    "instagram",
+    "bts",
+    "miniature",
+    "disaster",
+    "ai-video"
+  ],
+  "thumbnail": null,
+  "thumbnail_url": null,
+  "graph": {
+    "edges": [
+      {
+        "id": "e_city_to_prompt",
+        "source": "input_city",
+        "sourceHandle": "output",
+        "target": "image_prompt_template",
+        "targetHandle": "city"
+      },
+      {
+        "id": "e_disaster_to_prompt",
+        "source": "input_disaster",
+        "sourceHandle": "output",
+        "target": "image_prompt_template",
+        "targetHandle": "disaster"
+      },
+      {
+        "id": "e_prompt_to_image",
+        "source": "image_prompt_template",
+        "sourceHandle": "output",
+        "target": "text_to_image",
+        "targetHandle": "prompt"
+      },
+      {
+        "id": "e_image_to_video",
+        "source": "text_to_image",
+        "sourceHandle": "output",
+        "target": "image_to_video",
+        "targetHandle": "image"
+      },
+      {
+        "id": "e_city_to_motion",
+        "source": "input_city",
+        "sourceHandle": "output",
+        "target": "motion_prompt_template",
+        "targetHandle": "city"
+      },
+      {
+        "id": "e_disaster_to_motion",
+        "source": "input_disaster",
+        "sourceHandle": "output",
+        "target": "motion_prompt_template",
+        "targetHandle": "disaster"
+      },
+      {
+        "id": "e_motion_to_video",
+        "source": "motion_prompt_template",
+        "sourceHandle": "output",
+        "target": "image_to_video",
+        "targetHandle": "prompt"
+      },
+      {
+        "id": "e_neg_to_video",
+        "source": "input_negative",
+        "sourceHandle": "output",
+        "target": "image_to_video",
+        "targetHandle": "negative_prompt"
+      },
+      {
+        "id": "e_video_to_output",
+        "source": "image_to_video",
+        "sourceHandle": "output",
+        "target": "output_video",
+        "targetHandle": "value"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "comment_intro",
+        "type": "nodetool.workflows.base_node.Comment",
+        "data": {
+          "comment": "# 🎬 Miniature Disaster BTS Generator\n\nCreate viral videos in the style of **@wonderfulworldai** (700M+ views on Instagram).\n\n**Concept:** AI-generated \"behind-the-scenes\" footage showing a film crew shooting miniature city disasters. The fake BTS style creates viral engagement.\n\n**Pipeline:** City + Disaster → Build image prompt → Generate still → Build motion prompt → Animate → Output\n\n**Format:** 9:16 vertical for Instagram/TikTok Reels"
+        },
+        "ui_properties": {
+          "position": { "x": -500, "y": 0 },
+          "width": 420,
+          "height": 240
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "input_city",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "City",
+          "value": "Miami",
+          "description": "City name for the miniature model (e.g., Miami, Tokyo, New York, Paris, Dubai)"
+        },
+        "ui_properties": {
+          "position": { "x": 0, "y": 50 },
+          "width": 280,
+          "title": "1️⃣ City"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "input_disaster",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "Disaster",
+          "value": "tsunami wave crashing through downtown",
+          "description": "Type of disaster (e.g., tsunami wave, meteor impact, giant monster attack, earthquake, volcano eruption)"
+        },
+        "ui_properties": {
+          "position": { "x": 0, "y": 240 },
+          "width": 280,
+          "title": "2️⃣ Disaster"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "image_prompt_template",
+        "type": "nodetool.text.Prompt",
+        "data": {
+          "prompt": "Behind-the-scenes film set photography. A professional film crew is shooting a practical effects disaster scene using a detailed miniature scale model of {{ city }} city.\n\nThe miniature city model is incredibly detailed with tiny buildings, streets, cars, and palm trees. A {{ disaster }} is happening in the miniature - water/debris/effects are real practical elements.\n\nVisible in frame: professional camera operators with RED cameras on dollies, boom microphones, lighting rigs, director's chair, cables on floor, safety crew watching.\n\nCinematic lighting with dramatic shadows. Shot on Arri Alexa. Shallow depth of field focusing on the miniature disaster. Film set atmosphere with crew members in the background.\n\nHyper-realistic miniature photography, tilt-shift effect, practical effects, behind the scenes documentary style."
+        },
+        "ui_properties": {
+          "position": { "x": 350, "y": 50 },
+          "width": 360,
+          "height": 340,
+          "title": "3️⃣ Image Prompt"
+        },
+        "dynamic_properties": {
+          "city": "Miami",
+          "disaster": "tsunami wave crashing through downtown"
+        },
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "text_to_image",
+        "type": "nodetool.image.TextToImage",
+        "data": {
+          "model": {
+            "type": "image_model",
+            "provider": "huggingface_fal_ai",
+            "id": "fal-ai/flux-pro/v1.1",
+            "name": "FLUX.1 Pro v1.1",
+            "path": null,
+            "supported_tasks": []
+          },
+          "negative_prompt": "cartoon, anime, illustration, painting, drawing, watermark, text, logo, blurry, low quality, deformed",
+          "aspect_ratio": "9:16",
+          "resolution": "1K"
+        },
+        "ui_properties": {
+          "position": { "x": 780, "y": 50 },
+          "width": 360,
+          "height": 400,
+          "title": "4️⃣ Generate Image"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "motion_prompt_template",
+        "type": "nodetool.text.Prompt",
+        "data": {
+          "prompt": "Animate this behind-the-scenes film set photograph. The {{ disaster }} in the miniature {{ city }} model should have dramatic motion - water splashing, debris flying, dust clouds rising.\n\nCamera operators should have subtle movements, adjusting their equipment. The miniature destruction should be the hero action.\n\nSmooth dolly movement slightly pushing in toward the miniature disaster. Practical effects motion: water spray, dust particles, small debris. Film set lights may flicker subtly.\n\n8 second dramatic reveal with building tension."
+        },
+        "ui_properties": {
+          "position": { "x": 350, "y": 430 },
+          "width": 360,
+          "height": 260,
+          "title": "5️⃣ Motion Prompt"
+        },
+        "dynamic_properties": {
+          "city": "Miami",
+          "disaster": "tsunami wave crashing through downtown"
+        },
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "input_negative",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "Negative Prompt",
+          "value": "no watermarks, no text overlays, no jump cuts, no warped anatomy, no morphing faces, maintain realistic physics",
+          "description": "Elements to avoid in the generated video"
+        },
+        "ui_properties": {
+          "position": { "x": 780, "y": 500 },
+          "width": 280,
+          "title": "Negative"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "image_to_video",
+        "type": "nodetool.video.ImageToVideo",
+        "data": {
+          "model": {
+            "type": "video_model",
+            "provider": "gemini",
+            "id": "veo-3.1-generate-preview",
+            "name": "Veo 3.1 Preview",
+            "path": null,
+            "supported_tasks": []
+          },
+          "aspect_ratio": "9:16",
+          "resolution": "1080p",
+          "duration": 8,
+          "timeout_seconds": 0
+        },
+        "ui_properties": {
+          "position": { "x": 1200, "y": 160 },
+          "width": 380,
+          "height": 400,
+          "title": "6️⃣ Animate Video"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "output_video",
+        "type": "nodetool.output.Output",
+        "data": {
+          "name": "viral_video"
+        },
+        "ui_properties": {
+          "position": { "x": 1650, "y": 200 },
+          "width": 280,
+          "title": "📹 Output"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      }
+    ]
+  },
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "city": {
+        "type": "string",
+        "default": "Miami",
+        "label": "City name"
+      },
+      "disaster": {
+        "type": "string",
+        "default": "tsunami wave crashing through downtown",
+        "label": "Disaster type"
+      },
+      "negative_prompt": {
+        "type": "string",
+        "default": "no watermarks, no text overlays, no jump cuts, no warped anatomy",
+        "label": "Negative prompt"
+      }
+    },
+    "required": ["city", "disaster"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "viral_video": {
+        "type": "object",
+        "properties": {
+          "uri": { "type": "string", "format": "uri" },
+          "type": { "type": "string", "const": "video" }
+        },
+        "required": ["uri", "type"],
+        "label": "Generated BTS video"
+      }
+    },
+    "required": ["viral_video"]
+  },
+  "settings": {},
+  "package_name": null,
+  "path": null,
+  "run_mode": "workflow",
+  "workspace_id": null,
+  "required_providers": ["huggingface_fal_ai", "gemini"],
+  "required_models": null
+}

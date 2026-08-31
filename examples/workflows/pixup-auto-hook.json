@@ -1,0 +1,113 @@
+{
+  "name": "PixUp Auto Hook Generator",
+  "description": "Takes S3 image URL, prompt, and title → Analyzes image → Generates hook text in competitor style → Creates HookReveal video → Publishes to Instagram",
+  "params": {
+    "image_url": {
+      "type": "string",
+      "description": "S3 URL of the result image",
+      "required": true
+    },
+    "prompt": {
+      "type": "string",
+      "description": "Original generation prompt",
+      "required": true
+    },
+    "title": {
+      "type": "string",
+      "description": "Post title from database",
+      "required": true
+    },
+    "instagram_account_id": {
+      "type": "string",
+      "description": "Zernio Instagram account ID",
+      "required": true
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "id": "image_input",
+        "type": "nodetool.input.ImageInput",
+        "data": {
+          "value": {
+            "type": "image",
+            "uri": "{{image_url}}"
+          }
+        }
+      },
+      {
+        "id": "hook_generator",
+        "type": "nodetool.agents.Agent",
+        "data": {
+          "model": {
+            "type": "language_model",
+            "provider": "anthropic",
+            "id": "claude-sonnet-4-20250514",
+            "name": "Claude Sonnet 4",
+            "path": null,
+            "supported_tasks": []
+          },
+          "mode": "loop",
+          "system": "Ты — эксперт по созданию вирусных Instagram Reels в стиле русскоязычных AI-фото аккаунтов.\n\nТвоя задача: создать короткий hook-текст (1-5 слов + эмодзи) для видео с AI-фото.\n\nСТИЛЬ ТЕКСТА (на основе анализа конкурентов):\n- Интригующий, вызывает желание досмотреть\n- Эмоциональный, но не кликбейтный\n- Использует вопросы или незаконченные фразы\n- Включает 1-2 эмодзи\n\nПРИМЕРЫ ХОРОШИХ ХУКОВ:\n- \"Смотри до конца 👀\"\n- \"Вот результат 👇\"\n- \"Как это сделать? 🤔\"\n- \"Спорим, не знал... 😏\"\n- \"Подожди 3 секунды ⏰\"\n- \"Это нейросеть 🤖\"\n- \"Было vs Стало 🔥\"\n- \"Ты не поверишь... 😱\"\n\nПРАВИЛА:\n1. Текст должен быть на русском языке\n2. Максимум 5 слов (без учёта эмодзи)\n3. Должен создавать интригу\n4. Не повторяй заголовок буквально\n5. Отвечай ТОЛЬКО текстом хука, без объяснений",
+          "prompt": "Создай hook-текст для AI-фото.\n\nОписание изображения: {{prompt}}\nЗаголовок поста: {{title}}\n\nИзображение прикреплено. Проанализируй его и создай интригующий hook.\n\nОтветь ТОЛЬКО текстом хука (1-5 слов + эмодзи):",
+          "max_tokens": 100,
+          "max_turns": 1
+        }
+      },
+      {
+        "id": "remotion_render",
+        "type": "nodetool.video.RemotionRender",
+        "data": {
+          "template": "HookReveal",
+          "duration_frames": 90,
+          "fps": 30,
+          "width": 1080,
+          "height": 1920,
+          "server_url": "http://localhost:3333"
+        }
+      },
+      {
+        "id": "instagram_publish",
+        "type": "lib.social.ZernioPublishVideo",
+        "data": {
+          "caption": "{{title}}\n\n{{prompt}}\n\n#нейросеть #aiart #нейрофото #искусственныйинтеллект #нейроарт\n#aiartwork #digitalart #pixup #aiфото #нейропортрет",
+          "instagramAccountId": "{{instagram_account_id}}",
+          "isAiGenerated": true,
+          "trialMode": "auto"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "image_input",
+        "sourceHandle": "output",
+        "target": "hook_generator",
+        "targetHandle": "image"
+      },
+      {
+        "source": "image_input",
+        "sourceHandle": "output",
+        "target": "remotion_render",
+        "targetHandle": "before_image"
+      },
+      {
+        "source": "image_input",
+        "sourceHandle": "output",
+        "target": "remotion_render",
+        "targetHandle": "after_image"
+      },
+      {
+        "source": "hook_generator",
+        "sourceHandle": "text",
+        "target": "remotion_render",
+        "targetHandle": "hook_text"
+      },
+      {
+        "source": "remotion_render",
+        "sourceHandle": "output",
+        "target": "instagram_publish",
+        "targetHandle": "video"
+      }
+    ]
+  }
+}

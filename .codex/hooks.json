@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "'/Users/antonbelickij/IdeaProjects/nodetool/.codex/hooks/session-start.sh'"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,220 @@
+{
+  "id": "",
+  "access": "private",
+  "created_at": "2026-08-01T12:00:00.000Z",
+  "updated_at": "2026-08-01T12:00:00.000Z",
+  "name": "Miniature Disaster TEXT-TO-VIDEO v2",
+  "tool_name": null,
+  "description": "Воркфлоу в стиле @wonderfulworldai. Промпт основан на анализе реального туториала (Higgsfield AI / Seedance 2.0). Text-to-Video без стартового изображения — максимальная свобода движения камеры.",
+  "tags": [
+    "viral",
+    "instagram",
+    "miniature",
+    "disaster",
+    "text-to-video",
+    "wonderfulworldai",
+    "higgsfield-style"
+  ],
+  "thumbnail": null,
+  "thumbnail_url": null,
+  "graph": {
+    "edges": [
+      {
+        "id": "e_city_to_prompt",
+        "source": "input_city",
+        "sourceHandle": "output",
+        "target": "video_prompt_template",
+        "targetHandle": "city"
+      },
+      {
+        "id": "e_disaster_to_prompt",
+        "source": "input_disaster",
+        "sourceHandle": "output",
+        "target": "video_prompt_template",
+        "targetHandle": "disaster"
+      },
+      {
+        "id": "e_prompt_to_video",
+        "source": "video_prompt_template",
+        "sourceHandle": "output",
+        "target": "text_to_video",
+        "targetHandle": "prompt"
+      },
+      {
+        "id": "e_neg_to_video",
+        "source": "input_negative",
+        "sourceHandle": "output",
+        "target": "text_to_video",
+        "targetHandle": "negative_prompt"
+      },
+      {
+        "id": "e_video_to_output",
+        "source": "text_to_video",
+        "sourceHandle": "output",
+        "target": "output_video",
+        "targetHandle": "value"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "comment_intro",
+        "type": "nodetool.workflows.base_node.Comment",
+        "data": {
+          "comment": "# 🎬 Miniature Disaster — Higgsfield Style\n\n**Reverse-engineered from @wonderfulworldai tutorial**\n\nИсточник: Higgsfield AI + Seedance 2.0\n\n**Ключевые находки:**\n- Камера СВЕРХУ ВНИЗ (high angle)\n- Человек ОЧЕНЬ близко к камере (cropped by frame)\n- Вода с эффектом миниатюры (small droplets, tight foam)\n- Handheld shake, natural light\n- NO: centered, symmetrical, static camera"
+        },
+        "ui_properties": {
+          "position": { "x": -520, "y": 0 },
+          "width": 420,
+          "height": 280
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "input_city",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "Location",
+          "value": "Mediterranean coastal village",
+          "description": "Location for the miniature: Mediterranean Coast, Miami Beach, Tokyo Bay, Greek Islands, Santorini"
+        },
+        "ui_properties": {
+          "position": { "x": 0, "y": 50 },
+          "width": 300,
+          "title": "1️⃣ Location"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "input_disaster",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "Disaster",
+          "value": "massive tsunami wave",
+          "description": "Type of disaster: tsunami wave, storm surge, flash flood, tidal wave"
+        },
+        "ui_properties": {
+          "position": { "x": 0, "y": 240 },
+          "width": 300,
+          "title": "2️⃣ Disaster"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "video_prompt_template",
+        "type": "nodetool.text.Prompt",
+        "data": {
+          "prompt": "Vertical 9:16 handheld phone video, 15 seconds, one unbroken take, no cuts.\n\nClose, high angle, looking down onto a miniature {{ city }}. Pale sand beach with tiny palm trees on the left, turquoise water on the right. Detailed scale model with white Mediterranean buildings, terracotta roofs, tiny boats in a harbor, cypress trees.\n\nAt the very bottom of the frame: the back of a man's head and shoulders in a black \"EFFECTS CREW\" t-shirt, cropped by the frame edge, very close to the lens. A black camera crane arm hangs into the upper left corner of the frame. Blue chroma key screen with pink/orange tracking markers visible in the far background.\n\nThe water is initially CALM and still. Then suddenly a {{ disaster }} begins forming — the water starts rising dramatically. Miniature-scale water physics: small fast droplets, tight foam, visible surface tension.\n\nThe wave grows massive and crashes into the miniature city. Spectacular destruction: tiny buildings collapse, water explodes through streets, boats are tossed, palm trees bend and snap. The camera follows the action with natural handheld movement.\n\nAll voices off-screen, no speaking face, no lip-sync. Live production sound, large room reverb, no music. Handheld shake throughout, natural bright studio light, no color grade."
+        },
+        "ui_properties": {
+          "position": { "x": 380, "y": 20 },
+          "width": 480,
+          "height": 560,
+          "title": "3️⃣ Higgsfield-Style Prompt"
+        },
+        "dynamic_properties": {
+          "city": "Mediterranean coastal village",
+          "disaster": "massive tsunami wave"
+        },
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "input_negative",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "Negative Prompt",
+          "value": "centered, symmetrical, vanishing point, wide shot, establishing shot, eye level, full body visible, ceiling, lighting truss visible, static camera, music score, voiceover, narrator, visible speaking face, lip-sync, scene change, jump cut, dark, moody, night, cartoon, anime",
+          "description": "Elements to avoid (from Higgsfield tutorial)"
+        },
+        "ui_properties": {
+          "position": { "x": 0, "y": 440 },
+          "width": 300,
+          "height": 180,
+          "title": "Negative (Critical!)"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "text_to_video",
+        "type": "nodetool.video.TextToVideo",
+        "data": {
+          "model": {
+            "type": "video_model",
+            "provider": "gemini",
+            "id": "veo-3.1-generate-preview",
+            "name": "Veo 3.1 Preview",
+            "path": null,
+            "supported_tasks": []
+          },
+          "aspect_ratio": "9:16",
+          "resolution": "1080p",
+          "duration": 15,
+          "timeout_seconds": 0
+        },
+        "ui_properties": {
+          "position": { "x": 940, "y": 140 },
+          "width": 380,
+          "height": 400,
+          "title": "4️⃣ Generate Video (15s)"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "output_video",
+        "type": "nodetool.output.Output",
+        "data": {
+          "name": "viral_video"
+        },
+        "ui_properties": {
+          "position": { "x": 1400, "y": 240 },
+          "width": 280,
+          "title": "📹 Output"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      }
+    ]
+  },
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "city": {
+        "type": "string",
+        "default": "Mediterranean coastal village",
+        "label": "Location/Setting"
+      },
+      "disaster": {
+        "type": "string",
+        "default": "massive tsunami wave",
+        "label": "Disaster type"
+      }
+    },
+    "required": ["city", "disaster"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "viral_video": {
+        "type": "object",
+        "properties": {
+          "uri": { "type": "string", "format": "uri" },
+          "type": { "type": "string", "const": "video" }
+        },
+        "required": ["uri", "type"],
+        "label": "Generated viral video"
+      }
+    },
+    "required": ["viral_video"]
+  },
+  "settings": {},
+  "package_name": null,
+  "path": null,
+  "run_mode": "workflow",
+  "workspace_id": null,
+  "required_providers": ["gemini"],
+  "required_models": null
+}

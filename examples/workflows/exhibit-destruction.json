@@ -1,0 +1,318 @@
+{
+  "id": "",
+  "access": "private",
+  "created_at": "2026-08-01T12:00:00.000Z",
+  "updated_at": "2026-08-01T12:00:00.000Z",
+  "name": "Exhibit Destruction Viral",
+  "tool_name": null,
+  "description": "Generate viral videos of kids destroying valuable exhibits (LEGO sculptures, sand art, domino setups). Formula: calm scene → sudden chaos → satisfying destruction. 30K+ views format.",
+  "tags": [
+    "viral",
+    "destruction",
+    "lego",
+    "exhibit",
+    "chaos",
+    "instagram"
+  ],
+  "thumbnail": null,
+  "thumbnail_url": null,
+  "graph": {
+    "edges": [
+      {
+        "id": "e_location_to_img",
+        "source": "input_location",
+        "sourceHandle": "output",
+        "target": "image_prompt_template",
+        "targetHandle": "location"
+      },
+      {
+        "id": "e_exhibit_to_img",
+        "source": "input_exhibit",
+        "sourceHandle": "output",
+        "target": "image_prompt_template",
+        "targetHandle": "exhibit"
+      },
+      {
+        "id": "e_character_to_img",
+        "source": "input_character",
+        "sourceHandle": "output",
+        "target": "image_prompt_template",
+        "targetHandle": "character"
+      },
+      {
+        "id": "e_prompt_to_image",
+        "source": "image_prompt_template",
+        "sourceHandle": "output",
+        "target": "text_to_image",
+        "targetHandle": "prompt"
+      },
+      {
+        "id": "e_image_to_video",
+        "source": "text_to_image",
+        "sourceHandle": "output",
+        "target": "image_to_video",
+        "targetHandle": "image"
+      },
+      {
+        "id": "e_exhibit_to_motion",
+        "source": "input_exhibit",
+        "sourceHandle": "output",
+        "target": "motion_prompt_template",
+        "targetHandle": "exhibit"
+      },
+      {
+        "id": "e_character_to_motion",
+        "source": "input_character",
+        "sourceHandle": "output",
+        "target": "motion_prompt_template",
+        "targetHandle": "character"
+      },
+      {
+        "id": "e_motion_to_video",
+        "source": "motion_prompt_template",
+        "sourceHandle": "output",
+        "target": "image_to_video",
+        "targetHandle": "prompt"
+      },
+      {
+        "id": "e_neg_to_video",
+        "source": "input_negative",
+        "sourceHandle": "output",
+        "target": "image_to_video",
+        "targetHandle": "negative_prompt"
+      },
+      {
+        "id": "e_video_to_output",
+        "source": "image_to_video",
+        "sourceHandle": "output",
+        "target": "output_video",
+        "targetHandle": "value"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "comment_intro",
+        "type": "nodetool.workflows.base_node.Comment",
+        "data": {
+          "comment": "# 💥 Exhibit Destruction Viral Generator\n\n**Formula:** Kid destroys something valuable in public = viral engagement\n\n**Why it works:**\n- High emotional tension\n- \"Did that really happen?\" reaction\n- Satisfying destruction visuals\n- Relatable scenario\n\n**Pipeline:** Location + Exhibit + Character → Generate \"before\" image → Animate destruction\n\n**Proven:** 30K+ views on Instagram Reels"
+        },
+        "ui_properties": {
+          "position": { "x": -520, "y": 0 },
+          "width": 420,
+          "height": 260
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "input_location",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "Location",
+          "value": "LEGO Fan Convention exhibition hall",
+          "description": "Where the scene takes place: LEGO convention, art museum, toy store, sand sculpture festival, domino world record event"
+        },
+        "ui_properties": {
+          "position": { "x": 0, "y": 30 },
+          "width": 300,
+          "title": "1️⃣ Location"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "input_exhibit",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "Exhibit",
+          "value": "giant LEGO airplane sculpture, life-size, blue and white, 'LEGO Airlines' livery",
+          "description": "What gets destroyed: LEGO sculpture, sand castle, domino setup, glass art, ice sculpture, balloon tower"
+        },
+        "ui_properties": {
+          "position": { "x": 0, "y": 200 },
+          "width": 300,
+          "title": "2️⃣ Exhibit to Destroy"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "input_character",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "Character",
+          "value": "young boy, 6-7 years old, wearing orange hoodie with 'Fan Builder' text on back, jeans, colorful sneakers",
+          "description": "Who causes the chaos: child description, clothing, distinctive features"
+        },
+        "ui_properties": {
+          "position": { "x": 0, "y": 380 },
+          "width": 300,
+          "title": "3️⃣ Character"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "image_prompt_template",
+        "type": "nodetool.text.Prompt",
+        "data": {
+          "prompt": "Photorealistic photograph at a {{ location }}. Crowded with visitors in the background.\n\nIn the center: a magnificent {{ exhibit }} displayed on a raised platform behind gold stanchions with velvet rope barriers. The exhibit is pristine and impressive.\n\nIn the foreground: {{ character }}, seen from behind, standing just outside the velvet rope, looking at the exhibit with fascination. The child is positioned as if about to do something.\n\nCinematic lighting from above, exhibition hall atmosphere. Shot on Sony A7IV, 35mm lens, shallow depth of field focusing on the child and exhibit. High tension composition.\n\nThe scene is calm but anticipatory - something is about to happen."
+        },
+        "ui_properties": {
+          "position": { "x": 380, "y": 30 },
+          "width": 400,
+          "height": 380,
+          "title": "4️⃣ Image Prompt"
+        },
+        "dynamic_properties": {
+          "location": "LEGO Fan Convention exhibition hall",
+          "exhibit": "giant LEGO airplane sculpture, life-size, blue and white, 'LEGO Airlines' livery",
+          "character": "young boy, 6-7 years old, wearing orange hoodie with 'Fan Builder' text on back, jeans, colorful sneakers"
+        },
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "text_to_image",
+        "type": "nodetool.image.TextToImage",
+        "data": {
+          "model": {
+            "type": "image_model",
+            "provider": "huggingface_fal_ai",
+            "id": "fal-ai/flux-pro/v1.1",
+            "name": "FLUX.1 Pro v1.1",
+            "path": null,
+            "supported_tasks": []
+          },
+          "negative_prompt": "cartoon, anime, illustration, painting, watermark, text overlay, blurry, low quality, deformed faces, extra limbs",
+          "aspect_ratio": "9:16",
+          "resolution": "1K"
+        },
+        "ui_properties": {
+          "position": { "x": 850, "y": 30 },
+          "width": 360,
+          "height": 380,
+          "title": "5️⃣ Generate Image"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "motion_prompt_template",
+        "type": "nodetool.text.Prompt",
+        "data": {
+          "prompt": "One continuous camera shot. Animate this photograph into a dramatic destruction sequence.\n\nThe {{ character }} suddenly ducks under the velvet rope and runs toward the {{ exhibit }}. The child grabs onto it and starts pulling.\n\nThe exhibit begins to collapse spectacularly:\n- Pieces flying everywhere in satisfying slow-motion\n- The structure crumbling from the point of impact\n- Debris scattering across the floor\n- Dust and small particles in the air\n\nIn the background, security guards and shocked visitors react - people gasping, guards starting to run toward the scene.\n\nCamera does a subtle push-in toward the destruction. High tension, photorealistic style, cinematic lighting. The destruction should be satisfying and dramatic.\n\n10 seconds total. No voice, no text overlays."
+        },
+        "ui_properties": {
+          "position": { "x": 380, "y": 450 },
+          "width": 400,
+          "height": 320,
+          "title": "6️⃣ Motion Prompt"
+        },
+        "dynamic_properties": {
+          "exhibit": "giant LEGO airplane sculpture, life-size, blue and white, 'LEGO Airlines' livery",
+          "character": "young boy, 6-7 years old, wearing orange hoodie with 'Fan Builder' text on back, jeans, colorful sneakers"
+        },
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "input_negative",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "Negative Prompt",
+          "value": "voice, narration, text overlays, watermarks, subtitles, jump cuts, morphing faces, unrealistic physics, cartoon style, slow motion artifacts",
+          "description": "Elements to avoid"
+        },
+        "ui_properties": {
+          "position": { "x": 850, "y": 470 },
+          "width": 300,
+          "title": "Negative"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "image_to_video",
+        "type": "nodetool.video.ImageToVideo",
+        "data": {
+          "model": {
+            "type": "video_model",
+            "provider": "gemini",
+            "id": "veo-3.1-generate-preview",
+            "name": "Veo 3.1 Preview",
+            "path": null,
+            "supported_tasks": []
+          },
+          "aspect_ratio": "9:16",
+          "resolution": "1080p",
+          "duration": 10,
+          "timeout_seconds": 0
+        },
+        "ui_properties": {
+          "position": { "x": 1280, "y": 140 },
+          "width": 380,
+          "height": 400,
+          "title": "7️⃣ Animate Destruction"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "output_video",
+        "type": "nodetool.output.Output",
+        "data": {
+          "name": "viral_video"
+        },
+        "ui_properties": {
+          "position": { "x": 1730, "y": 200 },
+          "width": 280,
+          "title": "📹 Output"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      }
+    ]
+  },
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "location": {
+        "type": "string",
+        "default": "LEGO Fan Convention exhibition hall",
+        "label": "Location/Setting"
+      },
+      "exhibit": {
+        "type": "string",
+        "default": "giant LEGO airplane sculpture",
+        "label": "Exhibit to destroy"
+      },
+      "character": {
+        "type": "string",
+        "default": "young boy in orange hoodie",
+        "label": "Character description"
+      }
+    },
+    "required": ["location", "exhibit", "character"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "viral_video": {
+        "type": "object",
+        "properties": {
+          "uri": { "type": "string", "format": "uri" },
+          "type": { "type": "string", "const": "video" }
+        },
+        "required": ["uri", "type"],
+        "label": "Generated destruction video"
+      }
+    },
+    "required": ["viral_video"]
+  },
+  "settings": {},
+  "package_name": null,
+  "path": null,
+  "run_mode": "workflow",
+  "workspace_id": null,
+  "required_providers": ["huggingface_fal_ai", "gemini"],
+  "required_models": null
+}

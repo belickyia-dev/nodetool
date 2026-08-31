@@ -30,7 +30,30 @@ const DEFAULT_CDP_FLAGS = [
   "--disable-software-rasterizer",
   "--hide-scrollbars",
   "--mute-audio",
-  "--window-size=1280,900"
+  "--window-size=1280,900",
+  // Stealth flags to avoid bot detection
+  "--disable-blink-features=AutomationControlled",
+  "--disable-infobars",
+  "--disable-background-networking",
+  "--disable-breakpad",
+  "--disable-component-update",
+  "--disable-default-apps",
+  "--disable-extensions",
+  "--disable-features=TranslateUI",
+  "--disable-hang-monitor",
+  "--disable-ipc-flooding-protection",
+  "--disable-popup-blocking",
+  "--disable-prompt-on-repost",
+  "--disable-renderer-backgrounding",
+  "--disable-sync",
+  "--enable-features=NetworkService,NetworkServiceInProcess",
+  "--force-color-profile=srgb",
+  "--metrics-recording-only",
+  "--no-first-run",
+  "--password-store=basic",
+  "--use-mock-keychain",
+  "--export-tagged-pdf",
+  "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 ];
 
 async function launchCdpBrowser(): Promise<BrowserSession> {
@@ -58,6 +81,16 @@ async function launchCdpBrowser(): Promise<BrowserSession> {
     client.Network.enable(),
     client.DOM.enable()
   ]);
+
+  // Remove webdriver flag to avoid bot detection
+  await client.Page.addScriptToEvaluateOnNewDocument({
+    source: `
+      Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+      Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] });
+      Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
+      window.chrome = { runtime: {} };
+    `
+  });
 
   return {
     client,

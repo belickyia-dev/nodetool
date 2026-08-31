@@ -1,0 +1,291 @@
+{
+  "id": "",
+  "access": "private",
+  "created_at": "2026-08-01T12:00:00.000Z",
+  "updated_at": "2026-08-01T12:00:00.000Z",
+  "name": "Miniature City Disaster BTS",
+  "tool_name": null,
+  "description": "Generate viral BTS-style miniature city disaster videos like @wonderfulworldai. Shows film crew shooting practical effects of a scale model city being destroyed by tsunami/disaster in a water tank studio.",
+  "tags": [
+    "viral",
+    "instagram",
+    "miniature",
+    "disaster",
+    "bts",
+    "behind-the-scenes",
+    "practical-effects",
+    "wonderfulworldai"
+  ],
+  "thumbnail": null,
+  "thumbnail_url": null,
+  "graph": {
+    "edges": [
+      {
+        "id": "e_city_to_prompt",
+        "source": "input_city",
+        "sourceHandle": "output",
+        "target": "image_prompt_template",
+        "targetHandle": "city"
+      },
+      {
+        "id": "e_disaster_to_prompt",
+        "source": "input_disaster",
+        "sourceHandle": "output",
+        "target": "image_prompt_template",
+        "targetHandle": "disaster"
+      },
+      {
+        "id": "e_prompt_to_image",
+        "source": "image_prompt_template",
+        "sourceHandle": "output",
+        "target": "text_to_image",
+        "targetHandle": "prompt"
+      },
+      {
+        "id": "e_image_to_video",
+        "source": "text_to_image",
+        "sourceHandle": "output",
+        "target": "image_to_video",
+        "targetHandle": "image"
+      },
+      {
+        "id": "e_city_to_motion",
+        "source": "input_city",
+        "sourceHandle": "output",
+        "target": "motion_prompt_template",
+        "targetHandle": "city"
+      },
+      {
+        "id": "e_disaster_to_motion",
+        "source": "input_disaster",
+        "sourceHandle": "output",
+        "target": "motion_prompt_template",
+        "targetHandle": "disaster"
+      },
+      {
+        "id": "e_motion_to_video",
+        "source": "motion_prompt_template",
+        "sourceHandle": "output",
+        "target": "image_to_video",
+        "targetHandle": "prompt"
+      },
+      {
+        "id": "e_neg_to_video",
+        "source": "input_negative",
+        "sourceHandle": "output",
+        "target": "image_to_video",
+        "targetHandle": "negative_prompt"
+      },
+      {
+        "id": "e_video_to_output",
+        "source": "image_to_video",
+        "sourceHandle": "output",
+        "target": "output_video",
+        "targetHandle": "value"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "comment_intro",
+        "type": "nodetool.workflows.base_node.Comment",
+        "data": {
+          "comment": "# 🎬 Miniature City Disaster BTS v3\n\n**@wonderfulworldai** style (18M+ likes)\n\n**CRITICAL for starting image:**\n- Studio/crew = FOREGROUND (большая часть кадра)\n- Miniature = BACKGROUND (далеко, мелко)\n- Water = CALM (волны нет!)\n- Lighting = BRIGHT\n\n**The video model will animate:**\n- Wave forming and growing\n- Destruction of the miniature\n- Crew reactions"
+        },
+        "ui_properties": {
+          "position": { "x": -520, "y": 0 },
+          "width": 420,
+          "height": 280
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "input_city",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "City",
+          "value": "Miami",
+          "description": "City for the miniature: Miami, Santa Monica, Tokyo, New York, Dubai"
+        },
+        "ui_properties": {
+          "position": { "x": 0, "y": 50 },
+          "width": 280,
+          "title": "1️⃣ City"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "input_disaster",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "Disaster",
+          "value": "massive tsunami wave",
+          "description": "Type of disaster: tsunami wave, tornado, meteor impact"
+        },
+        "ui_properties": {
+          "position": { "x": 0, "y": 240 },
+          "width": 280,
+          "title": "2️⃣ Disaster"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "image_prompt_template",
+        "type": "nodetool.text.Prompt",
+        "data": {
+          "prompt": "Wide shot of a brightly lit Hollywood special effects studio. Behind-the-scenes setup photo BEFORE the action starts.\n\nTOP HALF OF FRAME - BACKGROUND:\nA massive bright blue chroma key screen fills the entire back wall, covered with a grid of orange and red tracking marker crosses. Very bright studio lighting from multiple large film lights on ceiling rigging. The blue screen is the dominant visual element.\n\nMIDDLE OF FRAME - FAR AWAY:\nA large indoor water tank built into the studio floor. The water is COMPLETELY CALM and STILL - no waves, no ripples, like a swimming pool. In the DISTANCE inside the tank: a small miniature scale model of {{ city }} - tiny buildings, a miniature pier with ferris wheel, barely visible because it's far away.\n\nBOTTOM HALF OF FRAME - FOREGROUND (most important!):\nProfessional film crew of 5-6 people positioned along the edge of the water tank. They wear matching black t-shirts with 'EFFECTS CREW' in white text on their backs. Camera operators crouching with professional cinema cameras. Dolly track rails visible on the ground. Equipment monitors. A large camera crane/jib arm extending over the water.\n\nThis is the CALM BEFORE THE STORM - the crew is ready, waiting for the wave machine to activate. Anticipation moment. No action yet.\n\nShot from elevated angle looking down at the entire studio set. Very bright, well-lit, professional film production environment. Photorealistic behind-the-scenes documentary photograph."
+        },
+        "ui_properties": {
+          "position": { "x": 350, "y": 10 },
+          "width": 440,
+          "height": 480,
+          "title": "3️⃣ Setup Image (NO WAVE)"
+        },
+        "dynamic_properties": {
+          "city": "Miami",
+          "disaster": "massive tsunami wave"
+        },
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "text_to_image",
+        "type": "nodetool.image.TextToImage",
+        "data": {
+          "model": {
+            "type": "image_model",
+            "provider": "huggingface_fal_ai",
+            "id": "fal-ai/flux-pro/v1.1",
+            "name": "FLUX.1 Pro v1.1",
+            "path": null,
+            "supported_tasks": []
+          },
+          "negative_prompt": "wave, waves, tsunami, water splash, destruction, action, dark, moody, night, dramatic lighting, close-up of miniature, miniature filling the frame, no people, empty studio, cartoon, anime",
+          "aspect_ratio": "9:16",
+          "resolution": "1K"
+        },
+        "ui_properties": {
+          "position": { "x": 860, "y": 10 },
+          "width": 360,
+          "height": 450,
+          "title": "4️⃣ Generate Setup Image"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "motion_prompt_template",
+        "type": "nodetool.text.Prompt",
+        "data": {
+          "prompt": "Animate this calm studio setup photo into a dramatic 15-second destruction sequence.\n\nPHASE 1 (0-3 sec): ANTICIPATION. The calm before the storm. Slight camera movement. Crew members making final adjustments. The water is still. Building tension.\n\nPHASE 2 (3-6 sec): THE WAVE BEGINS. Suddenly, the wave machine activates. A {{ disaster }} starts forming at the far end of the tank. The water rises dramatically. Crew members turn to watch. Camera operators begin tracking.\n\nPHASE 3 (6-11 sec): DESTRUCTION. The massive wave crashes into the miniature {{ city }}. Spectacular chaos: buildings topple, water explodes everywhere, the ferris wheel falls, debris flies. The crew keeps filming as water splashes toward them. Slow-motion feel during peak destruction.\n\nPHASE 4 (11-15 sec): AFTERMATH. Water continues flooding through the destroyed miniature. Crew members excited by the successful shot. Camera crane sweeps over the flooded city from above.\n\nMaintain the BTS perspective throughout - crew always visible in frame. Bright studio lighting. Professional filmmaking atmosphere."
+        },
+        "ui_properties": {
+          "position": { "x": 350, "y": 530 },
+          "width": 440,
+          "height": 320,
+          "title": "5️⃣ Motion Prompt"
+        },
+        "dynamic_properties": {
+          "city": "Miami",
+          "disaster": "massive tsunami wave"
+        },
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "input_negative",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "Negative Prompt",
+          "value": "dark, moody, night, dramatic shadows, watermarks, text overlays, jump cuts, morphing, cartoon",
+          "description": "Elements to avoid"
+        },
+        "ui_properties": {
+          "position": { "x": 860, "y": 510 },
+          "width": 300,
+          "title": "Negative"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "image_to_video",
+        "type": "nodetool.video.ImageToVideo",
+        "data": {
+          "model": {
+            "type": "video_model",
+            "provider": "gemini",
+            "id": "veo-3.1-generate-preview",
+            "name": "Veo 3.1 Preview",
+            "path": null,
+            "supported_tasks": []
+          },
+          "aspect_ratio": "9:16",
+          "resolution": "1080p",
+          "duration": 15,
+          "timeout_seconds": 0
+        },
+        "ui_properties": {
+          "position": { "x": 1300, "y": 180 },
+          "width": 380,
+          "height": 400,
+          "title": "6️⃣ Animate (15s)"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "output_video",
+        "type": "nodetool.output.Output",
+        "data": {
+          "name": "viral_video"
+        },
+        "ui_properties": {
+          "position": { "x": 1750, "y": 280 },
+          "width": 280,
+          "title": "📹 Output"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      }
+    ]
+  },
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "city": {
+        "type": "string",
+        "default": "Miami",
+        "label": "City name"
+      },
+      "disaster": {
+        "type": "string",
+        "default": "massive tsunami wave",
+        "label": "Disaster type"
+      }
+    },
+    "required": ["city", "disaster"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "viral_video": {
+        "type": "object",
+        "properties": {
+          "uri": { "type": "string", "format": "uri" },
+          "type": { "type": "string", "const": "video" }
+        },
+        "required": ["uri", "type"],
+        "label": "Generated BTS disaster video"
+      }
+    },
+    "required": ["viral_video"]
+  },
+  "settings": {},
+  "package_name": null,
+  "path": null,
+  "run_mode": "workflow",
+  "workspace_id": null,
+  "required_providers": ["huggingface_fal_ai", "gemini"],
+  "required_models": null
+}

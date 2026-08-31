@@ -1,0 +1,275 @@
+{
+  "id": "",
+  "access": "private",
+  "created_at": "2026-08-01T12:00:00.000Z",
+  "updated_at": "2026-08-01T12:00:00.000Z",
+  "name": "Viral Video Factory",
+  "tool_name": null,
+  "description": "Автоматическая генерация вирусных видео. LLM создаёт промпт на основе выбранного формата, затем text-to-video генерирует ролик. Поддерживает: Mini Rescue, Oddly Satisfying, Miniature Disasters, Cakeify и другие вирусные форматы.",
+  "tags": [
+    "viral",
+    "instagram",
+    "tiktok",
+    "reels",
+    "llm",
+    "automated",
+    "factory",
+    "text-to-video"
+  ],
+  "thumbnail": null,
+  "thumbnail_url": null,
+  "graph": {
+    "edges": [
+      {
+        "id": "e_format_to_llm",
+        "source": "input_format",
+        "sourceHandle": "output",
+        "target": "prompt_generator",
+        "targetHandle": "format"
+      },
+      {
+        "id": "e_subject_to_llm",
+        "source": "input_subject",
+        "sourceHandle": "output",
+        "target": "prompt_generator",
+        "targetHandle": "subject"
+      },
+      {
+        "id": "e_llm_system_to_agent",
+        "source": "llm_system_prompt",
+        "sourceHandle": "output",
+        "target": "llm_agent",
+        "targetHandle": "system"
+      },
+      {
+        "id": "e_prompt_gen_to_agent",
+        "source": "prompt_generator",
+        "sourceHandle": "output",
+        "target": "llm_agent",
+        "targetHandle": "prompt"
+      },
+      {
+        "id": "e_agent_to_video",
+        "source": "llm_agent",
+        "sourceHandle": "text",
+        "target": "text_to_video",
+        "targetHandle": "prompt"
+      },
+      {
+        "id": "e_neg_to_video",
+        "source": "input_negative",
+        "sourceHandle": "output",
+        "target": "text_to_video",
+        "targetHandle": "negative_prompt"
+      },
+      {
+        "id": "e_video_to_output",
+        "source": "text_to_video",
+        "sourceHandle": "output",
+        "target": "output_video",
+        "targetHandle": "value"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "comment_intro",
+        "type": "nodetool.workflows.base_node.Comment",
+        "data": {
+          "comment": "# 🏭 Viral Video Factory\n\n**Автоматическая генерация вирусных видео**\n\n1. Выбери формат (Mini Rescue, Oddly Satisfying, etc.)\n2. Укажи тему/объект\n3. LLM сгенерирует оптимальный промпт\n4. Text-to-Video создаст ролик\n\n**Форматы с доказанной вирусностью:**\n- mini_rescue — 50M+ views\n- miniature_disaster — 18M+ likes\n- oddly_satisfying — evergreen\n- cakeify — trending 2024-2025"
+        },
+        "ui_properties": {
+          "position": { "x": -550, "y": 0 },
+          "width": 440,
+          "height": 300
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "input_format",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "Video Format",
+          "value": "miniature_disaster",
+          "description": "Выбери формат: miniature_disaster | mini_rescue | oddly_satisfying | cakeify | squish | destruction | nature_phenomenon"
+        },
+        "ui_properties": {
+          "position": { "x": 0, "y": 50 },
+          "width": 320,
+          "title": "1️⃣ Format"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "input_subject",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "Subject/Theme",
+          "value": "Mediterranean coastal village with white buildings and blue domes",
+          "description": "Тема или объект для видео. Примеры: Tokyo cityscape, soap bar, chocolate cake, tiny farm, space station"
+        },
+        "ui_properties": {
+          "position": { "x": 0, "y": 240 },
+          "width": 320,
+          "title": "2️⃣ Subject"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "llm_system_prompt",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "System Prompt",
+          "value": "You are an expert viral video prompt engineer. You create prompts for AI video generation that maximize engagement on Instagram Reels and TikTok.\n\nYour prompts MUST follow these proven viral patterns:\n\n## FORMAT TEMPLATES:\n\n### miniature_disaster (BTS style, 18M+ likes)\nVertical 9:16 handheld phone video, 15 seconds, one unbroken take, no cuts.\nClose, high, looking down onto a miniature [SUBJECT]. [DETAILED DESCRIPTION].\nAt the very bottom of the frame, the back of a man's head and shoulders in a black \"EFFECTS CREW\" t-shirt, cropped by the frame edge, very close to the lens. A black crane arm hangs into the upper left corner.\n[DISASTER HAPPENS - wave, explosion, collapse, etc.]\nMiniature-scale physics — small fast droplets, tight foam, visible surface tension.\nAll voices off-screen, no speaking face. Live production sound, large room reverb, no music. Handheld shake, natural light.\n\n### mini_rescue (50M+ views potential)\nVertical 9:16 video, 10-15 seconds.\nExtreme close-up of a tiny detailed miniature [SUBJECT] in peril — [DANGER DESCRIPTION].\nA GIANT human hand enters frame from above, fingers reaching down.\nThe hand carefully rescues/saves the tiny [ELEMENT] just in time.\nMiniature scale contrast — the hand looks enormous compared to the tiny world.\nSoft dramatic lighting, slight camera movement, satisfying resolution.\n\n### oddly_satisfying (evergreen viral)\nVertical 9:16 close-up video, 10-15 seconds, loop-friendly.\n[SATISFYING ACTION] in extreme detail: [SUBJECT].\nSmooth continuous motion, perfect execution, no mistakes.\nCrisp ASMR-worthy sound: [SOUND DESCRIPTION].\nClean background, soft even lighting, shallow depth of field.\nThe action completes perfectly, ready to loop.\n\n### cakeify (trending effect)\nVertical 9:16 video, 8-12 seconds.\nA realistic-looking [EVERYDAY OBJECT] sits on a clean surface.\nA hand holding a sharp knife enters frame.\nThe knife slices through — REVEAL: it's actually a hyper-realistic CAKE inside!\nMulti-layered sponge, colorful frosting, perfect cross-section.\nSatisfying slice sound, dramatic pause on reveal.\n\n### squish (oddly satisfying)\nVertical 9:16 extreme close-up, 8-12 seconds.\nA soft, squishy version of [SUBJECT] — looks like a stress toy.\nA hand slowly presses down on it, fingers sinking in.\nSlow-motion squish, satisfying deformation, perfect rebound.\nSoft lighting, ASMR squish sounds, clean minimal background.\n\n### destruction (satisfying chaos)\nVertical 9:16 video, 10-15 seconds.\nA elaborate [STRUCTURE] — perfectly built, intricate details.\nSudden trigger: [CAUSE].\nSlow-motion destruction sequence — pieces flying, domino effect, satisfying collapse.\nDramatic lighting, dust particles, debris in the air.\nCamera tracks the destruction smoothly.\n\n### nature_phenomenon (awe content)\nVertical 9:16 cinematic video, 15 seconds.\nDramatic [NATURE EVENT] in stunning detail: [DESCRIPTION].\nEpic scale, powerful movement, raw natural force.\nCinematic slow-motion moments, dramatic lighting.\nNo people, no text, pure nature spectacle.\n\n## RULES:\n1. Output ONLY the video prompt, no explanations\n2. Be extremely specific and detailed\n3. Include camera angle, movement, lighting\n4. Include sound/audio description\n5. Keep it 15 seconds or less\n6. Make it loop-friendly when possible\n7. Front-load the hook in first 2 seconds",
+          "description": "System prompt for the LLM"
+        },
+        "ui_properties": {
+          "position": { "x": 400, "y": -200 },
+          "width": 500,
+          "height": 200,
+          "title": "LLM System (Templates)"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "prompt_generator",
+        "type": "nodetool.text.Prompt",
+        "data": {
+          "prompt": "Generate a viral video prompt.\n\nFormat: {{ format }}\nSubject: {{ subject }}\n\nCreate the perfect prompt for this format and subject. Follow the template exactly. Output ONLY the video generation prompt, nothing else."
+        },
+        "ui_properties": {
+          "position": { "x": 400, "y": 50 },
+          "width": 380,
+          "height": 200,
+          "title": "3️⃣ Build LLM Request"
+        },
+        "dynamic_properties": {
+          "format": "miniature_disaster",
+          "subject": "Mediterranean coastal village with white buildings and blue domes"
+        },
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "llm_agent",
+        "type": "nodetool.agents.Agent",
+        "data": {
+          "model": {
+            "type": "language_model",
+            "provider": "openai",
+            "id": "gpt-4o-mini",
+            "name": "GPT-4o mini",
+            "path": null,
+            "supported_tasks": []
+          }
+        },
+        "ui_properties": {
+          "position": { "x": 400, "y": 300 },
+          "width": 380,
+          "height": 280,
+          "title": "4️⃣ LLM Generates Prompt"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "input_negative",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "Negative Prompt",
+          "value": "centered, symmetrical, static camera, text overlay, watermark, logo, subtitles, voiceover, narrator, visible speaking face, lip-sync, scene change, jump cut, dark, moody, low quality, blurry, cartoon, anime, CGI looking, fake, artificial",
+          "description": "Elements to avoid in all formats"
+        },
+        "ui_properties": {
+          "position": { "x": 0, "y": 450 },
+          "width": 320,
+          "height": 140,
+          "title": "Negative (Universal)"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "text_to_video",
+        "type": "nodetool.video.TextToVideo",
+        "data": {
+          "model": {
+            "type": "video_model",
+            "provider": "gemini",
+            "id": "veo-3.1-generate-preview",
+            "name": "Veo 3.1 Preview",
+            "path": null,
+            "supported_tasks": []
+          },
+          "aspect_ratio": "9:16",
+          "resolution": "1080p",
+          "duration": 15,
+          "timeout_seconds": 0
+        },
+        "ui_properties": {
+          "position": { "x": 860, "y": 200 },
+          "width": 380,
+          "height": 400,
+          "title": "5️⃣ Generate Video"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "output_video",
+        "type": "nodetool.output.Output",
+        "data": {
+          "name": "viral_video"
+        },
+        "ui_properties": {
+          "position": { "x": 1320, "y": 300 },
+          "width": 280,
+          "title": "📹 Viral Video"
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      }
+    ]
+  },
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "format": {
+        "type": "string",
+        "default": "miniature_disaster",
+        "label": "Video Format",
+        "enum": ["miniature_disaster", "mini_rescue", "oddly_satisfying", "cakeify", "squish", "destruction", "nature_phenomenon"]
+      },
+      "subject": {
+        "type": "string",
+        "default": "Mediterranean coastal village",
+        "label": "Subject/Theme"
+      }
+    },
+    "required": ["format", "subject"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "viral_video": {
+        "type": "object",
+        "properties": {
+          "uri": { "type": "string", "format": "uri" },
+          "type": { "type": "string", "const": "video" }
+        },
+        "required": ["uri", "type"],
+        "label": "Generated viral video"
+      }
+    },
+    "required": ["viral_video"]
+  },
+  "settings": {},
+  "package_name": null,
+  "path": null,
+  "run_mode": "workflow",
+  "workspace_id": null,
+  "required_providers": ["openai", "gemini"],
+  "required_models": null
+}

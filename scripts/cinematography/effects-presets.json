@@ -1,0 +1,206 @@
+{
+  "collection": "cinematography-presets",
+  "category": "effects",
+  "presets": [
+    {
+      "id": "fx-kodak-500t",
+      "name": "Kodak Vision3 500T",
+      "tags": ["kodak", "500t", "tungsten", "warm", "film", "cinematic"],
+      "prompt_fragment": "Kodak Vision3 500T film stock look, warm tungsten balanced, rich shadows, subtle grain, cinematic color science",
+      "film_stock": "Kodak Vision3 500T",
+      "color_temp": "3200K tungsten",
+      "grain": "subtle",
+      "best_for": "night interiors, warm scenes, classic cinema"
+    },
+    {
+      "id": "fx-kodak-250d",
+      "name": "Kodak Vision3 250D",
+      "tags": ["kodak", "250d", "daylight", "natural", "film", "balanced"],
+      "prompt_fragment": "Kodak Vision3 250D film stock look, daylight balanced, natural skin tones, fine grain, neutral color rendering",
+      "film_stock": "Kodak Vision3 250D",
+      "color_temp": "5500K daylight",
+      "grain": "fine",
+      "best_for": "daylight exteriors, natural look, skin tones"
+    },
+    {
+      "id": "fx-fuji-eterna",
+      "name": "Fuji Eterna 500",
+      "tags": ["fuji", "eterna", "cool", "subtle", "film", "modern"],
+      "prompt_fragment": "Fuji Eterna 500 film stock look, cooler tones, subtle desaturated look, fine grain, modern cinema aesthetic",
+      "film_stock": "Fuji Eterna 500",
+      "color_temp": "balanced",
+      "grain": "fine",
+      "best_for": "modern drama, subtle look, cooler scenes"
+    },
+    {
+      "id": "fx-portra-400",
+      "name": "Kodak Portra 400",
+      "tags": ["portra", "portrait", "warm", "pastel", "soft", "instagram"],
+      "prompt_fragment": "Kodak Portra 400 aesthetic, warm pastel tones, soft contrast, creamy skin tones, subtle highlights",
+      "film_stock": "Kodak Portra 400",
+      "color_temp": "warm",
+      "grain": "medium",
+      "best_for": "portraits, lifestyle, fashion, soft aesthetic"
+    },
+    {
+      "id": "fx-cinestill-800t",
+      "name": "CineStill 800T",
+      "tags": ["cinestill", "halation", "neon", "night", "red-glow", "urban"],
+      "prompt_fragment": "CineStill 800T look with characteristic red halation around highlights, neon glow, urban night aesthetic",
+      "film_stock": "CineStill 800T",
+      "color_temp": "tungsten",
+      "grain": "visible",
+      "best_for": "night scenes, neon lights, urban, music videos"
+    },
+    {
+      "id": "fx-trix-bw",
+      "name": "Kodak Tri-X 400 B&W",
+      "tags": ["black-white", "trix", "contrast", "classic", "documentary"],
+      "prompt_fragment": "Kodak Tri-X 400 black and white film look, high contrast, visible grain, documentary aesthetic",
+      "film_stock": "Kodak Tri-X 400",
+      "color_temp": "monochrome",
+      "grain": "prominent",
+      "best_for": "documentary, art film, dramatic B&W"
+    },
+    {
+      "id": "fx-velvia-saturated",
+      "name": "Fuji Velvia 50",
+      "tags": ["velvia", "saturated", "vibrant", "landscape", "vivid"],
+      "prompt_fragment": "Fuji Velvia 50 slide film look, highly saturated colors, vivid greens and blues, punchy contrast",
+      "film_stock": "Fuji Velvia 50",
+      "color_temp": "daylight",
+      "grain": "ultra-fine",
+      "best_for": "landscapes, nature, vivid colors"
+    },
+    {
+      "id": "fx-bleach-bypass",
+      "name": "Bleach Bypass",
+      "tags": ["bleach-bypass", "desaturated", "silver", "gritty", "war"],
+      "prompt_fragment": "bleach bypass process look, silver retained in image, high contrast, desaturated colors, gritty aesthetic",
+      "film_stock": "processed bleach bypass",
+      "color_temp": "neutral",
+      "grain": "prominent",
+      "best_for": "war films, gritty drama, action"
+    },
+    {
+      "id": "fx-cross-process",
+      "name": "Cross Process",
+      "tags": ["cross-process", "shifted", "experimental", "music-video", "weird"],
+      "prompt_fragment": "cross-processed film look with shifted colors, cyan shadows, yellow highlights, experimental aesthetic",
+      "film_stock": "cross-processed",
+      "color_temp": "shifted",
+      "grain": "medium",
+      "best_for": "music videos, experimental, indie"
+    },
+    {
+      "id": "fx-teal-orange",
+      "name": "Teal & Orange",
+      "tags": ["teal-orange", "blockbuster", "complementary", "hollywood", "action"],
+      "prompt_fragment": "teal and orange color grading, complementary skin tones against cool backgrounds, Hollywood blockbuster look",
+      "film_stock": "digital grade",
+      "color_temp": "split",
+      "grain": "none",
+      "best_for": "action, blockbuster, commercial"
+    },
+    {
+      "id": "fx-day-for-night",
+      "name": "Day for Night",
+      "tags": ["day-for-night", "blue", "underexposed", "classic", "night"],
+      "prompt_fragment": "day for night treatment, blue color cast, underexposed look, simulated moonlight from daylight footage",
+      "film_stock": "processed",
+      "color_temp": "blue shift",
+      "grain": "light",
+      "best_for": "faux night scenes, stylized"
+    },
+    {
+      "id": "fx-vintage-70s",
+      "name": "Vintage 70s",
+      "tags": ["vintage", "70s", "faded", "retro", "warm", "nostalgic"],
+      "prompt_fragment": "1970s vintage film look, faded blacks, warm color cast, soft contrast, nostalgic aesthetic",
+      "film_stock": "aged Kodak",
+      "color_temp": "warm faded",
+      "grain": "heavy",
+      "best_for": "period pieces, nostalgia, retro"
+    },
+    {
+      "id": "fx-vintage-80s",
+      "name": "Vintage 80s VHS",
+      "tags": ["80s", "vhs", "scan-lines", "retro", "synthwave"],
+      "prompt_fragment": "1980s VHS aesthetic, scan lines, color bleeding, tracking artifacts, warm analog look",
+      "film_stock": "VHS tape",
+      "color_temp": "warm saturated",
+      "grain": "video noise",
+      "best_for": "retro, synthwave, horror, nostalgia"
+    },
+    {
+      "id": "fx-technicolor",
+      "name": "Technicolor Classic",
+      "tags": ["technicolor", "vivid", "classic", "musical", "saturated"],
+      "prompt_fragment": "classic Technicolor three-strip look, vivid saturated colors, rich reds and greens, golden age Hollywood",
+      "film_stock": "Technicolor 3-strip",
+      "color_temp": "vibrant",
+      "grain": "fine",
+      "best_for": "musicals, fantasy, classic Hollywood"
+    },
+    {
+      "id": "fx-anime-cel",
+      "name": "Anime Cel-Shaded",
+      "tags": ["anime", "cel", "cartoon", "flat", "stylized", "ghibli"],
+      "prompt_fragment": "anime cel-shaded aesthetic, flat colors, clean outlines, Studio Ghibli inspired, hand-drawn quality",
+      "film_stock": "animation",
+      "color_temp": "vibrant",
+      "grain": "none",
+      "best_for": "animation style, Ghibli, stylized"
+    },
+    {
+      "id": "fx-noir-contrast",
+      "name": "Film Noir Contrast",
+      "tags": ["noir", "contrast", "shadows", "classic", "detective"],
+      "prompt_fragment": "classic film noir high contrast, deep blacks, bright highlights, dramatic shadows, 1940s aesthetic",
+      "film_stock": "high contrast B&W",
+      "color_temp": "monochrome",
+      "grain": "medium",
+      "best_for": "noir, detective, mystery"
+    },
+    {
+      "id": "fx-muted-indie",
+      "name": "Muted Indie",
+      "tags": ["muted", "indie", "desaturated", "a24", "arthouse"],
+      "prompt_fragment": "muted indie film color palette, slightly desaturated, lifted blacks, natural skin tones, A24 aesthetic",
+      "film_stock": "digital muted",
+      "color_temp": "neutral",
+      "grain": "subtle",
+      "best_for": "indie drama, A24 style, arthouse"
+    },
+    {
+      "id": "fx-hdr-vivid",
+      "name": "HDR Vivid",
+      "tags": ["hdr", "vivid", "dynamic", "modern", "streaming"],
+      "prompt_fragment": "HDR mastered look, wide dynamic range, vivid colors, deep blacks, bright highlights, modern streaming quality",
+      "film_stock": "digital HDR",
+      "color_temp": "accurate",
+      "grain": "none",
+      "best_for": "modern streaming, commercials, product"
+    },
+    {
+      "id": "fx-sepia-vintage",
+      "name": "Sepia Vintage",
+      "tags": ["sepia", "vintage", "old", "memory", "flashback"],
+      "prompt_fragment": "sepia-toned vintage look, warm brown color cast, soft vignette, aged photograph aesthetic",
+      "film_stock": "sepia processed",
+      "color_temp": "warm sepia",
+      "grain": "heavy",
+      "best_for": "flashbacks, memories, period"
+    },
+    {
+      "id": "fx-infrared",
+      "name": "Infrared False Color",
+      "tags": ["infrared", "surreal", "experimental", "nature", "alien"],
+      "prompt_fragment": "infrared false color look, white foliage, dark skies, surreal color palette, dreamlike quality",
+      "film_stock": "infrared",
+      "color_temp": "false color",
+      "grain": "subtle",
+      "best_for": "surreal, experimental, nature"
+    }
+  ]
+}

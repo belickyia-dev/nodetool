@@ -1,0 +1,226 @@
+{
+  "collection": "cinematography-presets",
+  "category": "lighting",
+  "presets": [
+    {
+      "id": "light-three-point-classic",
+      "name": "Three-Point Classic",
+      "tags": ["three-point", "classic", "interview", "portrait", "studio"],
+      "prompt_fragment": "classic three-point lighting setup with key light at 45 degrees, soft fill light opposite, rim light for separation",
+      "key_light": "45 degrees, medium soft",
+      "fill_light": "opposite side, diffused",
+      "back_light": "rim/hair light",
+      "ratio": "3:1",
+      "best_for": "interviews, portraits, corporate, standard setup"
+    },
+    {
+      "id": "light-rembrandt",
+      "name": "Rembrandt Dramatic",
+      "tags": ["rembrandt", "dramatic", "portrait", "classic", "triangle"],
+      "prompt_fragment": "Rembrandt lighting with characteristic triangle of light on shadowed cheek, single key light at 45 degrees high angle",
+      "key_light": "45 degrees high, hard",
+      "fill_light": "minimal",
+      "back_light": "optional rim",
+      "ratio": "4:1",
+      "best_for": "dramatic portraits, character depth, artistic shots"
+    },
+    {
+      "id": "light-noir-lowkey",
+      "name": "Film Noir Low-Key",
+      "tags": ["noir", "low-key", "shadows", "mystery", "thriller", "dark"],
+      "prompt_fragment": "film noir low-key lighting with deep shadows, single hard key light creating dramatic contrast, minimal fill",
+      "key_light": "hard side light",
+      "fill_light": "none or minimal",
+      "back_light": "edge light optional",
+      "ratio": "8:1 or higher",
+      "best_for": "thriller, mystery, noir, psychological drama"
+    },
+    {
+      "id": "light-golden-hour",
+      "name": "Golden Hour Magic",
+      "tags": ["golden-hour", "warm", "romantic", "sunset", "magic-hour"],
+      "prompt_fragment": "golden hour lighting with warm directional sunlight, long shadows, orange and amber tones, backlit subject",
+      "key_light": "low sun, warm 3200K",
+      "fill_light": "natural bounce",
+      "back_light": "sun rim/flare",
+      "ratio": "natural",
+      "best_for": "romance, nostalgia, beauty, establishing shots"
+    },
+    {
+      "id": "light-blue-hour",
+      "name": "Blue Hour Twilight",
+      "tags": ["blue-hour", "twilight", "cool", "moody", "dusk"],
+      "prompt_fragment": "blue hour twilight lighting with cool ambient tones, soft directional quality, cyan and blue color cast",
+      "key_light": "ambient sky, 6500K+",
+      "fill_light": "practical warm lights",
+      "back_light": "city lights optional",
+      "ratio": "soft 2:1",
+      "best_for": "moody establishing, urban night, melancholy"
+    },
+    {
+      "id": "light-highkey-bright",
+      "name": "High-Key Bright",
+      "tags": ["high-key", "bright", "clean", "commercial", "beauty"],
+      "prompt_fragment": "high-key lighting with minimal shadows, even illumination, bright clean aesthetic, soft diffused sources",
+      "key_light": "large soft source",
+      "fill_light": "wrap-around fill",
+      "back_light": "white background",
+      "ratio": "1:1 to 2:1",
+      "best_for": "beauty, commercial, product, comedy"
+    },
+    {
+      "id": "light-neon-cyberpunk",
+      "name": "Neon Cyberpunk",
+      "tags": ["neon", "cyberpunk", "colorful", "urban", "night", "blade-runner"],
+      "prompt_fragment": "neon-lit cyberpunk atmosphere with pink and cyan colored lighting, reflections on wet surfaces, urban night feel",
+      "key_light": "neon practical pink",
+      "fill_light": "neon cyan opposite",
+      "back_light": "LED strips",
+      "ratio": "varies",
+      "best_for": "cyberpunk, night scenes, music videos, futuristic"
+    },
+    {
+      "id": "light-natural-window",
+      "name": "Natural Window Light",
+      "tags": ["natural", "window", "soft", "daylight", "indie"],
+      "prompt_fragment": "natural window light creating soft directional illumination, gentle shadows, realistic daylight quality",
+      "key_light": "large window, diffused",
+      "fill_light": "bounce card optional",
+      "back_light": "none",
+      "ratio": "3:1 to 4:1",
+      "best_for": "indie films, naturalistic, documentary style"
+    },
+    {
+      "id": "light-moonlight",
+      "name": "Moonlight Night",
+      "tags": ["moonlight", "night", "blue", "exterior", "romantic"],
+      "prompt_fragment": "moonlight illumination with cool blue tones, soft shadows, night exterior ambiance, HMI simulating moonlight",
+      "key_light": "high angle, blue gel",
+      "fill_light": "minimal ambient",
+      "back_light": "practicals optional",
+      "ratio": "6:1",
+      "best_for": "night exteriors, romantic, mysterious"
+    },
+    {
+      "id": "light-candlelight",
+      "name": "Candlelight Intimate",
+      "tags": ["candle", "warm", "intimate", "period", "romantic"],
+      "prompt_fragment": "candlelight illumination with warm flickering quality, deep shadows, intimate warm amber tones",
+      "key_light": "practical candles, 2000K",
+      "fill_light": "none",
+      "back_light": "fire glow",
+      "ratio": "high contrast",
+      "best_for": "period drama, romance, intimate scenes"
+    },
+    {
+      "id": "light-overhead-harsh",
+      "name": "Overhead Harsh",
+      "tags": ["overhead", "harsh", "interrogation", "dramatic", "shadows"],
+      "prompt_fragment": "harsh overhead lighting creating deep eye socket shadows, dramatic unflattering look, single practical overhead source",
+      "key_light": "direct overhead",
+      "fill_light": "none",
+      "back_light": "none",
+      "ratio": "extreme",
+      "best_for": "interrogation, horror, psychological thriller"
+    },
+    {
+      "id": "light-silhouette",
+      "name": "Silhouette Backlit",
+      "tags": ["silhouette", "backlit", "dramatic", "mystery", "graphic"],
+      "prompt_fragment": "complete silhouette with bright backlight, subject in shadow against illuminated background, graphic composition",
+      "key_light": "none on subject",
+      "fill_light": "none",
+      "back_light": "strong backlight only",
+      "ratio": "infinite",
+      "best_for": "mystery, dramatic reveals, artistic shots"
+    },
+    {
+      "id": "light-split",
+      "name": "Split Light Drama",
+      "tags": ["split", "half-face", "dramatic", "duality", "conflict"],
+      "prompt_fragment": "split lighting with half face illuminated, half in shadow, creating sense of duality and inner conflict",
+      "key_light": "90 degrees side",
+      "fill_light": "none",
+      "back_light": "optional",
+      "ratio": "extreme",
+      "best_for": "duality themes, conflict, villain reveal"
+    },
+    {
+      "id": "light-butterfly",
+      "name": "Butterfly Beauty",
+      "tags": ["butterfly", "paramount", "beauty", "glamour", "portrait"],
+      "prompt_fragment": "butterfly/paramount lighting with key light directly above camera, creating butterfly shadow under nose, glamorous look",
+      "key_light": "above camera, soft",
+      "fill_light": "reflector below",
+      "back_light": "hair light",
+      "ratio": "2:1",
+      "best_for": "beauty shots, glamour, fashion"
+    },
+    {
+      "id": "light-loop",
+      "name": "Loop Light Portrait",
+      "tags": ["loop", "portrait", "flattering", "natural", "commercial"],
+      "prompt_fragment": "loop lighting with small shadow from nose towards cheek, flattering for most faces, slightly off-center key",
+      "key_light": "30-45 degrees",
+      "fill_light": "soft fill",
+      "back_light": "rim light",
+      "ratio": "2:1 to 3:1",
+      "best_for": "corporate, headshots, flattering portraits"
+    },
+    {
+      "id": "light-cross",
+      "name": "Cross Light Dramatic",
+      "tags": ["cross", "dual-key", "dramatic", "music-video", "stylized"],
+      "prompt_fragment": "cross lighting with two opposing key lights creating dramatic shadows, stylized high-contrast look",
+      "key_light": "both sides",
+      "fill_light": "none",
+      "back_light": "optional top",
+      "ratio": "equal keys",
+      "best_for": "music videos, dramatic, stylized"
+    },
+    {
+      "id": "light-practical",
+      "name": "Practical Motivated",
+      "tags": ["practical", "motivated", "realistic", "in-frame", "natural"],
+      "prompt_fragment": "practical motivated lighting from visible in-frame sources like lamps, windows, screens, creating realistic atmosphere",
+      "key_light": "visible practical",
+      "fill_light": "bounce from practicals",
+      "back_light": "other practicals",
+      "ratio": "varies",
+      "best_for": "naturalistic, indie, documentary style"
+    },
+    {
+      "id": "light-horror-under",
+      "name": "Horror Underlighting",
+      "tags": ["horror", "under", "scary", "monster", "campfire"],
+      "prompt_fragment": "underlighting from below creating unnatural shadows, horror movie aesthetic, distorted facial features",
+      "key_light": "from below",
+      "fill_light": "none",
+      "back_light": "optional rim",
+      "ratio": "extreme",
+      "best_for": "horror, scary reveals, monster shots"
+    },
+    {
+      "id": "light-volumetric",
+      "name": "Volumetric God Rays",
+      "tags": ["volumetric", "god-rays", "atmospheric", "epic", "spiritual"],
+      "prompt_fragment": "volumetric lighting with visible god rays through haze, atmospheric beams of light, epic spiritual quality",
+      "key_light": "directional through haze",
+      "fill_light": "ambient scatter",
+      "back_light": "rim in haze",
+      "ratio": "varies",
+      "best_for": "epic moments, spiritual, forest scenes"
+    },
+    {
+      "id": "light-ring-beauty",
+      "name": "Ring Light Beauty",
+      "tags": ["ring", "beauty", "catchlights", "social", "influencer"],
+      "prompt_fragment": "ring light creating circular catchlights in eyes, flat even lighting, beauty influencer aesthetic",
+      "key_light": "ring around lens",
+      "fill_light": "inherent",
+      "back_light": "optional",
+      "ratio": "1:1",
+      "best_for": "beauty content, social media, tutorials"
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+# NodeTool + Remotion Stack for Docker Swarm
+# Deploy: cd /opt/apps/nodetool && export $(grep -v '^#' .env | xargs) && docker stack deploy -c stack.yml nodetool
+
+networks:
+  proxy:
+    external: true
+  backend:
+    external: true
+  internal:
+    driver: overlay
+
+volumes:
+  nodetool-data:
+  nodetool-assets:
+  remotion-exports:
+
+services:
+  # Main NodeTool API + Web server
+  api:
+    image: ghcr.io/nodetool-ai/nodetool:latest
+    networks:
+      - proxy
+      - backend
+      - internal
+    environment:
+      - HOST=0.0.0.0
+      - PORT=7777
+      - NODETOOL_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - SECRETS_MASTER_KEY=${SECRETS_MASTER_KEY}
+      - NODETOOL_STORAGE_BACKEND=local
+      - ASSET_BUCKET=/workspace/assets
+      - STATIC_FOLDER=/app/web/dist
+      - NODETOOL_TRUST_LOCAL_NETWORKS=172.16.0.0/12,10.0.0.0/8
+      # LLM Provider keys
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - FAL_API_KEY=${FAL_API_KEY:-}
+      - KIE_API_KEY=${KIE_API_KEY:-}
+      - HF_TOKEN=${HF_TOKEN:-}
+      # Remotion render service URL (internal Docker network)
+      - REMOTION_RENDER_URL=http://remotion:3333
+    volumes:
+      - nodetool-data:/workspace
+      - nodetool-assets:/workspace/assets
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 1G
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:7777/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Remotion video rendering service
+  remotion:
+    image: nodetool-remotion:latest
+    networks:
+      - internal
+    environment:
+      - NODE_ENV=production
+      - REMOTION_PORT=3333
+    volumes:
+      - remotion-exports:/app/exports
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 1G
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:3333/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s

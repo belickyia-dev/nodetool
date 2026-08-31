@@ -1,0 +1,226 @@
+{
+  "collection": "cinematography-presets",
+  "category": "camera",
+  "presets": [
+    {
+      "id": "cam-dramatic-closeup",
+      "name": "Dramatic Close-Up",
+      "tags": ["dramatic", "closeup", "portrait", "emotional", "intimate"],
+      "prompt_fragment": "shot on ARRI Alexa Mini LF with Cooke S7/i 85mm lens at f/1.4, shallow depth of field, static framing",
+      "camera_body": "ARRI Alexa Mini LF",
+      "lens": "Cooke S7/i 85mm",
+      "aperture": "f/1.4",
+      "movement": "static",
+      "best_for": "emotional reveals, character moments, intimate scenes"
+    },
+    {
+      "id": "cam-action-tracking",
+      "name": "Action Tracking Shot",
+      "tags": ["action", "chase", "dynamic", "movement", "intense"],
+      "prompt_fragment": "shot on RED V-Raptor with Zeiss CP.3 25mm lens, handheld tracking shot with natural motion blur",
+      "camera_body": "RED V-Raptor",
+      "lens": "Zeiss CP.3 25mm",
+      "aperture": "f/2.8",
+      "movement": "handheld tracking",
+      "best_for": "chase sequences, fight scenes, dynamic action"
+    },
+    {
+      "id": "cam-epic-wide",
+      "name": "Epic Wide Establishing",
+      "tags": ["wide", "establishing", "landscape", "epic", "cinematic"],
+      "prompt_fragment": "shot on ARRI Alexa 65 with Hasselblad Prime 28mm lens, locked tripod, deep focus",
+      "camera_body": "ARRI Alexa 65",
+      "lens": "Hasselblad Prime 28mm",
+      "aperture": "f/8",
+      "movement": "static tripod",
+      "best_for": "establishing shots, landscapes, epic reveals"
+    },
+    {
+      "id": "cam-dolly-push",
+      "name": "Dolly Push-In",
+      "tags": ["dolly", "push", "tension", "reveal", "dramatic"],
+      "prompt_fragment": "shot on RED Komodo with Panavision Primo 50mm lens, slow dolly push-in movement",
+      "camera_body": "RED Komodo",
+      "lens": "Panavision Primo 50mm",
+      "aperture": "f/2.0",
+      "movement": "dolly push-in",
+      "best_for": "building tension, character reveals, dramatic moments"
+    },
+    {
+      "id": "cam-steadicam-follow",
+      "name": "Steadicam Follow",
+      "tags": ["steadicam", "follow", "smooth", "walk-and-talk", "flowing"],
+      "prompt_fragment": "shot on ARRI Alexa Mini with Cooke S4/i 35mm lens, steadicam following shot, smooth floating movement",
+      "camera_body": "ARRI Alexa Mini",
+      "lens": "Cooke S4/i 35mm",
+      "aperture": "f/2.8",
+      "movement": "steadicam follow",
+      "best_for": "walk-and-talk scenes, exploration, flowing sequences"
+    },
+    {
+      "id": "cam-anamorphic-cinematic",
+      "name": "Anamorphic Cinematic",
+      "tags": ["anamorphic", "cinematic", "widescreen", "flares", "filmic"],
+      "prompt_fragment": "shot on Panavision Panaflex with C-Series Anamorphic 40mm lens, oval bokeh, characteristic lens flares, 2.39:1 aspect ratio",
+      "camera_body": "Panavision Panaflex",
+      "lens": "C-Series Anamorphic 40mm",
+      "aperture": "f/2.8",
+      "movement": "smooth dolly",
+      "best_for": "epic moments, romantic scenes, cinematic feel"
+    },
+    {
+      "id": "cam-handheld-documentary",
+      "name": "Documentary Handheld",
+      "tags": ["handheld", "documentary", "raw", "authentic", "verité"],
+      "prompt_fragment": "shot on Sony FX6 with Sony 24-70mm zoom lens, handheld documentary style, natural imperfect movement",
+      "camera_body": "Sony FX6",
+      "lens": "Sony 24-70mm zoom",
+      "aperture": "f/4.0",
+      "movement": "handheld observational",
+      "best_for": "documentary feel, authentic moments, raw emotion"
+    },
+    {
+      "id": "cam-crane-reveal",
+      "name": "Crane Reveal",
+      "tags": ["crane", "reveal", "sweeping", "grand", "aerial"],
+      "prompt_fragment": "shot on ARRI Alexa LF with Leica Summilux-C 29mm lens, crane movement rising to reveal, sweeping cinematic motion",
+      "camera_body": "ARRI Alexa LF",
+      "lens": "Leica Summilux-C 29mm",
+      "aperture": "f/2.0",
+      "movement": "crane rise",
+      "best_for": "grand reveals, location establishing, dramatic transitions"
+    },
+    {
+      "id": "cam-macro-detail",
+      "name": "Macro Detail Shot",
+      "tags": ["macro", "detail", "closeup", "texture", "product"],
+      "prompt_fragment": "shot with Laowa 24mm Probe lens, extreme close-up macro photography, sharp detail, shallow depth of field",
+      "camera_body": "RED V-Raptor",
+      "lens": "Laowa 24mm Probe",
+      "aperture": "f/11",
+      "movement": "slow push",
+      "best_for": "product details, textures, food photography, miniature"
+    },
+    {
+      "id": "cam-dutch-angle",
+      "name": "Dutch Angle Tension",
+      "tags": ["dutch", "tilted", "tension", "unease", "psychological"],
+      "prompt_fragment": "shot on ARRI Alexa Mini with Zeiss Master Prime 35mm lens, dutch angle tilt, creating visual tension and unease",
+      "camera_body": "ARRI Alexa Mini",
+      "lens": "Zeiss Master Prime 35mm",
+      "aperture": "f/2.0",
+      "movement": "static dutch",
+      "best_for": "psychological tension, horror, disorientation"
+    },
+    {
+      "id": "cam-over-shoulder",
+      "name": "Over-the-Shoulder",
+      "tags": ["ots", "dialogue", "conversation", "connection", "interview"],
+      "prompt_fragment": "shot on Sony Venice with Cooke Panchro 75mm lens, over-the-shoulder framing, medium depth of field",
+      "camera_body": "Sony Venice",
+      "lens": "Cooke Panchro 75mm",
+      "aperture": "f/2.8",
+      "movement": "subtle handheld",
+      "best_for": "dialogue scenes, interviews, conversations"
+    },
+    {
+      "id": "cam-low-angle-power",
+      "name": "Low Angle Power",
+      "tags": ["low-angle", "power", "dominant", "heroic", "imposing"],
+      "prompt_fragment": "shot on RED Monstro with Sigma Cine 20mm lens, low angle looking up, conveying power and dominance",
+      "camera_body": "RED Monstro",
+      "lens": "Sigma Cine 20mm",
+      "aperture": "f/2.8",
+      "movement": "static low",
+      "best_for": "hero shots, power dynamics, imposing figures"
+    },
+    {
+      "id": "cam-high-angle-vulnerable",
+      "name": "High Angle Vulnerable",
+      "tags": ["high-angle", "vulnerable", "small", "isolated", "exposed"],
+      "prompt_fragment": "shot on ARRI Alexa Mini with Zeiss CP.2 21mm lens, high angle looking down, conveying vulnerability and isolation",
+      "camera_body": "ARRI Alexa Mini",
+      "lens": "Zeiss CP.2 21mm",
+      "aperture": "f/4.0",
+      "movement": "static high",
+      "best_for": "vulnerability, isolation, emotional moments"
+    },
+    {
+      "id": "cam-whip-pan",
+      "name": "Whip Pan Transition",
+      "tags": ["whip", "pan", "fast", "transition", "energetic"],
+      "prompt_fragment": "shot on RED Komodo with Tokina Vista 25mm lens, fast whip pan movement, motion blur transition",
+      "camera_body": "RED Komodo",
+      "lens": "Tokina Vista 25mm",
+      "aperture": "f/2.8",
+      "movement": "whip pan",
+      "best_for": "transitions, energy, time jumps"
+    },
+    {
+      "id": "cam-360-orbit",
+      "name": "360 Orbit Shot",
+      "tags": ["orbit", "360", "circular", "dramatic", "showcase"],
+      "prompt_fragment": "shot on ARRI Alexa Mini LF with Cooke S7/i 50mm lens, 360 degree orbit around subject, smooth circular tracking",
+      "camera_body": "ARRI Alexa Mini LF",
+      "lens": "Cooke S7/i 50mm",
+      "aperture": "f/2.0",
+      "movement": "360 orbit",
+      "best_for": "showcasing products, dramatic moments, music videos"
+    },
+    {
+      "id": "cam-slow-zoom",
+      "name": "Slow Creeping Zoom",
+      "tags": ["zoom", "slow", "tension", "focus", "kubrick"],
+      "prompt_fragment": "shot on ARRI Alexa with Angenieux Optimo 24-290mm zoom lens, slow imperceptible zoom-in, building tension",
+      "camera_body": "ARRI Alexa",
+      "lens": "Angenieux Optimo 24-290mm",
+      "aperture": "f/2.8",
+      "movement": "slow zoom-in",
+      "best_for": "building dread, focus attention, Kubrick-style"
+    },
+    {
+      "id": "cam-pov-subjective",
+      "name": "POV Subjective",
+      "tags": ["pov", "subjective", "firstperson", "immersive", "horror"],
+      "prompt_fragment": "shot on GoPro Hero with wide angle lens, first-person POV perspective, immersive subjective view",
+      "camera_body": "GoPro Hero",
+      "lens": "Wide angle",
+      "aperture": "f/2.8",
+      "movement": "handheld POV",
+      "best_for": "horror, action, immersive sequences"
+    },
+    {
+      "id": "cam-split-diopter",
+      "name": "Split Diopter Shot",
+      "tags": ["split-diopter", "depalma", "dual-focus", "artistic", "suspense"],
+      "prompt_fragment": "shot on Panavision Panaflex with split diopter filter, dual plane focus, De Palma style composition",
+      "camera_body": "Panavision Panaflex",
+      "lens": "Panavision Primo 50mm + split diopter",
+      "aperture": "f/4.0",
+      "movement": "static",
+      "best_for": "suspense, dual narratives, artistic shots"
+    },
+    {
+      "id": "cam-vertigo-effect",
+      "name": "Vertigo Dolly Zoom",
+      "tags": ["vertigo", "dolly-zoom", "hitchcock", "disorientation", "reveal"],
+      "prompt_fragment": "shot on ARRI Alexa Mini with Fujinon Cabrio zoom lens, dolly-zoom vertigo effect, simultaneous dolly and zoom",
+      "camera_body": "ARRI Alexa Mini",
+      "lens": "Fujinon Cabrio 19-90mm",
+      "aperture": "f/2.9",
+      "movement": "dolly-zoom",
+      "best_for": "realization moments, vertigo, psychological impact"
+    },
+    {
+      "id": "cam-tiktok-vertical",
+      "name": "TikTok Vertical Dynamic",
+      "tags": ["vertical", "tiktok", "reels", "social", "9:16", "mobile"],
+      "prompt_fragment": "shot in 9:16 vertical format, smartphone-style framing, dynamic movement, social media optimized",
+      "camera_body": "iPhone 15 Pro",
+      "lens": "24mm equivalent",
+      "aperture": "f/1.8",
+      "movement": "handheld dynamic",
+      "best_for": "TikTok, Reels, Shorts, vertical video"
+    }
+  ]
+}
