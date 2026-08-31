@@ -582,16 +582,36 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
           // Navigate to hashtag page
           await cdpGoto(client, tagUrl, 30000);
 
-          // Wait for video cards to appear
-          await new Promise((r) => setTimeout(r, 3000));
+          // Wait longer for initial page load
+          await new Promise((r) => setTimeout(r, 5000));
 
           // Scroll down to load more videos
           for (let i = 0; i < scrollCount; i++) {
             await cdpEvaluate(client, () => {
-              window.scrollTo(0, document.body.scrollHeight);
+              window.scrollBy(0, 800);
             });
-            await new Promise((r) => setTimeout(r, 2000));
+            await new Promise((r) => setTimeout(r, 1000));
           }
+
+          // Wait for content to load after scrolling
+          await new Promise((r) => setTimeout(r, 2000));
+
+          // Debug: Get page info
+          const pageDebug = await cdpEvaluate<{
+            title: string;
+            url: string;
+            bodyText: string;
+            allLinks: number;
+            videoLinks: number;
+          }>(client, () => ({
+            title: document.title,
+            url: window.location.href,
+            bodyText: document.body?.textContent?.slice(0, 500) ?? "",
+            allLinks: document.querySelectorAll("a").length,
+            videoLinks: document.querySelectorAll('a[href*="/video/"]').length
+          }));
+          console.log(`TikTok debug: title="${pageDebug.title}" url="${pageDebug.url}" allLinks=${pageDebug.allLinks} videoLinks=${pageDebug.videoLinks}`);
+          console.log(`TikTok bodyText: ${pageDebug.bodyText.slice(0, 200)}`);
 
           // Step 1: Collect video links from hashtag page
           const videoLinks = await cdpEvaluate<string[]>(client, () => {
