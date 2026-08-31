@@ -23,19 +23,20 @@
     "@nodetool-ai/storage": "*",
     "chrome-launcher": "^1.2.0",
     "chrome-remote-interface": "^0.34.0",
+    "js-yaml": "^5.2.1",
     "nodemailer": "^9.0.3",
-    "js-yaml": "^5.2.1"
+    "playwright": "^1.62.1"
   },
   "devDependencies": {
     "@nodetool-ai/core-nodes": "*",
     "@nodetool-ai/data-nodes": "*",
     "@nodetool-ai/llm-nodes": "*",
     "@types/chrome-remote-interface": "^0.33.0",
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.0.0",
     "@types/nodemailer": "^7.0.11",
     "typescript": "^5.7.2",
-    "vitest": "^4.1.2",
-    "@types/js-yaml": "^4.0.9"
+    "vitest": "^4.1.2"
   },
   "exports": {
     ".": {

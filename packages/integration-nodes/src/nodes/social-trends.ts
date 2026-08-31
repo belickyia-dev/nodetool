@@ -1,9 +1,6 @@
 import { BaseNode, prop } from "@nodetool-ai/node-sdk";
 import { tagAsServer } from "@nodetool-ai/nodes-utils";
 
-// CDP types
-type CDPClient = any;
-
 interface Cookie {
   name: string;
   value: string;
@@ -13,143 +10,6 @@ interface Cookie {
   httpOnly?: boolean;
   sameSite?: string;
   expirationDate?: number;
-}
-
-// Minimal CDP page wrapper for TikTok scraping
-interface BrowserSession {
-  client: CDPClient;
-  close: () => Promise<void>;
-}
-
-const DEFAULT_CDP_FLAGS = [
-  "--headless=new",
-  "--disable-gpu",
-  "--no-sandbox",
-  "--disable-setuid-sandbox",
-  "--disable-dev-shm-usage",
-  "--disable-software-rasterizer",
-  "--hide-scrollbars",
-  "--mute-audio",
-  "--window-size=1280,900",
-  // Stealth flags to avoid bot detection
-  "--disable-blink-features=AutomationControlled",
-  "--disable-infobars",
-  "--disable-background-networking",
-  "--disable-breakpad",
-  "--disable-component-update",
-  "--disable-default-apps",
-  "--disable-extensions",
-  "--disable-features=TranslateUI",
-  "--disable-hang-monitor",
-  "--disable-ipc-flooding-protection",
-  "--disable-popup-blocking",
-  "--disable-prompt-on-repost",
-  "--disable-renderer-backgrounding",
-  "--disable-sync",
-  "--enable-features=NetworkService,NetworkServiceInProcess",
-  "--force-color-profile=srgb",
-  "--metrics-recording-only",
-  "--no-first-run",
-  "--password-store=basic",
-  "--use-mock-keychain",
-  "--export-tagged-pdf",
-  "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-];
-
-async function launchCdpBrowser(): Promise<BrowserSession> {
-  const { launch } = await import("chrome-launcher");
-  const CDPMod = (await import("chrome-remote-interface")).default;
-
-  const chrome = await launch({
-    chromeFlags: DEFAULT_CDP_FLAGS,
-    ignoreDefaultFlags: false,
-    chromePath: process.env.CHROME_PATH || undefined
-  });
-
-  const client: CDPClient = await CDPMod({ port: chrome.port });
-  await client.Emulation.setDeviceMetricsOverride({
-    width: 1280,
-    height: 900,
-    deviceScaleFactor: 1,
-    mobile: false
-  });
-
-  // Enable required domains
-  await Promise.all([
-    client.Page.enable(),
-    client.Runtime.enable(),
-    client.Network.enable(),
-    client.DOM.enable()
-  ]);
-
-  // Remove webdriver flag to avoid bot detection
-  await client.Page.addScriptToEvaluateOnNewDocument({
-    source: `
-      Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-      Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] });
-      Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
-      window.chrome = { runtime: {} };
-    `
-  });
-
-  return {
-    client,
-    close: async () => {
-      try {
-        await client.close();
-      } catch {
-        // ignore
-      }
-      try {
-        await chrome.kill();
-      } catch {
-        // ignore
-      }
-    }
-  };
-}
-
-async function cdpGoto(
-  client: CDPClient,
-  url: string,
-  timeout: number
-): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const t = setTimeout(() => {
-      // Don't reject on timeout, just resolve - TikTok may never fully load
-      resolve();
-    }, timeout);
-
-    const off = client.Page.domContentEventFired(() => {
-      clearTimeout(t);
-      off?.();
-      // Wait extra time for dynamic content
-      setTimeout(resolve, 3000);
-    });
-
-    client.Page.navigate({ url }).catch((err: Error) => {
-      clearTimeout(t);
-      off?.();
-      reject(err);
-    });
-  });
-}
-
-async function cdpEvaluate<T>(client: CDPClient, fn: () => T): Promise<T> {
-  const r = await client.Runtime.evaluate({
-    expression: `(${fn.toString()})()`,
-    returnByValue: true,
-    awaitPromise: true,
-    userGesture: true
-  });
-  if (r.exceptionDetails) {
-    throw new Error(
-      r.exceptionDetails.exception?.description ??
-        r.exceptionDetails.text ??
-        "evaluation failed"
-    );
-  }
-  return r.result?.value as T;
 }
 
 interface AnalyzedPost {
@@ -213,8 +73,8 @@ function cookieHeader(cookies: Map<string, string>): string {
     .join("; ");
 }
 
-/** Convert cookie input to CDP cookie format for Network.setCookies */
-function toCdpCookies(
+/** Convert cookie input to Playwright cookie format */
+function toPlaywrightCookies(
   cookiesInput: unknown,
   domain: string
 ): Array<{
@@ -222,16 +82,18 @@ function toCdpCookies(
   value: string;
   domain: string;
   path: string;
-  secure: boolean;
-  httpOnly: boolean;
+  secure?: boolean;
+  httpOnly?: boolean;
+  sameSite?: "Strict" | "Lax" | "None";
 }> {
   const result: Array<{
     name: string;
     value: string;
     domain: string;
     path: string;
-    secure: boolean;
-    httpOnly: boolean;
+    secure?: boolean;
+    httpOnly?: boolean;
+    sameSite?: "Strict" | "Lax" | "None";
   }> = [];
 
   if (!cookiesInput) return result;
@@ -246,7 +108,8 @@ function toCdpCookies(
           domain: c.domain ?? domain,
           path: c.path ?? "/",
           secure: c.secure ?? true,
-          httpOnly: c.httpOnly ?? false
+          httpOnly: c.httpOnly ?? false,
+          sameSite: "None" as const
         });
       }
     }
@@ -264,7 +127,8 @@ function toCdpCookies(
         domain,
         path: "/",
         secure: true,
-        httpOnly: false
+        httpOnly: false,
+        sameSite: "None" as const
       });
     }
     return result;
@@ -282,7 +146,8 @@ function toCdpCookies(
           domain,
           path: "/",
           secure: true,
-          httpOnly: false
+          httpOnly: false,
+          sameSite: "None" as const
         });
       }
     }
@@ -492,20 +357,20 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
   static readonly nodeType = "social.trends.TikTokTrendAnalyzer";
   static readonly title = "TikTok Trend Analyzer";
   static readonly description =
-    "Analyze trending TikTok videos by hashtag using browser automation with cookies. Returns engagement metrics and virality scores.\n    tiktok, trends, analytics, hashtags, engagement, cookies, playwright";
+    "Analyze trending TikTok videos by hashtag using Playwright browser automation. Returns engagement metrics and virality scores.\n    tiktok, trends, analytics, hashtags, engagement, playwright";
   static readonly metadataOutputTypes = {
     output: "list[dict[str, any]]"
   };
   static readonly inlineFields = [];
-  static readonly inputFields = ["cookies", "hashtags"];
+  static readonly inputFields = ["hashtags"];
 
   @prop({
     type: "dict[str, any]",
     default: null,
     title: "Cookies",
     description:
-      "TikTok cookies exported from browser (Cookie-Editor JSON format)",
-    required: true
+      "Optional TikTok cookies exported from browser (Cookie-Editor JSON format). Works without cookies too.",
+    required: false
   })
   declare cookies: any;
 
@@ -543,97 +408,59 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
   declare scrollCount: any;
 
   async process(): Promise<Record<string, unknown>> {
-    const cookieMap = parseCookies(this.cookies);
     const hashtags = (this.hashtags as string[]) ?? [];
     const maxDays = Number(this.days ?? 3);
     const limit = Number(this.limit ?? 50);
-    const scrollCount = Number(this.scrollCount ?? 3);
+    const scrollCount = Number(this.scrollCount ?? 5);
 
-    if (
-      !cookieMap.has("sessionid") &&
-      !cookieMap.has("sid_tt") &&
-      !cookieMap.has("sid_guard")
-    ) {
-      throw new Error(
-        "TikTok cookies must include 'sessionid', 'sid_tt', or 'sid_guard'"
-      );
-    }
-
-    const maxAgeSeconds = maxDays * 24 * 60 * 60;
-    const now = Math.floor(Date.now() / 1000);
     const results: AnalyzedPost[] = [];
 
-    // Launch browser
-    const session = await launchCdpBrowser();
+    // Import Playwright
+    const { chromium } = await import("playwright");
+
+    // Launch browser with stealth settings
+    const browser = await chromium.launch({
+      headless: true,
+      args: [
+        "--disable-blink-features=AutomationControlled",
+        "--no-sandbox",
+        "--disable-setuid-sandbox"
+      ]
+    });
+
+    const context = await browser.newContext({
+      viewport: { width: 1280, height: 720 },
+      userAgent:
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    });
+
+    // Set cookies if provided (optional - works without them too)
+    const playwrightCookies = toPlaywrightCookies(this.cookies, ".tiktok.com");
+    if (playwrightCookies.length > 0) {
+      await context.addCookies(playwrightCookies);
+    }
+
+    const page = await context.newPage();
+
     try {
-      const client = session.client;
-
-      // Set cookies for TikTok
-      const cdpCookies = toCdpCookies(this.cookies, ".tiktok.com");
-      if (cdpCookies.length > 0) {
-        await client.Network.setCookies({ cookies: cdpCookies });
-      }
-
       for (const hashtag of hashtags) {
         const tag = hashtag.replace(/^#/, "").toLowerCase();
         const tagUrl = `https://www.tiktok.com/tag/${encodeURIComponent(tag)}`;
 
+        console.log(`TikTok: analyzing #${tag}...`);
+
         try {
-          // Navigate to hashtag page
-          await cdpGoto(client, tagUrl, 30000);
+          await page.goto(tagUrl);
+          await page.waitForTimeout(4000);
 
-          // Wait for the page to be interactive and videos to load
-          // TikTok uses heavy JS, so we need to wait for it to finish
-          let attempts = 0;
-          const maxAttempts = 10;
-          let foundLinks = 0;
-
-          while (attempts < maxAttempts && foundLinks === 0) {
-            await new Promise((r) => setTimeout(r, 2000));
-
-            // Try scrolling to trigger lazy loading
-            await cdpEvaluate(client, () => {
-              window.scrollBy(0, 500);
-            });
-
-            foundLinks = await cdpEvaluate<number>(client, () =>
-              document.querySelectorAll('a[href*="/video/"]').length
-            );
-
-            attempts++;
-            console.log(`TikTok attempt ${attempts}/${maxAttempts}: found ${foundLinks} video links`);
+          // Scroll to load more videos
+          for (let i = 0; i < scrollCount; i++) {
+            await page.evaluate(() => window.scrollBy(0, 800));
+            await page.waitForTimeout(800);
           }
 
-          // Additional scrolls if we found some videos
-          if (foundLinks > 0) {
-            for (let i = 0; i < scrollCount; i++) {
-              await cdpEvaluate(client, () => {
-                window.scrollBy(0, 800);
-              });
-              await new Promise((r) => setTimeout(r, 1000));
-            }
-            await new Promise((r) => setTimeout(r, 2000));
-          }
-
-          // Debug: Get page info
-          const pageDebug = await cdpEvaluate<{
-            title: string;
-            url: string;
-            bodyText: string;
-            allLinks: number;
-            videoLinks: number;
-          }>(client, () => ({
-            title: document.title,
-            url: window.location.href,
-            bodyText: document.body?.textContent?.slice(0, 500) ?? "",
-            allLinks: document.querySelectorAll("a").length,
-            videoLinks: document.querySelectorAll('a[href*="/video/"]').length
-          }));
-          console.log(`TikTok debug: title="${pageDebug.title}" url="${pageDebug.url}" allLinks=${pageDebug.allLinks} videoLinks=${pageDebug.videoLinks}`);
-          console.log(`TikTok bodyText: ${pageDebug.bodyText.slice(0, 200)}`);
-
-          // Step 1: Collect video links from hashtag page
-          const videoLinks = await cdpEvaluate<string[]>(client, () => {
+          // Collect video links
+          const videoLinks = await page.evaluate(() => {
             const links: string[] = [];
             document.querySelectorAll('a[href*="/video/"]').forEach((a) => {
               const href = (a as HTMLAnchorElement).href;
@@ -646,32 +473,27 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
 
           console.log(`TikTok #${tag}: found ${videoLinks.length} video links`);
 
-          // Step 2: Visit each video to get detailed stats
+          // Process each video
           const videosToProcess = videoLinks.slice(0, limit);
+          let processed = 0;
+
           for (const videoUrl of videosToProcess) {
             if (results.length >= limit) break;
 
             try {
-              await cdpGoto(client, videoUrl, 15000);
-              await new Promise((r) => setTimeout(r, 2000));
+              await page.goto(videoUrl);
+              await page.waitForTimeout(2500);
 
-              // Extract video details from video page
-              const details = await cdpEvaluate<{
-                author: string;
-                description: string;
-                views: number;
-                likes: number;
-                comments: number;
-                shares: number;
-                timeText: string;
-              }>(client, () => {
+              const details = await page.evaluate(() => {
                 const parseCount = (str: string | null | undefined): number => {
                   if (!str) return 0;
                   const s = str.toLowerCase().trim();
                   const num = parseFloat(s.replace(/[^\d.kmKM]/g, ""));
                   if (isNaN(num)) return 0;
-                  if (s.includes("m") || s.includes("м")) return Math.round(num * 1000000);
-                  if (s.includes("k") || s.includes("к") || s.includes("тыс")) return Math.round(num * 1000);
+                  if (s.includes("m") || s.includes("м"))
+                    return Math.round(num * 1000000);
+                  if (s.includes("k") || s.includes("к") || s.includes("тыс"))
+                    return Math.round(num * 1000);
                   return parseInt(s.replace(/\D/g, "")) || 0;
                 };
 
@@ -679,7 +501,8 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
                 const authorEl = document.querySelector(
                   '[data-e2e="browse-username"], [data-e2e="video-author-uniqueid"]'
                 );
-                const author = authorEl?.textContent?.replace("@", "").trim() ?? "unknown";
+                const author =
+                  authorEl?.textContent?.replace("@", "").trim() ?? "unknown";
 
                 // Description
                 const descEl = document.querySelector(
@@ -709,14 +532,30 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
 
                 // Find time text
                 let timeText = "";
-                document.querySelectorAll('[class*="SpanOtherInfos"], span').forEach((el) => {
-                  const t = el.textContent ?? "";
-                  if (t.match(/\d+\s*(час|hour|дн|day|нед|week|мин|min|д\.)/i)) {
-                    timeText = t;
-                  }
-                });
+                document
+                  .querySelectorAll('[class*="SpanOtherInfos"], span')
+                  .forEach((el) => {
+                    const t = el.textContent ?? "";
+                    if (t.match(/\d+\s*(час|hour|дн|day|нед|week|мин|min|д\.)/i)) {
+                      timeText = t;
+                    }
+                  });
 
-                return { author, description: description.slice(0, 200), views, likes, comments, shares, timeText };
+                // Also try finding date in YYYY-MM-DD format
+                const dateMatch = document.body.textContent?.match(
+                  /(\d{4}-\d{1,2}-\d{1,2})/
+                );
+
+                return {
+                  author,
+                  description: description.slice(0, 300),
+                  views,
+                  likes,
+                  comments,
+                  shares,
+                  timeText,
+                  dateMatch: dateMatch ? dateMatch[1] : null
+                };
               });
 
               // Skip if no engagement
@@ -725,13 +564,32 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
               // Parse time
               let hoursAgo = 24;
               const timeText = (details.timeText || "").toLowerCase();
-              if (timeText.includes("мин") || timeText.includes("min")) {
+
+              if (details.dateMatch) {
+                try {
+                  const postDate = new Date(details.dateMatch);
+                  hoursAgo =
+                    (Date.now() - postDate.getTime()) / (1000 * 60 * 60);
+                } catch {
+                  // ignore
+                }
+              } else if (timeText.includes("мин") || timeText.includes("min")) {
                 const digits = timeText.replace(/\D/g, "");
-                hoursAgo = digits ? Math.max(parseInt(digits) / 60, 0.5) : 0.5;
-              } else if (timeText.includes("час") || timeText.includes("hour") || timeText.includes("ч")) {
+                hoursAgo = digits
+                  ? Math.max(parseInt(digits) / 60, 0.5)
+                  : 0.5;
+              } else if (
+                timeText.includes("час") ||
+                timeText.includes("hour") ||
+                timeText.includes("ч")
+              ) {
                 const digits = timeText.replace(/\D/g, "");
                 hoursAgo = digits ? parseInt(digits) : 1;
-              } else if (timeText.includes("дн") || timeText.includes("day") || timeText.includes("д")) {
+              } else if (
+                timeText.includes("дн") ||
+                timeText.includes("day") ||
+                timeText.includes("д")
+              ) {
                 const digits = timeText.replace(/\D/g, "");
                 hoursAgo = digits ? parseInt(digits) * 24 : 24;
               } else if (timeText.includes("нед") || timeText.includes("week")) {
@@ -742,12 +600,13 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
               // Skip if too old
               if (hoursAgo > maxDays * 24) continue;
 
-              const { engagementRate, velocity, viralityScore } = calculateMetrics(
-                details.views,
-                details.likes,
-                details.comments,
-                hoursAgo
-              );
+              const { engagementRate, velocity, viralityScore } =
+                calculateMetrics(
+                  details.views,
+                  details.likes,
+                  details.comments,
+                  hoursAgo
+                );
 
               results.push({
                 platform: "tiktok",
@@ -764,16 +623,22 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
                 virality_score: viralityScore,
                 is_video: true
               });
+
+              processed++;
             } catch (err) {
               console.error(`Error processing video ${videoUrl}:`, err);
             }
           }
+
+          console.log(`TikTok #${tag}: processed ${processed} videos`);
         } catch (err) {
           console.error(`Error fetching #${tag}:`, err);
         }
+
+        await page.waitForTimeout(2000);
       }
     } finally {
-      await session.close();
+      await browser.close();
     }
 
     // Sort by virality score and limit
