@@ -411,27 +411,38 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
     const hashtags = (this.hashtags as string[]) ?? [];
     const maxDays = Number(this.days ?? 3);
     const limit = Number(this.limit ?? 50);
-    const scrollCount = Number(this.scrollCount ?? 5);
+    const scrollCount = Number(this.scrollCount ?? 8);
 
     const results: AnalyzedPost[] = [];
 
-    // Import Playwright
+    // Import Playwright and Stealth
     const { chromium } = await import("playwright");
+    let Stealth: any;
+    try {
+      // @ts-ignore - playwright-stealth has no type declarations
+      const stealthModule = await import("playwright-stealth");
+      Stealth = stealthModule.Stealth;
+    } catch {
+      console.log("playwright-stealth not available, using basic mode");
+    }
 
-    // Launch browser with stealth settings
+    // Launch browser with anti-detection settings
     const browser = await chromium.launch({
       headless: true,
       args: [
         "--disable-blink-features=AutomationControlled",
         "--no-sandbox",
-        "--disable-setuid-sandbox"
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage"
       ]
     });
 
     const context = await browser.newContext({
-      viewport: { width: 1280, height: 720 },
+      viewport: { width: 1920, height: 1080 },
       userAgent:
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+      locale: "en-US",
+      timezoneId: "America/New_York"
     });
 
     // Set cookies if provided (optional - works without them too)
@@ -442,6 +453,12 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
 
     const page = await context.newPage();
 
+    // Apply stealth if available
+    if (Stealth) {
+      const stealth = new Stealth();
+      await stealth.apply_stealth_async(page);
+    }
+
     try {
       for (const hashtag of hashtags) {
         const tag = hashtag.replace(/^#/, "").toLowerCase();
@@ -450,8 +467,8 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
         console.log(`TikTok: analyzing #${tag}...`);
 
         try {
-          await page.goto(tagUrl, { waitUntil: "networkidle" });
-          await page.waitForTimeout(4000);
+          await page.goto(tagUrl, { waitUntil: "domcontentloaded", timeout: 45000 });
+          await page.waitForTimeout(6000);
 
           // Save screenshot for debugging
           try {
@@ -476,9 +493,10 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
 
           // Scroll to load more videos
           for (let i = 0; i < scrollCount; i++) {
-            await page.evaluate(() => window.scrollBy(0, 800));
-            await page.waitForTimeout(800);
+            await page.evaluate(() => window.scrollBy(0, 600));
+            await page.waitForTimeout(1000);
           }
+          await page.waitForTimeout(2000);
 
           // Check again after scrolling
           const afterScroll = await page.evaluate(
