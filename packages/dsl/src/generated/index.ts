@@ -71,4 +71,5 @@ export * as openaiAudio from "./openai.audio.js";
 export * as openaiImage from "./openai.image.js";
 export * as openaiText from "./openai.text.js";
 export * as searchGoogle from "./search.google.js";
+export * as socialTrends from "./social.trends.js";
 export * as vector from "./vector.js";

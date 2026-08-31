@@ -734,6 +734,7 @@ export {
 } from "@nodetool-ai/core-nodes/nodes/vector";
 export { GEMINI_NODES } from "@nodetool-ai/llm-nodes/nodes/gemini";
 export { APIFY_NODES } from "@nodetool-ai/integration-nodes/nodes/apify";
+export { SOCIAL_TRENDS_NODES } from "@nodetool-ai/integration-nodes/nodes/social-trends";
 export {
   ComfyWorkflowNode,
   ComfyWorkerWorkflowNode,
@@ -834,6 +835,7 @@ import { KIE_DYNAMIC_NODES } from "@nodetool-ai/integration-nodes/nodes/kie-dyna
 import { VECTOR_NODES } from "@nodetool-ai/core-nodes/nodes/vector";
 import { GEMINI_NODES } from "@nodetool-ai/llm-nodes/nodes/gemini";
 import { APIFY_NODES } from "@nodetool-ai/integration-nodes/nodes/apify";
+import { SOCIAL_TRENDS_NODES } from "@nodetool-ai/integration-nodes/nodes/social-trends";
 import { COMFY_NODES } from "@nodetool-ai/integration-nodes/nodes/comfy";
 import { MESSAGING_NODES } from "@nodetool-ai/integration-nodes/nodes/messaging";
 import { MISTRAL_NODES } from "@nodetool-ai/llm-nodes/nodes/mistral";
@@ -928,6 +930,7 @@ export const ALL_BASE_NODES: readonly NodeClass[] = [
   ...VECTOR_NODES,
   ...GEMINI_NODES,
   ...APIFY_NODES,
+  ...SOCIAL_TRENDS_NODES,
   ...COMFY_NODES,
   ...MESSAGING_NODES,
   ...MISTRAL_NODES,

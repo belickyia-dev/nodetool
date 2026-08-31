@@ -13,3 +13,4 @@ export * from "./nodes/search.js";
 export * from "./nodes/kie-dynamic.js";
 export * from "./nodes/comfy.js";
 export * from "./nodes/lib-social-publish.js";
+export * from "./nodes/social-trends.js";
