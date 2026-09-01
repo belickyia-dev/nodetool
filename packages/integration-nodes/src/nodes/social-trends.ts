@@ -33,9 +33,22 @@ function parseCookies(cookiesInput: unknown): Map<string, string> {
 
   if (!cookiesInput) return cookies;
 
+  // If input is a string, try to parse as JSON first
+  let input = cookiesInput;
+  if (typeof input === "string") {
+    const trimmed = input.trim();
+    if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
+      try {
+        input = JSON.parse(trimmed);
+      } catch {
+        // Not valid JSON, treat as cookie string below
+      }
+    }
+  }
+
   // Handle array of cookie objects (from browser export)
-  if (Array.isArray(cookiesInput)) {
-    for (const c of cookiesInput as Cookie[]) {
+  if (Array.isArray(input)) {
+    for (const c of input as Cookie[]) {
       if (c.name && c.value) {
         cookies.set(c.name, c.value);
       }
@@ -44,9 +57,9 @@ function parseCookies(cookiesInput: unknown): Map<string, string> {
   }
 
   // Handle object {name: value}
-  if (typeof cookiesInput === "object") {
+  if (typeof input === "object" && input !== null) {
     for (const [name, value] of Object.entries(
-      cookiesInput as Record<string, string>
+      input as Record<string, string>
     )) {
       cookies.set(name, String(value));
     }
@@ -54,8 +67,8 @@ function parseCookies(cookiesInput: unknown): Map<string, string> {
   }
 
   // Handle cookie string "name=value; name2=value2"
-  if (typeof cookiesInput === "string") {
-    const parts = cookiesInput.split(";");
+  if (typeof input === "string") {
+    const parts = input.split(";");
     for (const part of parts) {
       const [name, ...valueParts] = part.trim().split("=");
       if (name && valueParts.length > 0) {
@@ -98,9 +111,22 @@ function toPlaywrightCookies(
 
   if (!cookiesInput) return result;
 
+  // If input is a string, try to parse as JSON first
+  let input = cookiesInput;
+  if (typeof input === "string") {
+    const trimmed = input.trim();
+    if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
+      try {
+        input = JSON.parse(trimmed);
+      } catch {
+        // Not valid JSON, treat as cookie string below
+      }
+    }
+  }
+
   // Handle array of cookie objects (from browser export like Cookie-Editor)
-  if (Array.isArray(cookiesInput)) {
-    for (const c of cookiesInput as Cookie[]) {
+  if (Array.isArray(input)) {
+    for (const c of input as Cookie[]) {
       if (c.name && c.value) {
         result.push({
           name: c.name,
@@ -117,9 +143,9 @@ function toPlaywrightCookies(
   }
 
   // Handle object {name: value}
-  if (typeof cookiesInput === "object") {
+  if (typeof input === "object" && input !== null) {
     for (const [name, value] of Object.entries(
-      cookiesInput as Record<string, string>
+      input as Record<string, string>
     )) {
       result.push({
         name,
@@ -135,8 +161,8 @@ function toPlaywrightCookies(
   }
 
   // Handle cookie string "name=value; name2=value2"
-  if (typeof cookiesInput === "string") {
-    const parts = cookiesInput.split(";");
+  if (typeof input === "string") {
+    const parts = input.split(";");
     for (const part of parts) {
       const [name, ...valueParts] = part.trim().split("=");
       if (name && valueParts.length > 0) {
