@@ -532,15 +532,19 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
     // Check if we have a display (xvfb or real)
     const hasDisplay = !!process.env.DISPLAY;
 
-    // Use headed mode when display available (much lower block rate: 14-22% vs 58%)
-    // Fall back to headless if no display
-    const useHeaded = hasDisplay;
-    console.log(`TikTok: using ${useHeaded ? "headed" : "headless"} mode (DISPLAY=${process.env.DISPLAY || "none"})`);
+    // TikTok blocks standard headless mode. Use:
+    // 1. Headed mode if display available (best)
+    // 2. New headless mode (--headless=new) which is harder to detect
+    console.log(`TikTok: DISPLAY=${process.env.DISPLAY || "none"}, using ${hasDisplay ? "headed" : "new-headless"} mode`);
 
     // Launch browser with anti-detection settings
     const browser = await chromium.launch({
-      headless: !useHeaded,
+      // Use headed mode if display available, otherwise use regular headless
+      // but with --headless=new flag for better anti-detection
+      headless: !hasDisplay,
       args: [
+        // Use new headless mode (Chromium 112+) - harder to detect than old headless
+        ...(hasDisplay ? [] : ["--headless=new"]),
         "--disable-blink-features=AutomationControlled",
         "--no-sandbox",
         "--disable-setuid-sandbox",
@@ -549,7 +553,16 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
         "--disable-features=IsolateOrigins,site-per-process",
         "--disable-infobars",
         "--window-size=1920,1080",
-        "--start-maximized"
+        "--start-maximized",
+        // Additional anti-detection flags
+        "--disable-background-networking",
+        "--disable-default-apps",
+        "--disable-extensions",
+        "--disable-sync",
+        "--disable-translate",
+        "--metrics-recording-only",
+        "--mute-audio",
+        "--no-first-run"
       ]
     });
 
@@ -656,14 +669,38 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
     });
 
     try {
+      // First check login status on main page
+      console.log("TikTok: checking login status...");
+      await page.goto("https://www.tiktok.com", { waitUntil: "load", timeout: 30000 });
+      await page.waitForTimeout(3000);
+
+      const loginStatus = await page.evaluate(() => {
+        const content = document.body?.textContent?.toLowerCase() ?? "";
+        const isLoggedIn = !!(
+          document.querySelector('[data-e2e="profile-icon"]') ||
+          document.querySelector('[data-e2e="upload-icon"]') ||
+          document.querySelector('a[href*="/upload"]') ||
+          content.includes("upload") ||
+          content.includes("загрузить")
+        );
+        return { isLoggedIn };
+      });
+
+      if (!loginStatus.isLoggedIn) {
+        console.warn("TikTok: Not logged in! Results may be limited or blocked.");
+      } else {
+        console.log("TikTok: Logged in successfully");
+      }
+
       for (const hashtag of hashtags) {
         const tag = hashtag.replace(/^#/, "").toLowerCase();
-        const tagUrl = `https://www.tiktok.com/tag/${encodeURIComponent(tag)}`;
+        // Use search instead of tag page (less likely to trigger CAPTCHA)
+        const searchUrl = `https://www.tiktok.com/search/video?q=%23${encodeURIComponent(tag)}`;
 
-        console.log(`TikTok: analyzing #${tag}...`);
+        console.log(`TikTok: searching #${tag}...`);
 
         try {
-          await page.goto(tagUrl, { waitUntil: "load", timeout: 60000 });
+          await page.goto(searchUrl, { waitUntil: "load", timeout: 60000 });
 
           // Wait for video grid to load (TikTok lazy-loads content)
           console.log(`TikTok: waiting for video content to load...`);
@@ -673,7 +710,7 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
           } catch {
             console.log(`TikTok: no video links found after 15s, continuing anyway`);
           }
-          await page.waitForTimeout(3000);
+          await page.waitForTimeout(5000);
 
           // Save screenshot for debugging
           try {
@@ -726,12 +763,21 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
 
           console.log(`TikTok bodyText preview: ${pageInfo.bodyText.slice(0, 200)}`);
 
-          // Scroll to load more videos (larger scrolls, longer waits for lazy loading)
+          // Click on page to activate focus for keyboard scrolling
+          await page.click("body").catch(() => {});
+          await page.waitForTimeout(500);
+
+          // Scroll using keyboard (bypasses TikTok's anti-bot protection)
+          console.log(`TikTok: scrolling ${scrollCount} times using keyboard...`);
           for (let i = 0; i < scrollCount; i++) {
-            await page.evaluate(() => window.scrollBy(0, 800));
-            await page.waitForTimeout(2000);
+            await page.keyboard.press("End");
+            await page.waitForTimeout(800);
+            await page.keyboard.press("PageDown");
+            await page.waitForTimeout(800);
+            await page.keyboard.press("PageDown");
+            await page.waitForTimeout(1000);
           }
-          await page.waitForTimeout(3000);
+          await page.waitForTimeout(2000);
 
           // Check again after scrolling
           const afterScroll = await page.evaluate(
