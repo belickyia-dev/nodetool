@@ -474,16 +474,27 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
     // Import Playwright
     const { chromium } = await import("playwright");
 
+    // Check if we have a display (xvfb or real)
+    const hasDisplay = !!process.env.DISPLAY;
+
+    // Use headed mode when display available (much lower block rate: 14-22% vs 58%)
+    // Fall back to headless if no display
+    const useHeaded = hasDisplay;
+    console.log(`TikTok: using ${useHeaded ? "headed" : "headless"} mode (DISPLAY=${process.env.DISPLAY || "none"})`);
+
     // Launch browser with anti-detection settings
     const browser = await chromium.launch({
-      headless: true,
+      headless: !useHeaded,
       args: [
         "--disable-blink-features=AutomationControlled",
         "--no-sandbox",
         "--disable-setuid-sandbox",
         "--disable-dev-shm-usage",
         "--disable-web-security",
-        "--disable-features=IsolateOrigins,site-per-process"
+        "--disable-features=IsolateOrigins,site-per-process",
+        "--disable-infobars",
+        "--window-size=1920,1080",
+        "--start-maximized"
       ]
     });
 
@@ -514,11 +525,51 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
 
     const page = await context.newPage();
 
-    // Hide webdriver flag
+    // Hide webdriver flag and add realistic browser properties
     await page.addInitScript(() => {
+      // Remove webdriver property entirely
       Object.defineProperty(navigator, "webdriver", { get: () => undefined });
+
+      // Add chrome object
       // @ts-ignore
-      window.chrome = { runtime: {} };
+      window.chrome = {
+        runtime: {},
+        loadTimes: () => ({}),
+        csi: () => ({}),
+        app: { isInstalled: false }
+      };
+
+      // Override plugins to look real
+      Object.defineProperty(navigator, "plugins", {
+        get: () => [
+          { name: "Chrome PDF Plugin", filename: "internal-pdf-viewer" },
+          { name: "Chrome PDF Viewer", filename: "mhjfbmdgcfjbbpaeojofohoefgiehjai" },
+          { name: "Native Client", filename: "internal-nacl-plugin" }
+        ]
+      });
+
+      // Override languages
+      Object.defineProperty(navigator, "languages", {
+        get: () => ["en-US", "en"]
+      });
+
+      // Realistic hardware concurrency
+      Object.defineProperty(navigator, "hardwareConcurrency", {
+        get: () => 8
+      });
+
+      // Realistic device memory
+      Object.defineProperty(navigator, "deviceMemory", {
+        get: () => 8
+      });
+
+      // Override WebGL renderer for realistic GPU
+      const getParameter = WebGLRenderingContext.prototype.getParameter;
+      WebGLRenderingContext.prototype.getParameter = function(parameter) {
+        if (parameter === 37445) return "Intel Inc.";
+        if (parameter === 37446) return "Intel Iris OpenGL Engine";
+        return getParameter.call(this, parameter);
+      };
     });
 
     try {
