@@ -1,0 +1,211 @@
+{
+  "name": "Social Trend Analyzer",
+  "description": "Analyze trending posts from Instagram and TikTok by hashtag using cookies. Calculates engagement rate, velocity, and virality score.",
+  "tags": ["social", "analytics", "instagram", "tiktok", "trends", "cookies"],
+  "graph": {
+    "nodes": [
+      {
+        "id": "comment",
+        "type": "nodetool.workflows.base_node.Comment",
+        "data": {
+          "comment": "# 📊 Social Trend Analyzer\n\nAnalyze trending posts from Instagram and TikTok.\n\n**Setup:**\n1. Export cookies from browser (Cookie-Editor extension)\n2. Save as JSON asset\n3. Connect to the analyzer nodes\n\n**Output:** Posts sorted by virality_score with engagement metrics."
+        },
+        "ui_properties": {
+          "position": { "x": 50, "y": -100 },
+          "width": 400,
+          "height": 180
+        }
+      },
+      {
+        "id": "instagram_cookies",
+        "type": "nodetool.constant.JSON",
+        "data": {
+          "value": "[{\"name\":\"sessionid\",\"value\":\"YOUR_SESSION_ID\"},{\"name\":\"csrftoken\",\"value\":\"YOUR_CSRF_TOKEN\"}]"
+        },
+        "ui_properties": {
+          "position": { "x": 50, "y": 120 },
+          "width": 280,
+          "height": 150,
+          "title": "Instagram Cookies"
+        }
+      },
+      {
+        "id": "tiktok_cookies",
+        "type": "nodetool.constant.JSON",
+        "data": {
+          "value": "[{\"name\":\"sessionid\",\"value\":\"YOUR_SESSION_ID\"},{\"name\":\"sid_tt\",\"value\":\"YOUR_SID_TT\"}]"
+        },
+        "ui_properties": {
+          "position": { "x": 50, "y": 350 },
+          "width": 280,
+          "height": 150,
+          "title": "TikTok Cookies"
+        }
+      },
+      {
+        "id": "hashtags",
+        "type": "nodetool.input.StringListInput",
+        "data": {
+          "name": "hashtags",
+          "value": ["нейрофото", "aiart", "нейросеть"],
+          "description": "Hashtags to analyze (without #)"
+        },
+        "ui_properties": {
+          "position": { "x": 50, "y": 550 },
+          "width": 280,
+          "title": "Hashtags"
+        }
+      },
+      {
+        "id": "days",
+        "type": "nodetool.input.IntegerInput",
+        "data": {
+          "name": "days",
+          "value": 3,
+          "min": 1,
+          "max": 30,
+          "description": "Analyze posts from last N days"
+        },
+        "ui_properties": {
+          "position": { "x": 50, "y": 720 },
+          "width": 280,
+          "title": "Days"
+        }
+      },
+      {
+        "id": "limit",
+        "type": "nodetool.input.IntegerInput",
+        "data": {
+          "name": "limit",
+          "value": 20,
+          "min": 1,
+          "max": 100,
+          "description": "Max posts per platform"
+        },
+        "ui_properties": {
+          "position": { "x": 50, "y": 870 },
+          "width": 280,
+          "title": "Limit"
+        }
+      },
+      {
+        "id": "instagram_analyzer",
+        "type": "social.trends.InstagramTrendAnalyzer",
+        "data": {},
+        "ui_properties": {
+          "position": { "x": 420, "y": 120 },
+          "width": 300,
+          "title": "Instagram Trends"
+        }
+      },
+      {
+        "id": "tiktok_analyzer",
+        "type": "social.trends.TikTokTrendAnalyzer",
+        "data": {},
+        "ui_properties": {
+          "position": { "x": 420, "y": 350 },
+          "width": 300,
+          "title": "TikTok Trends"
+        }
+      },
+      {
+        "id": "instagram_output",
+        "type": "nodetool.output.Output",
+        "data": {
+          "name": "instagram_trends"
+        },
+        "ui_properties": {
+          "position": { "x": 780, "y": 120 },
+          "width": 350,
+          "height": 200,
+          "title": "📸 Instagram Trends"
+        }
+      },
+      {
+        "id": "tiktok_output",
+        "type": "nodetool.output.Output",
+        "data": {
+          "name": "tiktok_trends"
+        },
+        "ui_properties": {
+          "position": { "x": 780, "y": 350 },
+          "width": 350,
+          "height": 200,
+          "title": "🎵 TikTok Trends"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e1",
+        "source": "instagram_cookies",
+        "sourceHandle": "output",
+        "target": "instagram_analyzer",
+        "targetHandle": "cookies"
+      },
+      {
+        "id": "e2",
+        "source": "hashtags",
+        "sourceHandle": "output",
+        "target": "instagram_analyzer",
+        "targetHandle": "hashtags"
+      },
+      {
+        "id": "e3",
+        "source": "days",
+        "sourceHandle": "output",
+        "target": "instagram_analyzer",
+        "targetHandle": "days"
+      },
+      {
+        "id": "e4",
+        "source": "limit",
+        "sourceHandle": "output",
+        "target": "instagram_analyzer",
+        "targetHandle": "limit"
+      },
+      {
+        "id": "e5",
+        "source": "tiktok_cookies",
+        "sourceHandle": "output",
+        "target": "tiktok_analyzer",
+        "targetHandle": "cookies"
+      },
+      {
+        "id": "e6",
+        "source": "hashtags",
+        "sourceHandle": "output",
+        "target": "tiktok_analyzer",
+        "targetHandle": "hashtags"
+      },
+      {
+        "id": "e7",
+        "source": "days",
+        "sourceHandle": "output",
+        "target": "tiktok_analyzer",
+        "targetHandle": "days"
+      },
+      {
+        "id": "e8",
+        "source": "limit",
+        "sourceHandle": "output",
+        "target": "tiktok_analyzer",
+        "targetHandle": "limit"
+      },
+      {
+        "id": "e9",
+        "source": "instagram_analyzer",
+        "sourceHandle": "output",
+        "target": "instagram_output",
+        "targetHandle": "value"
+      },
+      {
+        "id": "e10",
+        "source": "tiktok_analyzer",
+        "sourceHandle": "output",
+        "target": "tiktok_output",
+        "targetHandle": "value"
+      }
+    ]
+  }
+}
