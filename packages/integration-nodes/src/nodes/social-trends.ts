@@ -1,5 +1,24 @@
 import { BaseNode, prop } from "@nodetool-ai/node-sdk";
 import { tagAsServer } from "@nodetool-ai/nodes-utils";
+import { Agent } from "undici";
+
+// Force IPv4 to work with VPN routing
+const ipv4Agent = new Agent({
+  connect: {
+    lookup: (_hostname, _options, callback) => {
+      // Use dns.lookup with family: 4 to force IPv4
+      import("dns").then(dns => {
+        dns.lookup(_hostname, { family: 4 }, (err, address) => {
+          if (err) {
+            callback(err, []);
+          } else {
+            callback(null, [{ address, family: 4 }]);
+          }
+        });
+      });
+    }
+  }
+});
 
 interface Cookie {
   name: string;
@@ -298,7 +317,9 @@ export class InstagramTrendAnalyzerNode extends BaseNode {
               Cookie: cookieHeader(cookieMap),
               "X-CSRFToken": cookieMap.get("csrftoken") ?? ""
             },
-            body: `tab=recent&page=0`
+            body: `tab=recent&page=0`,
+            // @ts-expect-error undici dispatcher option
+            dispatcher: ipv4Agent
           }
         );
 
