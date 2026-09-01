@@ -51,18 +51,33 @@ interface AnalyzedPost {
   is_video: boolean;
 }
 
+/** Unwrap NodeTool JSON node wrapper {type, data} if present */
+function unwrapNodeToolJson(input: unknown): unknown {
+  if (
+    typeof input === "object" &&
+    input !== null &&
+    "type" in input &&
+    "data" in input
+  ) {
+    return (input as { type: string; data: unknown }).data;
+  }
+  return input;
+}
+
 function parseCookies(cookiesInput: unknown): Map<string, string> {
   const cookies = new Map<string, string>();
 
   if (!cookiesInput) return cookies;
 
+  // Unwrap NodeTool JSON node wrapper {type, data}
+  let input = unwrapNodeToolJson(cookiesInput);
+
   // If input is a string, try to parse as JSON first
-  let input = cookiesInput;
   if (typeof input === "string") {
     const trimmed = input.trim();
     if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
       try {
-        input = JSON.parse(trimmed);
+        input = unwrapNodeToolJson(JSON.parse(trimmed));
       } catch {
         // Not valid JSON, treat as cookie string below
       }
@@ -79,12 +94,16 @@ function parseCookies(cookiesInput: unknown): Map<string, string> {
     return cookies;
   }
 
-  // Handle object {name: value}
+  // Handle object {name: value} - but skip if it looks like a wrapper
   if (typeof input === "object" && input !== null) {
-    for (const [name, value] of Object.entries(
-      input as Record<string, string>
-    )) {
-      cookies.set(name, String(value));
+    const keys = Object.keys(input);
+    // Skip objects that look like wrappers or have non-cookie structure
+    if (keys.length > 0 && !keys.includes("type") && !keys.includes("data")) {
+      for (const [name, value] of Object.entries(
+        input as Record<string, string>
+      )) {
+        cookies.set(name, String(value));
+      }
     }
     return cookies;
   }
@@ -154,13 +173,15 @@ function toPlaywrightCookies(
 
   if (!cookiesInput) return result;
 
+  // Unwrap NodeTool JSON node wrapper {type, data}
+  let input = unwrapNodeToolJson(cookiesInput);
+
   // If input is a string, try to parse as JSON first
-  let input = cookiesInput;
   if (typeof input === "string") {
     const trimmed = input.trim();
     if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
       try {
-        input = JSON.parse(trimmed);
+        input = unwrapNodeToolJson(JSON.parse(trimmed));
       } catch {
         // Not valid JSON, treat as cookie string below
       }
