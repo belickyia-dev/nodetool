@@ -1,24 +1,37 @@
 import { BaseNode, prop } from "@nodetool-ai/node-sdk";
 import { tagAsServer } from "@nodetool-ai/nodes-utils";
-import { Agent } from "undici";
+import https from "https";
 
-// Force IPv4 to work with VPN routing
-const ipv4Agent = new Agent({
-  connect: {
-    lookup: (_hostname, _options, callback) => {
-      // Use dns.lookup with family: 4 to force IPv4
-      import("dns").then(dns => {
-        dns.lookup(_hostname, { family: 4 }, (err, address) => {
-          if (err) {
-            callback(err, []);
-          } else {
-            callback(null, [{ address, family: 4 }]);
-          }
-        });
-      });
-    }
-  }
-});
+/** Make HTTPS POST request using Node's https module (bypasses undici's Sec-Fetch headers) */
+async function httpsPost(
+  url: string,
+  headers: Record<string, string>,
+  body: string
+): Promise<{ status: number; data: string }> {
+  return new Promise((resolve, reject) => {
+    const urlObj = new URL(url);
+    const options: https.RequestOptions = {
+      hostname: urlObj.hostname,
+      port: 443,
+      path: urlObj.pathname + urlObj.search,
+      method: "POST",
+      family: 4, // Force IPv4 for VPN routing
+      headers: {
+        ...headers,
+        "Content-Length": Buffer.byteLength(body)
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let data = "";
+      res.on("data", (chunk) => (data += chunk));
+      res.on("end", () => resolve({ status: res.statusCode ?? 0, data }));
+    });
+    req.on("error", reject);
+    req.write(body);
+    req.end();
+  });
+}
 
 interface Cookie {
   name: string;
@@ -306,32 +319,27 @@ export class InstagramTrendAnalyzerNode extends BaseNode {
       const tag = hashtag.replace(/^#/, "").toLowerCase();
 
       try {
-        const response = await fetch(
+        const response = await httpsPost(
           `https://i.instagram.com/api/v1/tags/${encodeURIComponent(tag)}/sections/`,
           {
-            method: "POST",
-            headers: {
-              "User-Agent":
-                "Instagram 358.0.0.46.92 Android (34/14; 420dpi; 1080x2400; samsung; SM-S918B; dm3q; qcom)",
-              "Content-Type": "application/x-www-form-urlencoded",
-              Cookie: cookieHeader(cookieMap),
-              "X-CSRFToken": cookieMap.get("csrftoken") ?? "",
-              "X-IG-App-ID": "936619743392459"
-            },
-            body: `tab=recent&page=0`,
-            // @ts-expect-error undici dispatcher option
-            dispatcher: ipv4Agent
-          }
+            "User-Agent":
+              "Instagram 358.0.0.46.92 Android (34/14; 420dpi; 1080x2400; samsung; SM-S918B; dm3q; qcom)",
+            "Content-Type": "application/x-www-form-urlencoded",
+            Cookie: cookieHeader(cookieMap),
+            "X-CSRFToken": cookieMap.get("csrftoken") ?? "",
+            "X-IG-App-ID": "936619743392459"
+          },
+          "tab=recent&page=0"
         );
 
-        if (!response.ok) {
+        if (response.status !== 200) {
           console.error(
-            `Instagram API error for #${tag}: ${response.status} ${response.statusText}`
+            `Instagram API error for #${tag}: ${response.status}`
           );
           continue;
         }
 
-        const data = (await response.json()) as InstagramHashtagResponse;
+        const data = JSON.parse(response.data) as InstagramHashtagResponse;
         const sections = data.sections ?? [];
 
         for (const section of sections) {
