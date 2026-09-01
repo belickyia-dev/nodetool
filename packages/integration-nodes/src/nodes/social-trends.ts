@@ -580,8 +580,17 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
         console.log(`TikTok: analyzing #${tag}...`);
 
         try {
-          await page.goto(tagUrl, { waitUntil: "domcontentloaded", timeout: 45000 });
-          await page.waitForTimeout(6000);
+          await page.goto(tagUrl, { waitUntil: "load", timeout: 60000 });
+
+          // Wait for video grid to load (TikTok lazy-loads content)
+          console.log(`TikTok: waiting for video content to load...`);
+          try {
+            await page.waitForSelector('a[href*="/video/"]', { timeout: 15000 });
+            console.log(`TikTok: video links appeared`);
+          } catch {
+            console.log(`TikTok: no video links found after 15s, continuing anyway`);
+          }
+          await page.waitForTimeout(3000);
 
           // Save screenshot for debugging
           try {
@@ -604,12 +613,12 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
           );
           console.log(`TikTok bodyText preview: ${pageInfo.bodyText.slice(0, 200)}`);
 
-          // Scroll to load more videos
+          // Scroll to load more videos (larger scrolls, longer waits for lazy loading)
           for (let i = 0; i < scrollCount; i++) {
-            await page.evaluate(() => window.scrollBy(0, 600));
-            await page.waitForTimeout(1000);
+            await page.evaluate(() => window.scrollBy(0, 800));
+            await page.waitForTimeout(2000);
           }
-          await page.waitForTimeout(2000);
+          await page.waitForTimeout(3000);
 
           // Check again after scrolling
           const afterScroll = await page.evaluate(
