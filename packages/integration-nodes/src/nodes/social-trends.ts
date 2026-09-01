@@ -520,7 +520,20 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
     // Set cookies if provided (optional - works without them too)
     const playwrightCookies = toPlaywrightCookies(this.cookies, ".tiktok.com");
     if (playwrightCookies.length > 0) {
+      // Log which cookies we're setting
+      const cookieNames = playwrightCookies.map(c => c.name);
+      console.log(`TikTok: setting ${playwrightCookies.length} cookies: ${cookieNames.join(", ")}`);
+
+      // Check for critical session cookies
+      const hasSessionId = cookieNames.some(n => n === "sessionid" || n === "sid_tt" || n === "sessionid_ss");
+      if (!hasSessionId) {
+        console.warn("TikTok WARNING: No session cookie (sessionid/sid_tt/sessionid_ss) found! CAPTCHA likely.");
+        console.warn("TikTok: Please re-export ALL cookies from a logged-in TikTok session");
+      }
+
       await context.addCookies(playwrightCookies);
+    } else {
+      console.log("TikTok: no cookies provided, running without authentication");
     }
 
     const page = await context.newPage();
@@ -601,16 +614,46 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
           }
 
           // Debug: Take a screenshot and log the page state
-          const pageInfo = await page.evaluate(() => ({
-            title: document.title,
-            url: window.location.href,
-            bodyText: document.body?.textContent?.slice(0, 500) ?? "",
-            allLinks: document.querySelectorAll("a").length,
-            videoLinks: document.querySelectorAll('a[href*="/video/"]').length
-          }));
+          const pageInfo = await page.evaluate(() => {
+            // Check for CAPTCHA indicators
+            const hasCaptcha = !!(
+              document.querySelector('[class*="captcha"]') ||
+              document.querySelector('[id*="captcha"]') ||
+              document.querySelector('img[src*="captcha"]') ||
+              document.body?.textContent?.includes("Drag the slider") ||
+              document.body?.textContent?.includes("Verify to continue") ||
+              document.body?.textContent?.includes("Перетащите ползунок")
+            );
+
+            // Check if logged in (look for profile/upload elements)
+            const isLoggedIn = !!(
+              document.querySelector('[data-e2e="profile-icon"]') ||
+              document.querySelector('[data-e2e="upload-icon"]') ||
+              document.querySelector('a[href*="/upload"]')
+            );
+
+            return {
+              title: document.title,
+              url: window.location.href,
+              bodyText: document.body?.textContent?.slice(0, 500) ?? "",
+              allLinks: document.querySelectorAll("a").length,
+              videoLinks: document.querySelectorAll('a[href*="/video/"]').length,
+              hasCaptcha,
+              isLoggedIn
+            };
+          });
           console.log(
             `TikTok page: title="${pageInfo.title}" links=${pageInfo.allLinks} videos=${pageInfo.videoLinks}`
           );
+          console.log(`TikTok: captcha=${pageInfo.hasCaptcha}, loggedIn=${pageInfo.isLoggedIn}`);
+
+          if (pageInfo.hasCaptcha) {
+            console.error("TikTok: CAPTCHA detected! Session cookies may be invalid or missing.");
+            console.error("TikTok: Required cookies: sessionid (or sid_tt), passport_csrf_token, odin_tt");
+            // Wait a bit in case captcha clears itself (some are JS challenges)
+            await page.waitForTimeout(5000);
+          }
+
           console.log(`TikTok bodyText preview: ${pageInfo.bodyText.slice(0, 200)}`);
 
           // Scroll to load more videos (larger scrolls, longer waits for lazy loading)
