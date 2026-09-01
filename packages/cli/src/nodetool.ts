@@ -1,5 +1,13 @@
 #!/usr/bin/env node
 /**
+ * Force IPv4 for fetch() - must be before any imports that might use fetch.
+ * Required for servers where IPv6 is configured but not actually routable
+ * (e.g., PI server with broken IPv6 to api.telegram.org).
+ */
+import { setGlobalDispatcher, Agent } from "undici";
+setGlobalDispatcher(new Agent({ connect: { family: 4 } }));
+
+/**
  * nodetool — Top-level CLI mirroring the Python nodetool CLI.
  *
  * Usage:
