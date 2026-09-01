@@ -33,16 +33,7 @@ async function httpsPost(
   });
 }
 
-interface Cookie {
-  name: string;
-  value: string;
-  domain?: string;
-  path?: string;
-  secure?: boolean;
-  httpOnly?: boolean;
-  sameSite?: string;
-  expirationDate?: number;
-}
+// Cookie interface moved to toPlaywrightCookies section as CookieEditorCookie
 
 interface AnalyzedPost {
   platform: string;
@@ -80,9 +71,9 @@ function parseCookies(cookiesInput: unknown): Map<string, string> {
 
   // Handle array of cookie objects (from browser export)
   if (Array.isArray(input)) {
-    for (const c of input as Cookie[]) {
-      if (c.name && c.value) {
-        cookies.set(c.name, c.value);
+    for (const c of input as Array<{ name?: string; value?: unknown }>) {
+      if (c.name && c.value !== undefined) {
+        cookies.set(c.name, String(c.value));
       }
     }
     return cookies;
@@ -118,11 +109,20 @@ function cookieHeader(cookies: Map<string, string>): string {
     .join("; ");
 }
 
-/** Convert cookie input to Playwright cookie format */
-function toPlaywrightCookies(
-  cookiesInput: unknown,
-  domain: string
-): Array<{
+/** Cookie-Editor export format */
+interface CookieEditorCookie {
+  name: string;
+  value: string;
+  domain?: string;
+  path?: string;
+  secure?: boolean;
+  httpOnly?: boolean;
+  sameSite?: string; // "no_restriction", "lax", "strict", "unspecified"
+  expirationDate?: number; // Unix timestamp in seconds
+}
+
+/** Playwright cookie format */
+interface PlaywrightCookie {
   name: string;
   value: string;
   domain: string;
@@ -130,16 +130,27 @@ function toPlaywrightCookies(
   secure?: boolean;
   httpOnly?: boolean;
   sameSite?: "Strict" | "Lax" | "None";
-}> {
-  const result: Array<{
-    name: string;
-    value: string;
-    domain: string;
-    path: string;
-    secure?: boolean;
-    httpOnly?: boolean;
-    sameSite?: "Strict" | "Lax" | "None";
-  }> = [];
+  expires?: number;
+}
+
+/** Convert Cookie-Editor sameSite to Playwright format */
+function mapSameSite(
+  sameSite: string | undefined
+): "Strict" | "Lax" | "None" | undefined {
+  if (!sameSite) return "Lax";
+  const lower = sameSite.toLowerCase();
+  if (lower === "no_restriction" || lower === "none") return "None";
+  if (lower === "lax") return "Lax";
+  if (lower === "strict") return "Strict";
+  return "Lax"; // Default for unknown values
+}
+
+/** Convert cookie input to Playwright cookie format */
+function toPlaywrightCookies(
+  cookiesInput: unknown,
+  domain: string
+): PlaywrightCookie[] {
+  const result: PlaywrightCookie[] = [];
 
   if (!cookiesInput) return result;
 
@@ -158,17 +169,28 @@ function toPlaywrightCookies(
 
   // Handle array of cookie objects (from browser export like Cookie-Editor)
   if (Array.isArray(input)) {
-    for (const c of input as Cookie[]) {
-      if (c.name && c.value) {
-        result.push({
+    for (const c of input as CookieEditorCookie[]) {
+      if (c.name && c.value !== undefined) {
+        const sameSite = mapSameSite(c.sameSite);
+        // sameSite: "None" requires secure: true
+        const secure = sameSite === "None" ? true : (c.secure ?? false);
+
+        const cookie: PlaywrightCookie = {
           name: c.name,
-          value: c.value,
+          value: String(c.value),
           domain: c.domain ?? domain,
           path: c.path ?? "/",
-          secure: c.secure ?? true,
+          secure,
           httpOnly: c.httpOnly ?? false,
-          sameSite: "None" as const
-        });
+          sameSite
+        };
+
+        // Add expires if expirationDate is provided (Cookie-Editor uses seconds)
+        if (c.expirationDate && c.expirationDate > 0) {
+          cookie.expires = c.expirationDate;
+        }
+
+        result.push(cookie);
       }
     }
     return result;
@@ -184,9 +206,9 @@ function toPlaywrightCookies(
         value: String(value),
         domain,
         path: "/",
-        secure: true,
+        secure: false,
         httpOnly: false,
-        sameSite: "None" as const
+        sameSite: "Lax"
       });
     }
     return result;
@@ -203,9 +225,9 @@ function toPlaywrightCookies(
           value: valueParts.join("=").trim(),
           domain,
           path: "/",
-          secure: true,
+          secure: false,
           httpOnly: false,
-          sameSite: "None" as const
+          sameSite: "Lax"
         });
       }
     }
@@ -307,8 +329,20 @@ export class InstagramTrendAnalyzerNode extends BaseNode {
     const maxDays = Number(this.days ?? 3);
     const limit = Number(this.limit ?? 50);
 
+    // Debug: log parsed cookie names
+    const cookieNames = Array.from(cookieMap.keys());
+    console.log(`Instagram: parsed ${cookieNames.length} cookies: ${cookieNames.join(", ") || "(none)"}`);
+
     if (!cookieMap.has("sessionid")) {
-      throw new Error("Instagram cookies must include 'sessionid'");
+      const inputType = this.cookies === null ? "null" :
+        this.cookies === undefined ? "undefined" :
+        Array.isArray(this.cookies) ? `array[${this.cookies.length}]` :
+        typeof this.cookies;
+      throw new Error(
+        `Instagram cookies must include 'sessionid'. ` +
+        `Received ${inputType} with keys: [${cookieNames.join(", ") || "none"}]. ` +
+        `Export cookies from browser using Cookie-Editor extension while logged into Instagram.`
+      );
     }
 
     const maxAgeSeconds = maxDays * 24 * 60 * 60;
@@ -531,7 +565,22 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
         console.warn("TikTok: Please re-export ALL cookies from a logged-in TikTok session");
       }
 
-      await context.addCookies(playwrightCookies);
+      try {
+        await context.addCookies(playwrightCookies);
+      } catch (cookieErr) {
+        // Log the problematic cookies for debugging
+        console.error("TikTok: Failed to set cookies. Cookie details:");
+        for (const c of playwrightCookies.slice(0, 5)) {
+          console.error(`  - ${c.name}: domain=${c.domain}, sameSite=${c.sameSite}, secure=${c.secure}`);
+        }
+        if (playwrightCookies.length > 5) {
+          console.error(`  ... and ${playwrightCookies.length - 5} more`);
+        }
+        throw new Error(
+          `Failed to set TikTok cookies: ${cookieErr instanceof Error ? cookieErr.message : String(cookieErr)}. ` +
+          `This usually means the cookie export format is invalid. Use Cookie-Editor extension in JSON format.`
+        );
+      }
     } else {
       console.log("TikTok: no cookies provided, running without authentication");
     }
