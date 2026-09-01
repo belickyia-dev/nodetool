@@ -471,16 +471,8 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
 
     const results: AnalyzedPost[] = [];
 
-    // Import Playwright and Stealth
+    // Import Playwright
     const { chromium } = await import("playwright");
-    let Stealth: any;
-    try {
-      // @ts-ignore - playwright-stealth has no type declarations
-      const stealthModule = await import("playwright-stealth");
-      Stealth = stealthModule.Stealth;
-    } catch {
-      console.log("playwright-stealth not available, using basic mode");
-    }
 
     // Launch browser with anti-detection settings
     const browser = await chromium.launch({
@@ -489,7 +481,9 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
         "--disable-blink-features=AutomationControlled",
         "--no-sandbox",
         "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage"
+        "--disable-dev-shm-usage",
+        "--disable-web-security",
+        "--disable-features=IsolateOrigins,site-per-process"
       ]
     });
 
@@ -498,7 +492,18 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
       userAgent:
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
       locale: "en-US",
-      timezoneId: "America/New_York"
+      timezoneId: "America/New_York",
+      // Extra anti-detection
+      javaScriptEnabled: true,
+      hasTouch: false,
+      isMobile: false,
+      deviceScaleFactor: 1,
+      extraHTTPHeaders: {
+        "Accept-Language": "en-US,en;q=0.9",
+        "sec-ch-ua": '"Chromium";v="131", "Not_A Brand";v="24"',
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": '"Windows"'
+      }
     });
 
     // Set cookies if provided (optional - works without them too)
@@ -509,11 +514,12 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
 
     const page = await context.newPage();
 
-    // Apply stealth if available
-    if (Stealth) {
-      const stealth = new Stealth();
-      await stealth.apply_stealth_async(page);
-    }
+    // Hide webdriver flag
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "webdriver", { get: () => undefined });
+      // @ts-ignore
+      window.chrome = { runtime: {} };
+    });
 
     try {
       for (const hashtag of hashtags) {
