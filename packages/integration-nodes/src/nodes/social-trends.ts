@@ -312,10 +312,11 @@ export class InstagramTrendAnalyzerNode extends BaseNode {
             method: "POST",
             headers: {
               "User-Agent":
-                "Instagram 275.0.0.27.98 Android (33/13; 420dpi; 1080x2400; samsung; SM-G991B; o1s; exynos2100)",
+                "Instagram 358.0.0.46.92 Android (34/14; 420dpi; 1080x2400; samsung; SM-S918B; dm3q; qcom)",
               "Content-Type": "application/x-www-form-urlencoded",
               Cookie: cookieHeader(cookieMap),
-              "X-CSRFToken": cookieMap.get("csrftoken") ?? ""
+              "X-CSRFToken": cookieMap.get("csrftoken") ?? "",
+              "X-IG-App-ID": "936619743392459"
             },
             body: `tab=recent&page=0`,
             // @ts-expect-error undici dispatcher option
