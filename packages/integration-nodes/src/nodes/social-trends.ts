@@ -209,7 +209,7 @@ export class InstagramTrendAnalyzerNode extends BaseNode {
   static readonly inputFields = ["cookies", "hashtags"];
 
   @prop({
-    type: "dict[str, any]",
+    type: "json",
     default: null,
     title: "Cookies",
     description:
@@ -365,7 +365,7 @@ export class TikTokTrendAnalyzerNode extends BaseNode {
   static readonly inputFields = ["hashtags"];
 
   @prop({
-    type: "dict[str, any]",
+    type: "json",
     default: null,
     title: "Cookies",
     description:
