@@ -249,25 +249,27 @@ and bundles `nodetool.mcpb` as an extra resource (`electron-builder.json`).
 (falling back to reveal-in-folder when no handler is registered). The button is
 desktop-only — it's hidden in the browser/remote UI.
 
-### MCP for Remote Server (via SSH tunnel)
+### MCP для продового сервера (Production)
 
-To connect Claude Code to a NodeTool server running on a remote host (e.g., PI server at `62.181.50.59`), use an SSH tunnel to avoid exposing the MCP endpoint publicly.
+Подключение Claude Code/Desktop к NodeTool на продовом сервере через SSH туннель.
 
-**Setup:**
+**Зачем:** MCP даёт Claude доступ к ~86 инструментам NodeTool — генерация изображений/видео, работа с workflows, браузер, поиск и т.д.
 
-1. **Create SSH tunnel** (forwards local port to remote server):
-   ```bash
-   ssh -L 7777:localhost:7777 pi -N -f
-   ```
+**Быстрый старт:**
 
-2. **Install MCP pointing to localhost**:
-   ```bash
-   npm run dev:nodetool -- mcp install --url "http://127.0.0.1:7777/mcp" --claude
-   ```
+```bash
+# 1. Создать SSH туннель (в отдельном терминале или фоном)
+ssh -L 7777:localhost:7777 pi -N -f
 
-3. **Restart Claude Code** to pick up the new MCP config.
+# 2. Установить MCP конфиг для Claude Code
+npm run dev:nodetool -- mcp install --url "http://127.0.0.1:7777/mcp" --claude
 
-**For persistent tunnel**, add to `~/.ssh/config`:
+# 3. Перезапустить Claude Code
+```
+
+**Persistent туннель** (автоматически при `ssh pi`):
+
+Добавить в `~/.ssh/config`:
 ```
 Host pi
   HostName 62.181.50.59
@@ -275,47 +277,97 @@ Host pi
   LocalForward 7777 localhost:7777
 ```
 
-Now any `ssh pi` connection automatically forwards port 7777.
+**Проверка подключения:**
+
+```bash
+# Туннель активен?
+curl -s http://127.0.0.1:7777/api/health
+# Ожидаемый ответ: {"status":"ok"}
+
+# MCP endpoint доступен?
+curl -s http://127.0.0.1:7777/mcp
+# Должен вернуть JSON с capabilities
+```
+
+**Доступные MCP инструменты** (~86):
+
+| Категория | Инструменты |
+|-----------|-------------|
+| Workflows | `list_workflows`, `get_workflow`, `create_workflow`, `run_workflow`, `validate_workflow`, `debug_workflow` |
+| Nodes | `list_nodes`, `search_nodes`, `get_node_info`, `run_node` |
+| Assets | `list_assets`, `get_asset`, `save_asset` |
+| Генерация | `generate_image`, `generate_video`, `generate_speech` |
+| Web | `web_search`, `browser`, `take_screenshot` |
+| Planning | `plan_workflow_graph` |
+
+**Troubleshooting:**
+
+```bash
+# Туннель упал — пересоздать
+ssh -L 7777:localhost:7777 pi -N -f
+
+# Сервер не отвечает — проверить PM2
+ssh pi "pm2 status"
+ssh pi "pm2 restart nodetool"
+
+# Claude не видит MCP — проверить конфиг
+cat ~/.claude/claude_desktop_config.json  # для Claude Desktop
+cat ~/.claude.json                         # для Claude Code
+```
 
 ### Deploying to PI Server
 
-The PI server runs NodeTool from source via PM2 (not Docker). Deployment workflow:
+PI сервер запускает NodeTool из исходников через PM2. Деплой — ручной перенос файлов, без CI/CD.
+
+**Workflow:**
 
 ```bash
-# 1. Push changes to main
+# 1. Закоммитить и запушить изменения в main
 git push origin main
 
-# 2. Pull and rebuild on PI
+# 2. Подключиться к серверу и обновить код
 ssh pi "cd /opt/apps/nodetool && git pull"
+
+# 3. Пересобрать пакеты (обязательно после изменений в packages/)
 ssh pi "export PATH=\"\$HOME/.local/share/fnm/node-versions/v22.22.1/installation/bin:\$PATH\" && cd /opt/apps/nodetool && npm run build:packages"
 
-# 3. Restart the server via PM2
+# 4. Перезапустить сервер
 ssh pi "export PATH=\"\$HOME/.local/share/fnm/node-versions/v22.22.1/installation/bin:\$PATH\" && cd /opt/apps/nodetool && pm2 restart nodetool"
-
-# 4. Verify
-ssh pi "curl -s http://localhost:7777/api/health"
 ```
 
-**One-liner deploy:**
+**One-liner деплой:**
 ```bash
 ssh pi "cd /opt/apps/nodetool && git pull && export PATH=\"\$HOME/.local/share/fnm/node-versions/v22.22.1/installation/bin:\$PATH\" && npm run build:packages && pm2 restart nodetool"
 ```
 
-**Logs:**
+**Проверка после деплоя (ОБЯЗАТЕЛЬНО):**
+
 ```bash
-ssh pi "pm2 logs nodetool --lines 50"
-ssh pi "tail -f /opt/apps/nodetool/logs/out.log"
+# 1. Проверить что сервер запустился
+ssh pi "curl -s http://localhost:7777/api/health"
+# Ожидаемый ответ: {"status":"ok"}
+
+# 2. Проверить PM2 статус
+ssh pi "pm2 status"
+# nodetool должен быть online
+
+# 3. Проверить логи на ошибки
+ssh pi "pm2 logs nodetool --lines 30"
+
+# 4. Проверить доступность API через внешний URL
+curl -s https://api.nodetool.ai/api/health
+
+# 5. При проблемах — полные логи
+ssh pi "tail -100 /opt/apps/nodetool/logs/out.log"
+ssh pi "tail -100 /opt/apps/nodetool/logs/error.log"
 ```
 
-**Environment variables:** Stored in `/opt/apps/nodetool/.env` (API keys, secrets).
+**Откат при проблемах:**
+```bash
+ssh pi "cd /opt/apps/nodetool && git checkout HEAD~1 && npm run build:packages && pm2 restart nodetool"
+```
 
-**Available MCP tools** (~86 total):
-- `list_workflows`, `get_workflow`, `create_workflow`, `run_workflow`
-- `list_nodes`, `search_nodes`, `get_node_info`, `run_node`
-- `list_assets`, `get_asset`, `save_asset`
-- `generate_image`, `generate_video`, `generate_speech`
-- `web_search`, `browser`, `take_screenshot`
-- `plan_workflow_graph`, `validate_workflow`, `debug_workflow`
+**Environment variables:** `/opt/apps/nodetool/.env` (API ключи, секреты).
 
 ### nodetool run (DSL Workflows)
 
