@@ -56,7 +56,8 @@ export const tableStyles = (theme: Theme) =>
       minHeight: "15px",
       minWidth: "20px",
       fontSize: theme.fontSizeSmall,
-      backgroundColor: theme.vars.palette.grey[900]
+      backgroundColor: theme.vars.palette.grey[900],
+      color: theme.vars.palette.text.primary
     },
     ".tabulator-row-even": {
       backgroundColor: theme.vars.palette.grey[800]
@@ -95,7 +96,8 @@ export const tableStyles = (theme: Theme) =>
       },
 
     ".tabulator-row .tabulator-cell": {
-      borderColor: theme.vars.palette.grey[900]
+      borderColor: theme.vars.palette.grey[900],
+      color: theme.vars.palette.text.primary
     },
     ".tabulator-row .tabulator-cell.tabulator-frozen": {
       paddingLeft: `${getSpacingPx(SPACING.micro)} !important`,
