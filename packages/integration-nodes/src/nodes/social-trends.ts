@@ -344,11 +344,20 @@ export class InstagramTrendAnalyzerNode extends BaseNode {
   })
   declare limit: any;
 
+  @prop({
+    type: "int",
+    default: 3,
+    title: "Pages",
+    description: "Number of pages to fetch per hashtag (more pages = more posts but slower)"
+  })
+  declare pages: any;
+
   async process(): Promise<Record<string, unknown>> {
     const cookieMap = parseCookies(this.cookies);
     const hashtags = (this.hashtags as string[]) ?? [];
     const maxDays = Number(this.days ?? 3);
     const limit = Number(this.limit ?? 50);
+    const maxPages = Number(this.pages ?? 3);
 
     // Debug: log parsed cookie names
     const cookieNames = Array.from(cookieMap.keys());
@@ -372,76 +381,114 @@ export class InstagramTrendAnalyzerNode extends BaseNode {
 
     for (const hashtag of hashtags) {
       const tag = hashtag.replace(/^#/, "").toLowerCase();
+      let nextMaxId: string | undefined;
+      let pageNum = 0;
+      const seenIds = new Set<string>();
 
-      try {
-        const response = await httpsPost(
-          `https://i.instagram.com/api/v1/tags/${encodeURIComponent(tag)}/sections/`,
-          {
-            "User-Agent":
-              "Instagram 358.0.0.46.92 Android (34/14; 420dpi; 1080x2400; samsung; SM-S918B; dm3q; qcom)",
-            "Content-Type": "application/x-www-form-urlencoded",
-            Cookie: cookieHeader(cookieMap),
-            "X-CSRFToken": cookieMap.get("csrftoken") ?? "",
-            "X-IG-App-ID": "936619743392459"
-          },
-          "tab=recent&page=0"
-        );
+      console.log(`Instagram: fetching up to ${maxPages} pages for #${tag}`);
 
-        if (response.status !== 200) {
-          console.error(
-            `Instagram API error for #${tag}: ${response.status}`
-          );
-          continue;
-        }
-
-        const data = JSON.parse(response.data) as InstagramHashtagResponse;
-        const sections = data.sections ?? [];
-
-        for (const section of sections) {
-          const medias = section.layout_content?.medias ?? [];
-
-          for (const item of medias) {
-            const media = item.media;
-            if (!media) continue;
-
-            const takenAt = media.taken_at ?? 0;
-            const age = now - takenAt;
-            if (age > maxAgeSeconds) continue;
-
-            const hoursAgo = age / 3600;
-            const views =
-              media.play_count ?? media.view_count ?? (media.like_count ?? 0) * 10;
-            const likes = media.like_count ?? 0;
-            const comments = media.comment_count ?? 0;
-
-            const { engagementRate, velocity, viralityScore } = calculateMetrics(
-              views,
-              likes,
-              comments,
-              hoursAgo
-            );
-
-            results.push({
-              platform: "instagram",
-              url: `https://instagram.com/p/${media.code}`,
-              author: media.user?.username ?? "unknown",
-              description: (media.caption?.text ?? "").slice(0, 200),
-              views,
-              likes,
-              comments,
-              shares: 0,
-              hours_ago: Math.round(hoursAgo * 10) / 10,
-              engagement_rate: engagementRate,
-              velocity,
-              virality_score: viralityScore,
-              is_video: media.media_type === 2
-            });
-
-            if (results.length >= limit * hashtags.length) break;
+      while (pageNum < maxPages) {
+        try {
+          // Build request body with pagination
+          const bodyParams = new URLSearchParams();
+          bodyParams.set("tab", "recent");
+          bodyParams.set("page", String(pageNum));
+          if (nextMaxId) {
+            bodyParams.set("max_id", nextMaxId);
           }
+
+          const response = await httpsPost(
+            `https://i.instagram.com/api/v1/tags/${encodeURIComponent(tag)}/sections/`,
+            {
+              "User-Agent":
+                "Instagram 358.0.0.46.92 Android (34/14; 420dpi; 1080x2400; samsung; SM-S918B; dm3q; qcom)",
+              "Content-Type": "application/x-www-form-urlencoded",
+              Cookie: cookieHeader(cookieMap),
+              "X-CSRFToken": cookieMap.get("csrftoken") ?? "",
+              "X-IG-App-ID": "936619743392459"
+            },
+            bodyParams.toString()
+          );
+
+          if (response.status !== 200) {
+            console.error(
+              `Instagram API error for #${tag} page ${pageNum}: ${response.status}`
+            );
+            break;
+          }
+
+          const data = JSON.parse(response.data) as InstagramHashtagResponse;
+          const sections = data.sections ?? [];
+          let postsOnPage = 0;
+
+          for (const section of sections) {
+            const medias = section.layout_content?.medias ?? [];
+
+            for (const item of medias) {
+              const media = item.media;
+              if (!media) continue;
+
+              // Skip duplicates
+              const mediaId = media.pk ?? media.id ?? media.code;
+              if (mediaId && seenIds.has(mediaId)) continue;
+              if (mediaId) seenIds.add(mediaId);
+
+              const takenAt = media.taken_at ?? 0;
+              const age = now - takenAt;
+              if (age > maxAgeSeconds) continue;
+
+              const hoursAgo = age / 3600;
+              const views =
+                media.play_count ?? media.view_count ?? (media.like_count ?? 0) * 10;
+              const likes = media.like_count ?? 0;
+              const comments = media.comment_count ?? 0;
+
+              const { engagementRate, velocity, viralityScore } = calculateMetrics(
+                views,
+                likes,
+                comments,
+                hoursAgo
+              );
+
+              results.push({
+                platform: "instagram",
+                url: `https://instagram.com/p/${media.code}`,
+                author: media.user?.username ?? "unknown",
+                description: (media.caption?.text ?? "").slice(0, 200),
+                views,
+                likes,
+                comments,
+                shares: 0,
+                hours_ago: Math.round(hoursAgo * 10) / 10,
+                engagement_rate: engagementRate,
+                velocity,
+                virality_score: viralityScore,
+                is_video: media.media_type === 2
+              });
+
+              postsOnPage++;
+            }
+          }
+
+          console.log(`Instagram #${tag} page ${pageNum}: ${postsOnPage} posts (total: ${results.length})`);
+
+          // Check for next page
+          nextMaxId = data.next_max_id;
+          if (!nextMaxId) {
+            console.log(`Instagram #${tag}: no more pages after page ${pageNum}`);
+            break;
+          }
+
+          pageNum++;
+
+          // Rate limiting delay between pages
+          if (pageNum < maxPages) {
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          }
+        } catch (err) {
+          console.error(`Error fetching #${tag} page ${pageNum}:`, err);
+          break;
         }
-      } catch (err) {
-        console.error(`Error fetching #${tag}:`, err);
       }
     }
 
