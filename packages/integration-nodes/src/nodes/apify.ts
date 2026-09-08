@@ -9,7 +9,10 @@ const MAX_RESULTS_PER_PAGE = 100;
 
 const APIFY_API_BASE = "https://api.apify.com/v2";
 
-// Force IPv4 globally for this module - fixes network issues on some servers
+// Page size for paginated fetching - small to avoid network timeouts
+const DATASET_PAGE_SIZE = 5;
+
+// Force IPv4 and enable compression for this module
 setGlobalDispatcher(
   new Agent({
     connect: {
@@ -33,14 +36,14 @@ interface ApifyRun {
 }
 
 /**
- * Fetch JSON with retry logic using undici with forced IPv4
+ * Fetch a single page of JSON with retry logic
  */
-async function fetchJsonWithRetry<T>(
+async function fetchPageWithRetry<T>(
   url: string,
   headers: Record<string, string>,
   maxRetries = 3,
-  timeoutMs = 60000
-): Promise<T> {
+  timeoutMs = 30000
+): Promise<{ data: T; total: number }> {
   let lastError: Error | undefined;
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
@@ -48,9 +51,11 @@ async function fetchJsonWithRetry<T>(
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
-      console.log(`Apify: fetch attempt ${attempt + 1}/${maxRetries}...`);
       const response = await undiciFetch(url, {
-        headers,
+        headers: {
+          ...headers,
+          "Accept-Encoding": "gzip, deflate" // Request compression
+        },
         signal: controller.signal
       });
       clearTimeout(timeoutId);
@@ -60,9 +65,10 @@ async function fetchJsonWithRetry<T>(
         throw new Error(`HTTP ${response.status}: ${text.slice(0, 200)}`);
       }
 
+      // Get total count from Apify pagination header
+      const total = parseInt(response.headers.get("x-apify-pagination-total") ?? "0", 10);
       const data = (await response.json()) as T;
-      console.log(`Apify: fetch successful`);
-      return data;
+      return { data, total };
     } catch (err) {
       clearTimeout(timeoutId);
       lastError = err instanceof Error ? err : new Error(String(err));
@@ -76,17 +82,52 @@ async function fetchJsonWithRetry<T>(
         lastError.name === "AbortError";
 
       if (!isRetryable || attempt >= maxRetries - 1) {
-        console.error(`Apify: fetch failed after ${attempt + 1} attempts:`, lastError.message);
         throw lastError;
       }
 
-      const delay = 2000 * Math.pow(2, attempt);
-      console.log(`Apify: attempt ${attempt + 1} failed (${lastError.message}), retrying in ${delay}ms...`);
+      const delay = 1000 * Math.pow(2, attempt);
+      console.log(`Apify: page fetch attempt ${attempt + 1} failed, retrying in ${delay}ms...`);
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
 
-  throw lastError ?? new Error("fetchJsonWithRetry: unknown error");
+  throw lastError ?? new Error("fetchPageWithRetry: unknown error");
+}
+
+/**
+ * Fetch all dataset items using pagination to handle slow networks
+ */
+async function fetchDatasetPaginated(
+  datasetId: string,
+  apiKey: string,
+  maxItems: number
+): Promise<Record<string, unknown>[]> {
+  const allItems: Record<string, unknown>[] = [];
+  let offset = 0;
+  let total = Infinity;
+  const headers = { Authorization: `Bearer ${apiKey}` };
+
+  console.log(`Apify: fetching dataset ${datasetId} with pagination...`);
+
+  while (offset < total && allItems.length < maxItems) {
+    const limit = Math.min(DATASET_PAGE_SIZE, maxItems - allItems.length);
+    const url = `${APIFY_API_BASE}/datasets/${datasetId}/items?format=json&limit=${limit}&offset=${offset}`;
+
+    const { data, total: pageTotal } = await fetchPageWithRetry<Record<string, unknown>[]>(
+      url,
+      headers
+    );
+
+    total = pageTotal;
+    allItems.push(...data);
+    offset += data.length;
+
+    console.log(`Apify: fetched ${allItems.length}/${Math.min(total, maxItems)} items`);
+
+    if (data.length === 0) break; // No more items
+  }
+
+  return allItems;
 }
 
 async function runActor(
@@ -150,16 +191,10 @@ async function runActor(
     throw new Error(`Apify run ${runId} ended with status: ${status}`);
   }
 
-  // Fetch results from dataset with retry logic (limit to 30 items for faster response)
-  const datasetUrl = `${APIFY_API_BASE}/datasets/${datasetId}/items?format=json&limit=30`;
-  console.log(`Apify: fetching results from dataset ${datasetId}...`);
-
-  const items = await fetchJsonWithRetry<Record<string, unknown>[]>(
-    datasetUrl,
-    { Authorization: `Bearer ${apiKey}` }
-  );
-  console.log(`Apify: got ${items.length} results`);
-  return items;
+  // Fetch results using pagination to handle slow networks reliably
+  // Small page size (5 items) ensures each request completes quickly
+  const maxItems = (input.resultsLimit ?? input.resultsPerPage ?? 30) as number;
+  return fetchDatasetPaginated(datasetId, apiKey, Math.min(maxItems, 100));
 }
 
 export class ApifyWebScraperNode extends BaseNode {
