@@ -1043,7 +1043,10 @@ function buildExamplesFromDir(
       // Point thumbnail_url to the served JPG when the file exists in
       // assets. withCacheBuster() appends ?v=<md5-8> so the browser cache
       // invalidates whenever the JPG is regenerated.
-      const jpgFile = `${name}.jpg`;
+      // Use the filename (without .json) for thumbnail lookup since JPG files
+      // use the original English filenames, not the translated name field.
+      const fileBaseName = file.replace(/\.json$/i, "");
+      const jpgFile = `${fileBaseName}.jpg`;
       const jpgPath = nodePath.join(assetsDir, jpgFile);
       const thumbnailUrl = existsSync(jpgPath)
         ? withCacheBuster(

@@ -83,21 +83,35 @@ async function runActor(
     throw new Error(`Apify run ${runId} ended with status: ${status}`);
   }
 
-  // Fetch results from dataset
-  const datasetUrl = `${APIFY_API_BASE}/datasets/${datasetId}/items?format=json`;
+  // Fetch results from dataset with timeout (limit to 100 items to avoid large responses)
+  const datasetUrl = `${APIFY_API_BASE}/datasets/${datasetId}/items?format=json&limit=100`;
   console.log(`Apify: fetching results from dataset ${datasetId}...`);
-  const datasetResponse = await fetch(datasetUrl, {
-    headers: { Authorization: `Bearer ${apiKey}` }
-  });
 
-  if (!datasetResponse.ok) {
-    const text = await datasetResponse.text();
-    throw new Error(`Apify dataset error (${datasetResponse.status}): ${text}`);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
+
+  try {
+    const datasetResponse = await fetch(datasetUrl, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+
+    if (!datasetResponse.ok) {
+      const text = await datasetResponse.text();
+      throw new Error(`Apify dataset error (${datasetResponse.status}): ${text}`);
+    }
+
+    const items = (await datasetResponse.json()) as Record<string, unknown>[];
+    console.log(`Apify: got ${items.length} results`);
+    return items;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err instanceof Error && err.name === "AbortError") {
+      throw new Error(`Apify: timeout fetching dataset ${datasetId}`);
+    }
+    throw err;
   }
-
-  const items = (await datasetResponse.json()) as Record<string, unknown>[];
-  console.log(`Apify: got ${items.length} results`);
-  return items;
 }
 
 export class ApifyWebScraperNode extends BaseNode {
