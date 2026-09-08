@@ -711,6 +711,107 @@ export class ApifyLinkedInScraperNode extends BaseNode {
   }
 }
 
+export class ApifyTikTokScraperNode extends BaseNode {
+  static readonly nodeType = "apify.scraping.ApifyTikTokScraper";
+  static readonly title = "Apify TikTok Scraper";
+  static readonly description =
+    "Scrape TikTok videos, profiles, hashtags, and trends — views, likes, comments, and video metadata. No login required, bypasses anti-bot protection.\n    apify, tiktok, social, video, scraping, trends, hashtags";
+  static readonly metadataOutputTypes = {
+    output: "list[dict[str, any]]"
+  };
+  static readonly requiredSettings = ["APIFY_API_TOKEN"];
+  static readonly inlineFields = ["hashtags"];
+  static readonly inputFields = ["hashtags", "profiles", "video_urls"];
+
+  @prop({
+    type: "list[str]",
+    default: null,
+    title: "Hashtags",
+    description: "List of hashtags to scrape (without #)",
+    required: false
+  })
+  declare hashtags: any;
+
+  @prop({
+    type: "list[str]",
+    default: null,
+    title: "Profiles",
+    description: "List of TikTok usernames to scrape",
+    required: false
+  })
+  declare profiles: any;
+
+  @prop({
+    type: "list[str]",
+    default: null,
+    title: "Video Urls",
+    description: "List of specific TikTok video URLs to scrape",
+    required: false
+  })
+  declare video_urls: any;
+
+  @prop({
+    type: "int",
+    default: 30,
+    title: "Results Per Page",
+    description: "Number of videos to scrape per hashtag/profile",
+    min: 1,
+    max: 100
+  })
+  declare results_per_page: any;
+
+  @prop({
+    type: "int",
+    default: 600,
+    title: "Wait For Finish",
+    description: "Maximum time to wait for scraping to complete (seconds)"
+  })
+  declare wait_for_finish: any;
+
+  async process(): Promise<Record<string, unknown>> {
+    const apiKey = getApifyApiKey(this._secrets);
+    const hashtags = (this.hashtags as string[]) ?? [];
+    const profiles = (this.profiles as string[]) ?? [];
+    const videoUrls = (this.video_urls as string[]) ?? [];
+
+    if (hashtags.length === 0 && profiles.length === 0 && videoUrls.length === 0) {
+      throw new Error("At least one of hashtags, profiles, or video_urls is required");
+    }
+
+    // Build input for the TikTok scraper actor
+    const runInput: Record<string, unknown> = {
+      resultsPerPage: Number(this.results_per_page ?? 30),
+      shouldDownloadVideos: false,
+      shouldDownloadCovers: false,
+      shouldDownloadSubtitles: false,
+      shouldDownloadSlideshowImages: false
+    };
+
+    // Add hashtags
+    if (hashtags.length > 0) {
+      runInput.hashtags = hashtags.map((tag: string) => tag.replace(/^#/, ""));
+    }
+
+    // Add profiles
+    if (profiles.length > 0) {
+      runInput.profiles = profiles.map((profile: string) => profile.replace(/^@/, ""));
+    }
+
+    // Add specific video URLs
+    if (videoUrls.length > 0) {
+      runInput.postURLs = videoUrls;
+    }
+
+    const items = await runActor(
+      apiKey,
+      "clockworks/free-tiktok-scraper",
+      runInput,
+      Number(this.wait_for_finish ?? 600)
+    );
+    return { output: items };
+  }
+}
+
 export const APIFY_NODES = tagAsServer([
   ApifyWebScraperNode,
   ApifyGoogleSearchScraperNode,
@@ -718,5 +819,6 @@ export const APIFY_NODES = tagAsServer([
   ApifyAmazonScraperNode,
   ApifyYouTubeScraperNode,
   ApifyTwitterScraperNode,
-  ApifyLinkedInScraperNode
+  ApifyLinkedInScraperNode,
+  ApifyTikTokScraperNode
 ]);
