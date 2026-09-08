@@ -31,6 +31,7 @@ async function runActor(
   const encodedActorId = actorId.replace("/", "~");
   const url = `${APIFY_API_BASE}/acts/${encodedActorId}/runs?waitForFinish=${waitSecs}`;
 
+  console.log(`Apify: starting actor ${actorId}...`);
   const response = await fetch(url, {
     method: "POST",
     headers: {
@@ -46,16 +47,57 @@ async function runActor(
   }
 
   const run = (await response.json()) as ApifyRun;
+  const runId = run.data?.id;
   const datasetId = run.data?.defaultDatasetId;
-  if (!datasetId) return [];
+  let status = run.data?.status;
 
+  console.log(`Apify: run ${runId} started, status=${status}, datasetId=${datasetId}`);
+
+  if (!datasetId) {
+    throw new Error(`Apify: no dataset ID returned for run ${runId}`);
+  }
+
+  // Poll for completion if not already done
+  const terminalStatuses = ["SUCCEEDED", "FAILED", "ABORTED", "TIMED-OUT"];
+  const pollInterval = 5000; // 5 seconds
+  const maxPolls = Math.ceil((waitSecs * 1000) / pollInterval);
+  let polls = 0;
+
+  while (!terminalStatuses.includes(status ?? "") && polls < maxPolls) {
+    await new Promise(resolve => setTimeout(resolve, pollInterval));
+    polls++;
+
+    const statusUrl = `${APIFY_API_BASE}/actor-runs/${runId}`;
+    const statusResponse = await fetch(statusUrl, {
+      headers: { Authorization: `Bearer ${apiKey}` }
+    });
+
+    if (statusResponse.ok) {
+      const statusData = (await statusResponse.json()) as ApifyRun;
+      status = statusData.data?.status;
+      console.log(`Apify: poll ${polls}/${maxPolls}, status=${status}`);
+    }
+  }
+
+  if (status !== "SUCCEEDED") {
+    throw new Error(`Apify run ${runId} ended with status: ${status}`);
+  }
+
+  // Fetch results from dataset
   const datasetUrl = `${APIFY_API_BASE}/datasets/${datasetId}/items?format=json`;
+  console.log(`Apify: fetching results from dataset ${datasetId}...`);
   const datasetResponse = await fetch(datasetUrl, {
     headers: { Authorization: `Bearer ${apiKey}` }
   });
 
-  if (!datasetResponse.ok) return [];
-  return (await datasetResponse.json()) as Record<string, unknown>[];
+  if (!datasetResponse.ok) {
+    const text = await datasetResponse.text();
+    throw new Error(`Apify dataset error (${datasetResponse.status}): ${text}`);
+  }
+
+  const items = (await datasetResponse.json()) as Record<string, unknown>[];
+  console.log(`Apify: got ${items.length} results`);
+  return items;
 }
 
 export class ApifyWebScraperNode extends BaseNode {
