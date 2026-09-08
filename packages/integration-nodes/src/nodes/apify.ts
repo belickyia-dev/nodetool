@@ -1,6 +1,6 @@
 import { BaseNode, prop } from "@nodetool-ai/node-sdk";
 import { tagAsServer } from "@nodetool-ai/nodes-utils";
-import { spawn } from "node:child_process";
+import { Agent, fetch as undiciFetch, setGlobalDispatcher } from "undici";
 
 const DEFAULT_PAGE_FUNCTION =
   "async function pageFunction(context) { return context.request.loadedUrl; }";
@@ -8,6 +8,15 @@ const MIN_RESULTS_PER_PAGE = 10;
 const MAX_RESULTS_PER_PAGE = 100;
 
 const APIFY_API_BASE = "https://api.apify.com/v2";
+
+// Force IPv4 globally for this module - fixes network issues on some servers
+setGlobalDispatcher(
+  new Agent({
+    connect: {
+      family: 4 // Force IPv4
+    }
+  })
+);
 
 function getApifyApiKey(secrets: Record<string, string>): string {
   const key = secrets.APIFY_API_TOKEN || process.env.APIFY_API_TOKEN;
@@ -24,99 +33,60 @@ interface ApifyRun {
 }
 
 /**
- * Fetch JSON using curl (workaround for Node.js HTTP issues on some networks)
- * Node's https module hangs on HTTP/2 connections where curl works fine
+ * Fetch JSON with retry logic using undici with forced IPv4
  */
-function curlGetJson<T>(
+async function fetchJsonWithRetry<T>(
   url: string,
-  apiKey: string,
-  timeoutSecs = 60
-): Promise<T> {
-  return new Promise((resolve, reject) => {
-    console.log(`Apify: fetching via curl...`);
-    const startTime = Date.now();
-
-    const curl = spawn("curl", [
-      "-4", // Force IPv4
-      "-s", // Silent mode
-      "--max-time",
-      String(timeoutSecs),
-      "-H",
-      `Authorization: Bearer ${apiKey}`,
-      "-H",
-      "Accept: application/json",
-      url
-    ]);
-
-    let stdout = "";
-    let stderr = "";
-
-    curl.stdout.on("data", data => {
-      stdout += data.toString();
-    });
-
-    curl.stderr.on("data", data => {
-      stderr += data.toString();
-    });
-
-    curl.on("close", code => {
-      const elapsed = Date.now() - startTime;
-      if (code === 0) {
-        console.log(`Apify: curl completed in ${elapsed}ms, ${stdout.length} bytes`);
-        try {
-          resolve(JSON.parse(stdout) as T);
-        } catch {
-          reject(new Error(`Invalid JSON from curl: ${stdout.slice(0, 200)}`));
-        }
-      } else {
-        console.error(`Apify: curl failed with code ${code}: ${stderr}`);
-        reject(new Error(`curl failed (code ${code}): ${stderr || "timeout"}`));
-      }
-    });
-
-    curl.on("error", err => {
-      console.error(`Apify: curl spawn error:`, err.message);
-      reject(err);
-    });
-  });
-}
-
-async function fetchDatasetWithRetry(
-  url: string,
-  apiKey: string,
+  headers: Record<string, string>,
   maxRetries = 3,
-  baseDelayMs = 3000
-): Promise<Record<string, unknown>[]> {
+  timeoutMs = 60000
+): Promise<T> {
   let lastError: Error | undefined;
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
     try {
-      console.log(`Apify: dataset fetch attempt ${attempt + 1}/${maxRetries}...`);
-      const items = await curlGetJson<Record<string, unknown>[]>(url, apiKey, 60);
-      return items;
+      console.log(`Apify: fetch attempt ${attempt + 1}/${maxRetries}...`);
+      const response = await undiciFetch(url, {
+        headers,
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`HTTP ${response.status}: ${text.slice(0, 200)}`);
+      }
+
+      const data = (await response.json()) as T;
+      console.log(`Apify: fetch successful`);
+      return data;
     } catch (err) {
+      clearTimeout(timeoutId);
       lastError = err instanceof Error ? err : new Error(String(err));
       const errMsg = lastError.message.toLowerCase();
       const isRetryable =
         errMsg.includes("timeout") ||
         errMsg.includes("etimedout") ||
         errMsg.includes("econnreset") ||
-        errMsg.includes("econnrefused") ||
-        errMsg.includes("socket hang up") ||
         errMsg.includes("terminated") ||
-        errMsg.includes("curl failed");
+        errMsg.includes("abort") ||
+        lastError.name === "AbortError";
 
       if (!isRetryable || attempt >= maxRetries - 1) {
+        console.error(`Apify: fetch failed after ${attempt + 1} attempts:`, lastError.message);
         throw lastError;
       }
 
-      const delay = baseDelayMs * Math.pow(2, attempt);
+      const delay = 2000 * Math.pow(2, attempt);
       console.log(`Apify: attempt ${attempt + 1} failed (${lastError.message}), retrying in ${delay}ms...`);
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
 
-  throw lastError ?? new Error("fetchDatasetWithRetry: unknown error");
+  throw lastError ?? new Error("fetchJsonWithRetry: unknown error");
 }
 
 async function runActor(
@@ -180,21 +150,16 @@ async function runActor(
     throw new Error(`Apify run ${runId} ended with status: ${status}`);
   }
 
-  // Fetch results from dataset using native https (limit to 30 items for faster response)
+  // Fetch results from dataset with retry logic (limit to 30 items for faster response)
   const datasetUrl = `${APIFY_API_BASE}/datasets/${datasetId}/items?format=json&limit=30`;
   console.log(`Apify: fetching results from dataset ${datasetId}...`);
 
-  try {
-    const items = await fetchDatasetWithRetry(datasetUrl, apiKey);
-    console.log(`Apify: got ${items.length} results`);
-    return items;
-  } catch (err) {
-    console.error(`Apify: fetch failed after retries`, err);
-    if (err instanceof Error) {
-      console.error(`Apify: error name=${err.name}, message=${err.message}`);
-    }
-    throw err;
-  }
+  const items = await fetchJsonWithRetry<Record<string, unknown>[]>(
+    datasetUrl,
+    { Authorization: `Bearer ${apiKey}` }
+  );
+  console.log(`Apify: got ${items.length} results`);
+  return items;
 }
 
 export class ApifyWebScraperNode extends BaseNode {
