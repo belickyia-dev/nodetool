@@ -107,8 +107,12 @@ async function runActor(
     return items;
   } catch (err) {
     clearTimeout(timeoutId);
-    if (err instanceof Error && err.name === "AbortError") {
-      throw new Error(`Apify: timeout fetching dataset ${datasetId}`);
+    console.error(`Apify: fetch error`, err);
+    if (err instanceof Error) {
+      console.error(`Apify: error name=${err.name}, message=${err.message}, stack=${err.stack}`);
+      if (err.name === "AbortError") {
+        throw new Error(`Apify: timeout fetching dataset ${datasetId}`);
+      }
     }
     throw err;
   }
