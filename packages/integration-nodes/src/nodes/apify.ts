@@ -1,6 +1,6 @@
 import { BaseNode, prop } from "@nodetool-ai/node-sdk";
 import { tagAsServer } from "@nodetool-ai/nodes-utils";
-import https from "node:https";
+import { spawn } from "node:child_process";
 
 const DEFAULT_PAGE_FUNCTION =
   "async function pageFunction(context) { return context.request.loadedUrl; }";
@@ -24,85 +24,60 @@ interface ApifyRun {
 }
 
 /**
- * Fetch JSON using native https module with forced IPv4 (more reliable on some networks)
+ * Fetch JSON using curl (workaround for Node.js HTTP issues on some networks)
+ * Node's https module hangs on HTTP/2 connections where curl works fine
  */
-function httpsGetJson<T>(
+function curlGetJson<T>(
   url: string,
-  headers: Record<string, string>,
-  timeoutMs = 60000
+  apiKey: string,
+  timeoutSecs = 60
 ): Promise<T> {
   return new Promise((resolve, reject) => {
-    const parsedUrl = new URL(url);
-    console.log(`Apify: connecting to ${parsedUrl.hostname} (IPv4 only)...`);
+    console.log(`Apify: fetching via curl...`);
     const startTime = Date.now();
 
-    const req = https.request(
-      {
-        hostname: parsedUrl.hostname,
-        port: 443,
-        path: parsedUrl.pathname + parsedUrl.search,
-        method: "GET",
-        family: 4, // Force IPv4 - prevents IPv6 timeouts on misconfigured networks
-        headers: {
-          ...headers,
-          Accept: "application/json",
-          "User-Agent": "NodeTool/1.0"
-        },
-        timeout: timeoutMs,
-        // Keep connection alive and prevent premature closes
-        agent: new https.Agent({
-          keepAlive: false,
-          timeout: timeoutMs
-        })
-      },
-      res => {
-        console.log(`Apify: connected in ${Date.now() - startTime}ms, status=${res.statusCode}`);
-        let data = "";
-        let chunks = 0;
-        res.setEncoding("utf8");
-        res.on("data", chunk => {
-          chunks++;
-          data += chunk;
-          if (chunks % 10 === 0) {
-            console.log(`Apify: received ${chunks} chunks, ${data.length} bytes...`);
-          }
-        });
-        res.on("end", () => {
-          console.log(`Apify: transfer complete in ${Date.now() - startTime}ms, ${data.length} bytes`);
-          if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
-            try {
-              resolve(JSON.parse(data) as T);
-            } catch (e) {
-              reject(new Error(`Invalid JSON: ${data.slice(0, 200)}`));
-            }
-          } else {
-            reject(new Error(`HTTP ${res.statusCode}: ${data.slice(0, 500)}`));
-          }
-        });
-      }
-    );
+    const curl = spawn("curl", [
+      "-4", // Force IPv4
+      "-s", // Silent mode
+      "--max-time",
+      String(timeoutSecs),
+      "-H",
+      `Authorization: Bearer ${apiKey}`,
+      "-H",
+      "Accept: application/json",
+      url
+    ]);
 
-    req.on("error", err => {
-      console.error(`Apify: request error after ${Date.now() - startTime}ms:`, err.message);
+    let stdout = "";
+    let stderr = "";
+
+    curl.stdout.on("data", data => {
+      stdout += data.toString();
+    });
+
+    curl.stderr.on("data", data => {
+      stderr += data.toString();
+    });
+
+    curl.on("close", code => {
+      const elapsed = Date.now() - startTime;
+      if (code === 0) {
+        console.log(`Apify: curl completed in ${elapsed}ms, ${stdout.length} bytes`);
+        try {
+          resolve(JSON.parse(stdout) as T);
+        } catch {
+          reject(new Error(`Invalid JSON from curl: ${stdout.slice(0, 200)}`));
+        }
+      } else {
+        console.error(`Apify: curl failed with code ${code}: ${stderr}`);
+        reject(new Error(`curl failed (code ${code}): ${stderr || "timeout"}`));
+      }
+    });
+
+    curl.on("error", err => {
+      console.error(`Apify: curl spawn error:`, err.message);
       reject(err);
     });
-
-    req.on("timeout", () => {
-      console.error(`Apify: request timeout after ${Date.now() - startTime}ms`);
-      req.destroy();
-      reject(new Error(`Request timeout after ${timeoutMs}ms`));
-    });
-
-    req.on("socket", socket => {
-      socket.setTimeout(timeoutMs);
-      socket.on("timeout", () => {
-        console.error(`Apify: socket timeout after ${Date.now() - startTime}ms`);
-        req.destroy();
-        reject(new Error(`Socket timeout after ${timeoutMs}ms`));
-      });
-    });
-
-    req.end();
   });
 }
 
@@ -117,11 +92,7 @@ async function fetchDatasetWithRetry(
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       console.log(`Apify: dataset fetch attempt ${attempt + 1}/${maxRetries}...`);
-      const items = await httpsGetJson<Record<string, unknown>[]>(
-        url,
-        { Authorization: `Bearer ${apiKey}` },
-        120000
-      );
+      const items = await curlGetJson<Record<string, unknown>[]>(url, apiKey, 60);
       return items;
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err));
@@ -132,7 +103,8 @@ async function fetchDatasetWithRetry(
         errMsg.includes("econnreset") ||
         errMsg.includes("econnrefused") ||
         errMsg.includes("socket hang up") ||
-        errMsg.includes("terminated");
+        errMsg.includes("terminated") ||
+        errMsg.includes("curl failed");
 
       if (!isRetryable || attempt >= maxRetries - 1) {
         throw lastError;
