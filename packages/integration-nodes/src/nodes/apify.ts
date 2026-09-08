@@ -24,34 +24,51 @@ interface ApifyRun {
 }
 
 /**
- * Fetch JSON using native https module (more reliable than undici for some networks)
+ * Fetch JSON using native https module with forced IPv4 (more reliable on some networks)
  */
 function httpsGetJson<T>(
   url: string,
   headers: Record<string, string>,
-  timeoutMs = 120000
+  timeoutMs = 60000
 ): Promise<T> {
   return new Promise((resolve, reject) => {
     const parsedUrl = new URL(url);
+    console.log(`Apify: connecting to ${parsedUrl.hostname} (IPv4 only)...`);
+    const startTime = Date.now();
+
     const req = https.request(
       {
         hostname: parsedUrl.hostname,
         port: 443,
         path: parsedUrl.pathname + parsedUrl.search,
         method: "GET",
+        family: 4, // Force IPv4 - prevents IPv6 timeouts on misconfigured networks
         headers: {
           ...headers,
-          Accept: "application/json"
+          Accept: "application/json",
+          "User-Agent": "NodeTool/1.0"
         },
-        timeout: timeoutMs
+        timeout: timeoutMs,
+        // Keep connection alive and prevent premature closes
+        agent: new https.Agent({
+          keepAlive: false,
+          timeout: timeoutMs
+        })
       },
       res => {
+        console.log(`Apify: connected in ${Date.now() - startTime}ms, status=${res.statusCode}`);
         let data = "";
+        let chunks = 0;
         res.setEncoding("utf8");
         res.on("data", chunk => {
+          chunks++;
           data += chunk;
+          if (chunks % 10 === 0) {
+            console.log(`Apify: received ${chunks} chunks, ${data.length} bytes...`);
+          }
         });
         res.on("end", () => {
+          console.log(`Apify: transfer complete in ${Date.now() - startTime}ms, ${data.length} bytes`);
           if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
             try {
               resolve(JSON.parse(data) as T);
@@ -66,12 +83,23 @@ function httpsGetJson<T>(
     );
 
     req.on("error", err => {
+      console.error(`Apify: request error after ${Date.now() - startTime}ms:`, err.message);
       reject(err);
     });
 
     req.on("timeout", () => {
+      console.error(`Apify: request timeout after ${Date.now() - startTime}ms`);
       req.destroy();
       reject(new Error(`Request timeout after ${timeoutMs}ms`));
+    });
+
+    req.on("socket", socket => {
+      socket.setTimeout(timeoutMs);
+      socket.on("timeout", () => {
+        console.error(`Apify: socket timeout after ${Date.now() - startTime}ms`);
+        req.destroy();
+        reject(new Error(`Socket timeout after ${timeoutMs}ms`));
+      });
     });
 
     req.end();
