@@ -22,6 +22,47 @@ interface ApifyRun {
   };
 }
 
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  maxRetries = 3,
+  baseDelayMs = 2000
+): Promise<Response> {
+  let lastError: Error | undefined;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 90000); // 90s timeout per attempt
+
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+      return response;
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      const isRetryable =
+        lastError.message.includes("terminated") ||
+        lastError.message.includes("ETIMEDOUT") ||
+        lastError.message.includes("ECONNRESET") ||
+        lastError.name === "AbortError";
+
+      if (!isRetryable || attempt >= maxRetries - 1) {
+        throw lastError;
+      }
+
+      const delay = baseDelayMs * Math.pow(2, attempt);
+      console.log(`Apify: fetch attempt ${attempt + 1} failed (${lastError.message}), retrying in ${delay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+
+  throw lastError ?? new Error("fetchWithRetry: unknown error");
+}
+
 async function runActor(
   apiKey: string,
   actorId: string,
@@ -83,19 +124,14 @@ async function runActor(
     throw new Error(`Apify run ${runId} ended with status: ${status}`);
   }
 
-  // Fetch results from dataset with timeout (limit to 100 items to avoid large responses)
-  const datasetUrl = `${APIFY_API_BASE}/datasets/${datasetId}/items?format=json&limit=100`;
+  // Fetch results from dataset with retry logic (limit to 30 items for faster response)
+  const datasetUrl = `${APIFY_API_BASE}/datasets/${datasetId}/items?format=json&limit=30`;
   console.log(`Apify: fetching results from dataset ${datasetId}...`);
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
-
   try {
-    const datasetResponse = await fetch(datasetUrl, {
-      headers: { Authorization: `Bearer ${apiKey}` },
-      signal: controller.signal
+    const datasetResponse = await fetchWithRetry(datasetUrl, {
+      headers: { Authorization: `Bearer ${apiKey}` }
     });
-    clearTimeout(timeoutId);
 
     if (!datasetResponse.ok) {
       const text = await datasetResponse.text();
@@ -106,13 +142,9 @@ async function runActor(
     console.log(`Apify: got ${items.length} results`);
     return items;
   } catch (err) {
-    clearTimeout(timeoutId);
-    console.error(`Apify: fetch error`, err);
+    console.error(`Apify: fetch failed after retries`, err);
     if (err instanceof Error) {
-      console.error(`Apify: error name=${err.name}, message=${err.message}, stack=${err.stack}`);
-      if (err.name === "AbortError") {
-        throw new Error(`Apify: timeout fetching dataset ${datasetId}`);
-      }
+      console.error(`Apify: error name=${err.name}, message=${err.message}`);
     }
     throw err;
   }
