@@ -1,6 +1,6 @@
 import { BaseNode, prop } from "@nodetool-ai/node-sdk";
 import { tagAsServer } from "@nodetool-ai/nodes-utils";
-import { Agent, fetch as undiciFetch, setGlobalDispatcher } from "undici";
+import { Agent, fetch as undiciFetch } from "undici";
 
 const DEFAULT_PAGE_FUNCTION =
   "async function pageFunction(context) { return context.request.loadedUrl; }";
@@ -12,14 +12,12 @@ const APIFY_API_BASE = "https://api.apify.com/v2";
 // Page size for paginated fetching - small to avoid network timeouts
 const DATASET_PAGE_SIZE = 5;
 
-// Force IPv4 and enable compression for this module
-setGlobalDispatcher(
-  new Agent({
-    connect: {
-      family: 4 // Force IPv4
-    }
-  })
-);
+// Local agent for Apify requests only - forces IPv4 without affecting global dispatcher
+const apifyAgent = new Agent({
+  connect: {
+    family: 4 // Force IPv4
+  }
+});
 
 function getApifyApiKey(secrets: Record<string, string>): string {
   const key = secrets.APIFY_API_TOKEN || process.env.APIFY_API_TOKEN;
@@ -56,7 +54,8 @@ async function fetchPageWithRetry<T>(
           ...headers,
           "Accept-Encoding": "gzip, deflate" // Request compression
         },
-        signal: controller.signal
+        signal: controller.signal,
+        dispatcher: apifyAgent // Use local IPv4-only agent
       });
       clearTimeout(timeoutId);
 
@@ -140,13 +139,14 @@ async function runActor(
   const url = `${APIFY_API_BASE}/acts/${encodedActorId}/runs?waitForFinish=${waitSecs}`;
 
   console.log(`Apify: starting actor ${actorId}...`);
-  const response = await fetch(url, {
+  const response = await undiciFetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`
     },
-    body: JSON.stringify(input)
+    body: JSON.stringify(input),
+    dispatcher: apifyAgent
   });
 
   if (!response.ok) {
@@ -176,8 +176,9 @@ async function runActor(
     polls++;
 
     const statusUrl = `${APIFY_API_BASE}/actor-runs/${runId}`;
-    const statusResponse = await fetch(statusUrl, {
-      headers: { Authorization: `Bearer ${apiKey}` }
+    const statusResponse = await undiciFetch(statusUrl, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      dispatcher: apifyAgent
     });
 
     if (statusResponse.ok) {
