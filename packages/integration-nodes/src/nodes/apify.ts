@@ -952,13 +952,143 @@ export class ApifyTikTokScraperNode extends BaseNode {
   }
 }
 
+export class ApifyInstagramTrendsScraperNode extends BaseNode {
+  static readonly nodeType = "apify.scraping.ApifyInstagramTrendsScraper";
+  static readonly title = "Instagram Trends Scraper";
+  static readonly description =
+    "Scrape trending posts from Instagram Explore page — viral reels, posts with engagement metrics, audio trends, and creator info.\n    apify, instagram, trends, viral, reels, explore";
+  static readonly metadataOutputTypes = {
+    output: "list[dict[str, any]]"
+  };
+  static readonly requiredSettings = ["APIFY_API_TOKEN"];
+
+  @prop({
+    type: "str",
+    default: "United States",
+    title: "Country",
+    description: "Country for Instagram locale (United States, Russia, United Kingdom, Germany, France, etc.)"
+  })
+  declare country: any;
+
+  @prop({
+    type: "int",
+    default: 20,
+    title: "Max Results",
+    description: "Maximum number of trending posts to scrape"
+  })
+  declare max_results: any;
+
+  @prop({
+    type: "int",
+    default: 300,
+    title: "Wait For Finish",
+    description: "Maximum time to wait for scraping to complete (seconds)"
+  })
+  declare wait_for_finish: any;
+
+  async process(): Promise<Record<string, unknown>> {
+    const apiKey = getApifyApiKey(this._secrets);
+
+    const runInput: Record<string, unknown> = {
+      country: String(this.country ?? "United States"),
+      max_results: Number(this.max_results ?? 20)
+    };
+
+    const items = await runActor(
+      apiKey,
+      "agentx/instagram-trending-scraper",
+      runInput,
+      Number(this.wait_for_finish ?? 300)
+    );
+    return { output: items };
+  }
+}
+
+export class ApifyTikTokTrendsScraperNode extends BaseNode {
+  static readonly nodeType = "apify.scraping.ApifyTikTokTrendsScraper";
+  static readonly title = "TikTok Trends Scraper";
+  static readonly description =
+    "Scrape real-time trending data from TikTok Creative Center — trending hashtags, sounds, creators, and videos with trend direction (rising/falling/stable).\n    apify, tiktok, trends, viral, hashtags, sounds, creators";
+  static readonly metadataOutputTypes = {
+    output: "list[dict[str, any]]"
+  };
+  static readonly requiredSettings = ["APIFY_API_TOKEN"];
+  static readonly inlineFields = ["data_types"];
+
+  @prop({
+    type: "list[str]",
+    default: ["hashtags", "videos"],
+    title: "Data Types",
+    description: "Types of trending data to scrape: hashtags, sounds, creators, videos"
+  })
+  declare data_types: any;
+
+  @prop({
+    type: "str",
+    default: "RU",
+    title: "Country Code",
+    description: "Country code for trends (US, RU, GB, DE, FR, etc.)"
+  })
+  declare country_code: any;
+
+  @prop({
+    type: "str",
+    default: "7",
+    title: "Time Period",
+    description: "Time period for trends: 7 (week), 30 (month), 120 (4 months)"
+  })
+  declare time_period: any;
+
+  @prop({
+    type: "int",
+    default: 20,
+    title: "Max Results",
+    description: "Maximum number of results per data type"
+  })
+  declare max_results: any;
+
+  @prop({
+    type: "int",
+    default: 300,
+    title: "Wait For Finish",
+    description: "Maximum time to wait for scraping to complete (seconds)"
+  })
+  declare wait_for_finish: any;
+
+  async process(): Promise<Record<string, unknown>> {
+    const apiKey = getApifyApiKey(this._secrets);
+    const dataTypes = (this.data_types as string[]) ?? ["hashtags", "videos"];
+
+    const runInput: Record<string, unknown> = {
+      country: String(this.country_code ?? "RU").toUpperCase(),
+      period: String(this.time_period ?? "7"),
+      maxItems: Number(this.max_results ?? 20),
+      // Enable requested data types
+      scrapeHashtags: dataTypes.includes("hashtags"),
+      scrapeSounds: dataTypes.includes("sounds"),
+      scrapeCreators: dataTypes.includes("creators"),
+      scrapeVideos: dataTypes.includes("videos")
+    };
+
+    const items = await runActor(
+      apiKey,
+      "automation-lab/tiktok-trends-scraper",
+      runInput,
+      Number(this.wait_for_finish ?? 300)
+    );
+    return { output: items };
+  }
+}
+
 export const APIFY_NODES = tagAsServer([
   ApifyWebScraperNode,
   ApifyGoogleSearchScraperNode,
   ApifyInstagramScraperNode,
+  ApifyInstagramTrendsScraperNode,
   ApifyAmazonScraperNode,
   ApifyYouTubeScraperNode,
   ApifyTwitterScraperNode,
   ApifyLinkedInScraperNode,
-  ApifyTikTokScraperNode
+  ApifyTikTokScraperNode,
+  ApifyTikTokTrendsScraperNode
 ]);
