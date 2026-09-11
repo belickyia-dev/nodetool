@@ -68,8 +68,8 @@
           "model": {
             "type": "language_model",
             "provider": "openrouter",
-            "id": "anthropic/claude-sonnet-4",
-            "name": "Claude Sonnet 4 (OpenRouter)"
+            "id": "deepseek/deepseek-chat",
+            "name": "DeepSeek V3"
           },
           "tools": []
         },
@@ -89,8 +89,8 @@
           "model": {
             "type": "language_model",
             "provider": "openrouter",
-            "id": "anthropic/claude-sonnet-4",
-            "name": "Claude Sonnet 4 (OpenRouter)"
+            "id": "deepseek/deepseek-chat",
+            "name": "DeepSeek V3"
           },
           "tools": []
         },
