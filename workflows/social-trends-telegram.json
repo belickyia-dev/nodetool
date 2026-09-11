@@ -1,0 +1,204 @@
+{
+  "name": "Social Trends → Telegram",
+  "description": "Scrapes trending content from TikTok Creative Center and Instagram Explore, formats results showing trend direction and velocity, then sends to Telegram.",
+  "tags": ["social", "trends", "telegram", "tiktok", "instagram", "apify"],
+  "graph": {
+    "nodes": [
+      {
+        "id": "tiktok_trends",
+        "type": "apify.scraping.ApifyTikTokTrendsScraper",
+        "data": {
+          "data_types": ["hashtags", "videos"],
+          "country_code": "RU",
+          "time_period": 7,
+          "max_results": 15,
+          "wait_for_finish": 300
+        },
+        "ui_properties": {
+          "position": { "x": 100, "y": 100 },
+          "width": 280,
+          "title": "TikTok Trends"
+        }
+      },
+      {
+        "id": "instagram_trends",
+        "type": "apify.scraping.ApifyInstagramTrendsScraper",
+        "data": {
+          "country": "United States",
+          "max_results": 15,
+          "wait_for_finish": 300
+        },
+        "ui_properties": {
+          "position": { "x": 100, "y": 400 },
+          "width": 280,
+          "title": "Instagram Trends"
+        }
+      },
+      {
+        "id": "tiktok_prompt",
+        "type": "nodetool.text.Template",
+        "data": {
+          "string": "Отформатируй эти TikTok тренды для Telegram:\n\n{{data}}\n\nТвоя задача:\n1. Отфильтруй только РАСТУЩИЕ тренды (trend = rising или положительный growth)\n2. Для каждого тренда покажи: название/хештег, направление тренда (🔥 растущий, ➡️ стабильный, ⬇️ падающий), рост за период, количество просмотров\n3. Сортируй по скорости роста (самые быстрорастущие сверху)\n4. Выведи топ-10 растущих трендов\n\nФормат:\n📊 TikTok Тренды России\n\n🔥 РАСТУЩИЕ:\n1. #trend1 — +234% за неделю (12.3M просмотров)\n...\n\nЕсли данных нет, напиши ❌ Не удалось получить данные TikTok"
+        },
+        "ui_properties": {
+          "position": { "x": 650, "y": 100 },
+          "width": 280,
+          "title": "TikTok Prompt"
+        }
+      },
+      {
+        "id": "instagram_prompt",
+        "type": "nodetool.text.Template",
+        "data": {
+          "string": "Отформатируй эти Instagram тренды для Telegram:\n\n{{data}}\n\nТвоя задача:\n1. Для каждого поста покажи: тип контента (Reel/Post), лайки и комментарии, описание (первые 100 символов), автор, дата публикации\n2. Сортируй по вовлечённости (лайки + комментарии)\n3. Выведи топ-10\n\nФормат:\n📸 Instagram Тренды\n\n1. 🎬 Reel от @author\n   ❤️ 125K | 💬 2.3K\n   📅 2 часа назад\n   Описание поста...\n...\n\nЕсли данных нет, напиши ❌ Не удалось получить данные Instagram"
+        },
+        "ui_properties": {
+          "position": { "x": 650, "y": 400 },
+          "width": 280,
+          "title": "Instagram Prompt"
+        }
+      },
+      {
+        "id": "format_tiktok",
+        "type": "nodetool.agents.Agent",
+        "data": {
+          "mode": "loop",
+          "system": "Ты форматируешь данные о трендах для Telegram. Выводи только отформатированный текст, без лишних комментариев.",
+          "prompt": "",
+          "model": {
+            "type": "language_model",
+            "provider": "anthropic",
+            "id": "claude-sonnet-4-20250514",
+            "name": "Claude Sonnet 4"
+          },
+          "tools": []
+        },
+        "ui_properties": {
+          "position": { "x": 1000, "y": 100 },
+          "width": 280,
+          "title": "Format TikTok"
+        }
+      },
+      {
+        "id": "format_instagram",
+        "type": "nodetool.agents.Agent",
+        "data": {
+          "mode": "loop",
+          "system": "Ты форматируешь данные о трендах для Telegram. Выводи только отформатированный текст, без лишних комментариев.",
+          "prompt": "",
+          "model": {
+            "type": "language_model",
+            "provider": "anthropic",
+            "id": "claude-sonnet-4-20250514",
+            "name": "Claude Sonnet 4"
+          },
+          "tools": []
+        },
+        "ui_properties": {
+          "position": { "x": 1000, "y": 400 },
+          "width": 280,
+          "title": "Format Instagram"
+        }
+      },
+      {
+        "id": "combine",
+        "type": "nodetool.text.Concat",
+        "data": {
+          "separator": "\n\n━━━━━━━━━━━━━━━━━━━━\n\n"
+        },
+        "ui_properties": {
+          "position": { "x": 1350, "y": 250 },
+          "width": 200,
+          "title": "Combine Reports"
+        }
+      },
+      {
+        "id": "telegram_chat_id",
+        "type": "nodetool.input.IntegerInput",
+        "data": {
+          "name": "chat_id",
+          "value": 0,
+          "description": "Telegram Chat ID"
+        },
+        "ui_properties": {
+          "position": { "x": 1350, "y": 450 },
+          "width": 200,
+          "title": "Chat ID"
+        }
+      },
+      {
+        "id": "telegram",
+        "type": "messaging.telegram.TelegramSendMessage",
+        "data": {
+          "token": "",
+          "chat_id": 0,
+          "parse_mode": "",
+          "disable_web_page_preview": true
+        },
+        "ui_properties": {
+          "position": { "x": 1650, "y": 250 },
+          "width": 280,
+          "title": "Send to Telegram"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e1",
+        "source": "tiktok_trends",
+        "sourceHandle": "output",
+        "target": "tiktok_prompt",
+        "targetHandle": "data"
+      },
+      {
+        "id": "e2",
+        "source": "instagram_trends",
+        "sourceHandle": "output",
+        "target": "instagram_prompt",
+        "targetHandle": "data"
+      },
+      {
+        "id": "e3",
+        "source": "tiktok_prompt",
+        "sourceHandle": "output",
+        "target": "format_tiktok",
+        "targetHandle": "prompt"
+      },
+      {
+        "id": "e4",
+        "source": "instagram_prompt",
+        "sourceHandle": "output",
+        "target": "format_instagram",
+        "targetHandle": "prompt"
+      },
+      {
+        "id": "e5",
+        "source": "format_tiktok",
+        "sourceHandle": "text",
+        "target": "combine",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e6",
+        "source": "format_instagram",
+        "sourceHandle": "text",
+        "target": "combine",
+        "targetHandle": "b"
+      },
+      {
+        "id": "e7",
+        "source": "combine",
+        "sourceHandle": "output",
+        "target": "telegram",
+        "targetHandle": "text"
+      },
+      {
+        "id": "e8",
+        "source": "telegram_chat_id",
+        "sourceHandle": "output",
+        "target": "telegram",
+        "targetHandle": "chat_id"
+      }
+    ]
+  }
+}

@@ -963,10 +963,47 @@ export class ApifyInstagramTrendsScraperNode extends BaseNode {
   static readonly requiredSettings = ["APIFY_API_TOKEN"];
 
   @prop({
-    type: "str",
+    type: "enum",
     default: "United States",
     title: "Country",
-    description: "Country for Instagram locale (United States, Russia, United Kingdom, Germany, France, etc.)"
+    description: "Country for Instagram locale",
+    values: [
+      "United States",
+      "Canada",
+      "United Kingdom",
+      "Australia",
+      "Germany",
+      "France",
+      "Italy",
+      "Spain",
+      "Netherlands",
+      "Sweden",
+      "Norway",
+      "Denmark",
+      "Finland",
+      "Poland",
+      "Portugal",
+      "Brazil",
+      "Mexico",
+      "Argentina",
+      "Chile",
+      "Colombia",
+      "Japan",
+      "South Korea",
+      "Singapore",
+      "Hong Kong",
+      "Taiwan",
+      "India",
+      "Indonesia",
+      "Thailand",
+      "Philippines",
+      "Malaysia",
+      "Vietnam",
+      "United Arab Emirates",
+      "Saudi Arabia",
+      "Turkey",
+      "South Africa"
+    ]
   })
   declare country: any;
 
@@ -1032,8 +1069,8 @@ export class ApifyTikTokTrendsScraperNode extends BaseNode {
   declare country_code: any;
 
   @prop({
-    type: "str",
-    default: "7",
+    type: "int",
+    default: 7,
     title: "Time Period",
     description: "Time period for trends: 7 (week), 30 (month), 120 (4 months)"
   })
@@ -1061,7 +1098,7 @@ export class ApifyTikTokTrendsScraperNode extends BaseNode {
 
     const runInput: Record<string, unknown> = {
       country: String(this.country_code ?? "RU").toUpperCase(),
-      period: String(this.time_period ?? "7"),
+      period: Number(this.time_period ?? 7),
       maxItems: Number(this.max_results ?? 20),
       // Enable requested data types
       scrapeHashtags: dataTypes.includes("hashtags"),
