@@ -385,8 +385,7 @@ export class TelegramSendMessage extends BaseNode {
     type: "int",
     default: 0,
     title: "Chat Id",
-    description: "Target chat ID",
-    min: 1
+    description: "Target chat ID (negative for channels/groups)"
   })
   declare chat_id: any;
 
@@ -446,7 +445,7 @@ export class TelegramSendMessage extends BaseNode {
     if (!token) {
       throw new Error("Telegram bot token is required");
     }
-    if (!chatId) {
+    if (chatId === 0) {
       throw new Error("Telegram chat ID is required");
     }
 
