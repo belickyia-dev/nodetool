@@ -62,7 +62,7 @@
         "id": "tiktok_prompt",
         "type": "nodetool.text.Template",
         "data": {
-          "string": "📊 TikTok Тренды\n\nВыведи ВСЕ данные из JSON в виде таблицы. Для каждого элемента покажи ВСЕ доступные поля:\n\n{{data}}\n\nФормат для каждого элемента:\n№ | name | trend | videoViews | publishedVideoCount | countryCode | period\n\nНе фильтруй, не сортируй — выведи как есть. Если поле отсутствует, пропусти его."
+          "string": "📊 TikTok Тренды\n\nВыведи данные из JSON. Для каждого хештега СГЕНЕРИРУЙ ссылку в формате: https://www.tiktok.com/tag/{имя_без_решетки}\n\n{{data}}\n\nФормат:\n1. #name — trend | views | videos | 🔗 ссылка\n\nПример:\n1. #trend1 — 🔥 rising | 189M views | 34K videos | https://www.tiktok.com/tag/trend1"
         },
         "ui_properties": {
           "position": { "x": 650, "y": 100 },
