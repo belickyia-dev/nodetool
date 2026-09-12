@@ -1,0 +1,388 @@
+{
+  "id": "",
+  "access": "private",
+  "created_at": "2026-09-12T12:00:00.000000",
+  "updated_at": "2026-09-12T12:00:00.000Z",
+  "name": "Neurophoto Session with Reference",
+  "tool_name": null,
+  "description": "Генератор промптов для нейрофотосессий с анализом Pinterest/Instagram референса. Загрузи изображение-референс, и AI извлечёт стиль, настроение, позу и создаст промпт.",
+  "tags": [
+    "photo",
+    "portrait",
+    "prompt",
+    "generation",
+    "fashion",
+    "lifestyle",
+    "pinterest",
+    "reference",
+    "example"
+  ],
+  "thumbnail": null,
+  "thumbnail_url": null,
+  "graph": {
+    "edges": [
+      {
+        "id": "e1",
+        "source": "in_reference",
+        "sourceHandle": "output",
+        "target": "analyze_reference",
+        "targetHandle": "image",
+        "ui_properties": { "className": "image" },
+        "edge_type": "data"
+      },
+      {
+        "id": "e2",
+        "source": "in_theme",
+        "sourceHandle": "output",
+        "target": "analyze_reference",
+        "targetHandle": "prompt",
+        "ui_properties": { "className": "str" },
+        "edge_type": "data"
+      },
+      {
+        "id": "e3",
+        "source": "analyze_reference",
+        "sourceHandle": "text",
+        "target": "prompt_generator",
+        "targetHandle": "reference_analysis",
+        "ui_properties": { "className": "str" },
+        "edge_type": "data"
+      },
+      {
+        "id": "e4",
+        "source": "in_theme",
+        "sourceHandle": "output",
+        "target": "prompt_generator",
+        "targetHandle": "theme",
+        "ui_properties": { "className": "str" },
+        "edge_type": "data"
+      },
+      {
+        "id": "e5",
+        "source": "in_format",
+        "sourceHandle": "output",
+        "target": "prompt_generator",
+        "targetHandle": "format",
+        "ui_properties": { "className": "str" },
+        "edge_type": "data"
+      },
+      {
+        "id": "e6",
+        "source": "in_shot_count",
+        "sourceHandle": "output",
+        "target": "prompt_generator",
+        "targetHandle": "shot_count",
+        "ui_properties": { "className": "int" },
+        "edge_type": "data"
+      },
+      {
+        "id": "e7",
+        "source": "prompt_generator",
+        "sourceHandle": "output",
+        "target": "llm_agent",
+        "targetHandle": "prompt",
+        "ui_properties": { "className": "str" },
+        "edge_type": "data"
+      },
+      {
+        "id": "e8",
+        "source": "llm_agent",
+        "sourceHandle": "text",
+        "target": "prompt_assembler",
+        "targetHandle": "generated_details",
+        "ui_properties": { "className": "str" },
+        "edge_type": "data"
+      },
+      {
+        "id": "e9",
+        "source": "in_format",
+        "sourceHandle": "output",
+        "target": "prompt_assembler",
+        "targetHandle": "format",
+        "ui_properties": { "className": "str" },
+        "edge_type": "data"
+      },
+      {
+        "id": "e10",
+        "source": "prompt_assembler",
+        "sourceHandle": "output",
+        "target": "out_prompt",
+        "targetHandle": "value",
+        "ui_properties": { "className": "str" },
+        "edge_type": "data"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "comment_intro",
+        "type": "nodetool.workflows.base_node.Comment",
+        "data": {
+          "comment": "# 📸 Neurophoto Session with Reference\n\nГенератор промптов для AI-фотосессий **с анализом референса**.\n\n**Как работает:**\n1. Загрузи Pinterest/Instagram референс\n2. AI анализирует: стиль, позу, одежду, освещение, настроение\n3. Добавь свою тему (опционально)\n4. Получи готовый промпт для генерации\n\n**Референс может быть:**\n- Скриншот из Pinterest/Instagram\n- Фото из журнала\n- Любое вдохновляющее изображение"
+        },
+        "ui_properties": {
+          "selected": false,
+          "position": { "x": -520, "y": 0 },
+          "zIndex": 0,
+          "width": 400,
+          "height": 280,
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "in_reference",
+        "type": "nodetool.input.ImageInput",
+        "data": {
+          "name": "reference_image",
+          "description": "Референс-изображение (Pinterest, Instagram, журнал). AI извлечёт из него стиль, позу, настроение.",
+          "value": {
+            "type": "image",
+            "uri": "",
+            "asset_id": null,
+            "data": null,
+            "metadata": null
+          }
+        },
+        "ui_properties": {
+          "selected": false,
+          "position": { "x": 0, "y": 0 },
+          "zIndex": 0,
+          "width": 320,
+          "height": 280,
+          "title": "1️⃣ Референс (Pinterest/Instagram)",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "in_theme",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "theme",
+          "description": "Дополнительная тема/уточнение (опционально). Если пусто — AI возьмёт всё из референса.",
+          "value": ""
+        },
+        "ui_properties": {
+          "selected": false,
+          "position": { "x": 0, "y": 320 },
+          "zIndex": 0,
+          "width": 320,
+          "title": "2️⃣ Тема (опционально)",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "in_format",
+        "type": "nodetool.input.SelectInput",
+        "data": {
+          "name": "format",
+          "description": "Формат изображения",
+          "value": "9:16",
+          "options": ["9:16", "3:4", "1:1", "16:9", "4:3"],
+          "enum_type_name": ""
+        },
+        "ui_properties": {
+          "selected": false,
+          "position": { "x": 0, "y": 480 },
+          "zIndex": 0,
+          "width": 320,
+          "title": "3️⃣ Формат",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "in_shot_count",
+        "type": "nodetool.input.IntegerInput",
+        "data": {
+          "name": "shot_count",
+          "description": "Количество вариаций кадра (1-4)",
+          "value": 1,
+          "min": 1,
+          "max": 4
+        },
+        "ui_properties": {
+          "selected": false,
+          "position": { "x": 0, "y": 620 },
+          "zIndex": 0,
+          "width": 320,
+          "title": "4️⃣ Количество вариаций",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "analyze_reference",
+        "type": "nodetool.agents.Agent",
+        "data": {
+          "model": {
+            "type": "language_model",
+            "provider": "openai",
+            "id": "gpt-5-mini",
+            "name": "GPT-5 mini",
+            "path": null,
+            "supported_tasks": []
+          },
+          "system": "Ты эксперт по анализу fashion и lifestyle фотографий. Твоя задача — детально разобрать референс-изображение и извлечь все визуальные элементы для воспроизведения в AI-фотосессии.\n\nПроанализируй изображение и опиши:\n\n1. **СТИЛЬ** — общий визуальный стиль (lifestyle, editorial, studio, street, romantic, dramatic, minimalist, cottagecore, и т.д.)\n2. **ТИП КАДРА** — close-up, medium shot, full body, 3/4 портрет\n3. **ПОЗА** — положение головы, направление взгляда, руки, корпус, ноги\n4. **ОДЕЖДА** — детали одежды: цвет, материал, фасон, как сидит\n5. **АКСЕССУАРЫ** — украшения, сумки, очки, реквизит, букеты\n6. **ПРИЧЁСКА/МАКИЯЖ** — укладка, объём, макияж (стрелки, губы, хайлайтер)\n7. **ЛОКАЦИЯ/ФОН** — где происходит съёмка, детали окружения\n8. **ОСВЕЩЕНИЕ** — тип (golden hour, studio, flash, low-key), направление, тени, контраст\n9. **КАМЕРА** — примерные настройки: фокусное расстояние, глубина резкости, зернистость\n10. **АТМОСФЕРА/MOOD** — настроение, цветовая гамма, тёплый/холодный, film grain\n\nБудь максимально конкретен. Описывай то, что ВИДИШЬ, а не домысливай."
+        },
+        "ui_properties": {
+          "selected": false,
+          "position": { "x": 400, "y": 0 },
+          "zIndex": 0,
+          "width": 380,
+          "height": 420,
+          "title": "5️⃣ Анализ референса",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "prompt_generator",
+        "type": "nodetool.text.Prompt",
+        "data": {
+          "prompt": "Ты профессиональный fashion-фотограф и арт-директор для AI-фотосессий.\n\nАнализ референса:\n{{ reference_analysis }}\n\nДополнительная тема от пользователя: {{ theme }}\nФормат: {{ format }}\nКоличество вариаций: {{ shot_count }}\n\nНа основе анализа референса сгенерируй детальное описание для {{ shot_count }} кадров.\n\nДля КАЖДОГО кадра укажи:\n\n1. **SHOT_TYPE** — тип кадра (как на референсе или адаптированный)\n2. **POSE** — поза, вдохновлённая референсом: положение головы, взгляд, руки, корпус\n3. **CLOTHING** — одежда в стиле референса: цвет, материал, фасон\n4. **ACCESSORIES** — аксессуары и реквизит как на референсе или аналогичные\n5. **HAIR_MAKEUP** — причёска и макияж в стиле референса\n6. **LOCATION** — локация/фон как на референсе или похожие\n7. **LIGHTING** — освещение как на референсе\n8. **CAMERA** — камера и настройки для воспроизведения стиля\n9. **ATMOSPHERE** — атмосфера и mood референса\n\nПравила:\n- Воспроизводи СТИЛЬ референса, не копируй дословно\n- Если пользователь указал тему — интегрируй её в стиль референса\n- Если несколько вариаций — меняй позу/ракурс, сохраняя единый стиль\n- Конкретика важнее абстракций\n\nФормат ответа:\n---КАДР N---\nSHOT_TYPE: ...\nPOSE: ...\nCLOTHING: ...\nACCESSORIES: ...\nHAIR_MAKEUP: ...\nLOCATION: ...\nLIGHTING: ...\nCAMERA: ...\nATMOSPHERE: ..."
+        },
+        "ui_properties": {
+          "selected": false,
+          "position": { "x": 840, "y": 0 },
+          "zIndex": 0,
+          "width": 400,
+          "height": 500,
+          "title": "6️⃣ Генерация деталей",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {
+          "reference_analysis": "",
+          "theme": "",
+          "format": "9:16",
+          "shot_count": "1"
+        },
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "llm_agent",
+        "type": "nodetool.agents.Agent",
+        "data": {
+          "model": {
+            "type": "language_model",
+            "provider": "openai",
+            "id": "gpt-5-mini",
+            "name": "GPT-5 mini",
+            "path": null,
+            "supported_tasks": []
+          },
+          "system": "Ты креативный арт-директор для AI-фотосессий. Генерируй детальные описания, сохраняя стиль и настроение референса. Конкретные детали: цвета, текстуры, позы, освещение."
+        },
+        "ui_properties": {
+          "selected": false,
+          "position": { "x": 1300, "y": 0 },
+          "zIndex": 0,
+          "width": 360,
+          "height": 400,
+          "title": "7️⃣ LLM: Генерация",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "prompt_assembler",
+        "type": "nodetool.text.Prompt",
+        "data": {
+          "prompt": "Собери финальный промпт для генерации AI-изображения.\n\nСгенерированные детали:\n{{ generated_details }}\n\nФормат: {{ format }}\n\nПравила сборки промпта:\n1. ВСЕГДА начинай с: \"СТРОГО сохранить внешность 1:1 — лицо, черты, пропорции, текстуру кожи, тон кожи, возраст, цвет и длину волос. Фото — эталон внешности.\"\n2. Укажи формат: \"Формат {{ format }}.\"\n3. Собери все элементы в связный текст:\n   - Тип кадра и композиция\n   - Поза\n   - Одежда и аксессуары\n   - Причёска и макияж\n   - Локация\n   - Освещение\n   - Атмосфера и техническое\n4. ВСЕГДА заканчивай: \"Высокая детализация кожи, без пластиковой ретуши. Raw photo.\"\n\nЕсли несколько кадров — разделяй: \"\\n\\n---\\n\\n\"\n\nВыведи ТОЛЬКО финальный промпт(ы)."
+        },
+        "ui_properties": {
+          "selected": false,
+          "position": { "x": 1720, "y": 0 },
+          "zIndex": 0,
+          "width": 400,
+          "height": 450,
+          "title": "8️⃣ Сборка промпта",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {
+          "generated_details": "",
+          "format": "9:16"
+        },
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "out_prompt",
+        "type": "nodetool.output.Output",
+        "data": {
+          "name": "final_prompt"
+        },
+        "ui_properties": {
+          "position": { "x": 2180, "y": 40 },
+          "zIndex": 0,
+          "width": 400,
+          "title": "📝 Готовый промпт",
+          "selectable": true
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      }
+    ]
+  },
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "reference_image": {
+        "type": "object",
+        "default": { "type": "image", "uri": "", "asset_id": null, "data": null, "metadata": null },
+        "label": "Референс-изображение"
+      },
+      "theme": {
+        "type": "string",
+        "default": "",
+        "label": "Тема (опционально)"
+      },
+      "format": {
+        "type": "string",
+        "enum": ["9:16", "3:4", "1:1", "16:9", "4:3"],
+        "default": "9:16",
+        "label": "Формат"
+      },
+      "shot_count": {
+        "type": "integer",
+        "default": 1,
+        "minimum": 1,
+        "maximum": 4,
+        "label": "Количество вариаций"
+      }
+    },
+    "required": ["reference_image", "format", "shot_count"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "final_prompt": {
+        "type": "string",
+        "label": "Готовый промпт"
+      }
+    },
+    "required": ["final_prompt"]
+  },
+  "settings": {},
+  "package_name": "nodetool-base",
+  "path": null,
+  "run_mode": null,
+  "required_providers": null,
+  "required_models": null
+}
