@@ -35,6 +35,30 @@
         }
       },
       {
+        "id": "tiktok_to_json",
+        "type": "nodetool.text.ToString",
+        "data": {
+          "mode": "str"
+        },
+        "ui_properties": {
+          "position": { "x": 380, "y": 100 },
+          "width": 200,
+          "title": "TikTok → JSON"
+        }
+      },
+      {
+        "id": "instagram_to_json",
+        "type": "nodetool.text.ToString",
+        "data": {
+          "mode": "str"
+        },
+        "ui_properties": {
+          "position": { "x": 380, "y": 400 },
+          "width": 200,
+          "title": "Instagram → JSON"
+        }
+      },
+      {
         "id": "tiktok_prompt",
         "type": "nodetool.text.Template",
         "data": {
@@ -133,12 +157,26 @@
         "id": "e1",
         "source": "tiktok_trends",
         "sourceHandle": "output",
+        "target": "tiktok_to_json",
+        "targetHandle": "value"
+      },
+      {
+        "id": "e1a",
+        "source": "tiktok_to_json",
+        "sourceHandle": "output",
         "target": "tiktok_prompt",
         "targetHandle": "data"
       },
       {
         "id": "e2",
         "source": "instagram_trends",
+        "sourceHandle": "output",
+        "target": "instagram_to_json",
+        "targetHandle": "value"
+      },
+      {
+        "id": "e2a",
+        "source": "instagram_to_json",
         "sourceHandle": "output",
         "target": "instagram_prompt",
         "targetHandle": "data"
