@@ -131,7 +131,7 @@
         "type": "messaging.telegram.TelegramSendMessage",
         "data": {
           "token": "",
-          "chat_id": 0,
+          "chat_id": -1003994165035,
           "parse_mode": "",
           "disable_web_page_preview": true
         },
