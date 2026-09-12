@@ -92,8 +92,8 @@
           "model": {
             "type": "language_model",
             "provider": "gemini",
-            "id": "gemini-2.0-flash-lite",
-            "name": "Gemini 2.0 Flash Lite"
+            "id": "gemini-2.5-flash-lite-preview-06-17",
+            "name": "Gemini 2.5 Flash Lite"
           },
           "tools": []
         },
@@ -113,8 +113,8 @@
           "model": {
             "type": "language_model",
             "provider": "gemini",
-            "id": "gemini-2.0-flash-lite",
-            "name": "Gemini 2.0 Flash Lite"
+            "id": "gemini-2.5-flash-lite-preview-06-17",
+            "name": "Gemini 2.5 Flash Lite"
           },
           "tools": []
         },
