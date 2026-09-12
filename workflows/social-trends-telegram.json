@@ -91,9 +91,9 @@
           "prompt": "",
           "model": {
             "type": "language_model",
-            "provider": "openrouter",
-            "id": "deepseek/deepseek-chat",
-            "name": "DeepSeek V3"
+            "provider": "gemini",
+            "id": "gemini-2.0-flash-lite",
+            "name": "Gemini 2.0 Flash Lite"
           },
           "tools": []
         },
@@ -112,9 +112,9 @@
           "prompt": "",
           "model": {
             "type": "language_model",
-            "provider": "openrouter",
-            "id": "deepseek/deepseek-chat",
-            "name": "DeepSeek V3"
+            "provider": "gemini",
+            "id": "gemini-2.0-flash-lite",
+            "name": "Gemini 2.0 Flash Lite"
           },
           "tools": []
         },
