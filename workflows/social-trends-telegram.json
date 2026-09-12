@@ -113,20 +113,6 @@
         }
       },
       {
-        "id": "telegram_chat_id",
-        "type": "nodetool.input.IntegerInput",
-        "data": {
-          "name": "chat_id",
-          "value": -1003994165035,
-          "description": "Telegram Chat ID"
-        },
-        "ui_properties": {
-          "position": { "x": 1350, "y": 450 },
-          "width": 200,
-          "title": "Chat ID"
-        }
-      },
-      {
         "id": "telegram",
         "type": "messaging.telegram.TelegramSendMessage",
         "data": {
@@ -191,13 +177,6 @@
         "sourceHandle": "output",
         "target": "telegram",
         "targetHandle": "text"
-      },
-      {
-        "id": "e8",
-        "source": "telegram_chat_id",
-        "sourceHandle": "output",
-        "target": "telegram",
-        "targetHandle": "chat_id"
       }
     ]
   }
