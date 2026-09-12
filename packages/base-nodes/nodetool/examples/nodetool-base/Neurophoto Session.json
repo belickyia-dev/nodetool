@@ -1,0 +1,337 @@
+{
+  "id": "",
+  "access": "private",
+  "created_at": "2026-09-12T12:00:00.000000",
+  "updated_at": "2026-09-12T12:00:00.000Z",
+  "name": "Neurophoto Session Prompt Generator",
+  "tool_name": null,
+  "description": "Генератор промптов для нейрофотосессий. На входе: тема/концепт + стиль, на выходе: готовый детальный промпт для генерации изображений с сохранением внешности.",
+  "tags": [
+    "photo",
+    "portrait",
+    "prompt",
+    "generation",
+    "fashion",
+    "lifestyle",
+    "example"
+  ],
+  "thumbnail": null,
+  "thumbnail_url": null,
+  "graph": {
+    "edges": [
+      {
+        "id": "e1",
+        "source": "in_theme",
+        "sourceHandle": "output",
+        "target": "prompt_generator",
+        "targetHandle": "theme",
+        "ui_properties": { "className": "str" },
+        "edge_type": "data"
+      },
+      {
+        "id": "e2",
+        "source": "in_style",
+        "sourceHandle": "output",
+        "target": "prompt_generator",
+        "targetHandle": "style",
+        "ui_properties": { "className": "str" },
+        "edge_type": "data"
+      },
+      {
+        "id": "e3",
+        "source": "in_format",
+        "sourceHandle": "output",
+        "target": "prompt_generator",
+        "targetHandle": "format",
+        "ui_properties": { "className": "str" },
+        "edge_type": "data"
+      },
+      {
+        "id": "e4",
+        "source": "in_shot_count",
+        "sourceHandle": "output",
+        "target": "prompt_generator",
+        "targetHandle": "shot_count",
+        "ui_properties": { "className": "int" },
+        "edge_type": "data"
+      },
+      {
+        "id": "e5",
+        "source": "prompt_generator",
+        "sourceHandle": "output",
+        "target": "llm_agent",
+        "targetHandle": "prompt",
+        "ui_properties": { "className": "str" },
+        "edge_type": "data"
+      },
+      {
+        "id": "e6",
+        "source": "llm_agent",
+        "sourceHandle": "text",
+        "target": "prompt_assembler",
+        "targetHandle": "generated_details",
+        "ui_properties": { "className": "str" },
+        "edge_type": "data"
+      },
+      {
+        "id": "e7",
+        "source": "in_format",
+        "sourceHandle": "output",
+        "target": "prompt_assembler",
+        "targetHandle": "format",
+        "ui_properties": { "className": "str" },
+        "edge_type": "data"
+      },
+      {
+        "id": "e8",
+        "source": "prompt_assembler",
+        "sourceHandle": "output",
+        "target": "out_prompt",
+        "targetHandle": "value",
+        "ui_properties": { "className": "str" },
+        "edge_type": "data"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "comment_intro",
+        "type": "nodetool.workflows.base_node.Comment",
+        "data": {
+          "comment": "# 📸 Neurophoto Session Prompt Generator\n\nГенератор промптов для AI-фотосессий с сохранением внешности.\n\n**Как работает:**\n1. Ввод: тема, стиль, формат\n2. LLM генерирует детали: поза, одежда, локация, освещение\n3. Сборка финального промпта с identity preservation\n\n**Примеры тем:**\n- \"весенняя фотосессия с букетом тюльпанов на кровати\"\n- \"осенний лайфстайл в парке с кофе\"\n- \"студийная съёмка в чёрном платье\"\n- \"пляжная фотосессия на закате\""
+        },
+        "ui_properties": {
+          "selected": false,
+          "position": { "x": -520, "y": 0 },
+          "zIndex": 0,
+          "width": 450,
+          "height": 280,
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "in_theme",
+        "type": "nodetool.input.StringInput",
+        "data": {
+          "name": "theme",
+          "description": "Тема/концепт фотосессии. Например: \"весенняя фотосессия с букетом розовых тюльпанов на белой кровати\"",
+          "value": "весенняя фотосессия с букетом розовых тюльпанов на белой кровати"
+        },
+        "ui_properties": {
+          "selected": false,
+          "position": { "x": 0, "y": 0 },
+          "zIndex": 0,
+          "width": 320,
+          "title": "1️⃣ Тема фотосессии",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "in_style",
+        "type": "nodetool.input.SelectInput",
+        "data": {
+          "name": "style",
+          "description": "Стиль съёмки",
+          "value": "lifestyle",
+          "options": ["lifestyle", "editorial", "studio", "street", "romantic", "dramatic", "minimalist", "cottagecore"],
+          "enum_type_name": ""
+        },
+        "ui_properties": {
+          "selected": false,
+          "position": { "x": 0, "y": 180 },
+          "zIndex": 0,
+          "width": 320,
+          "title": "2️⃣ Стиль",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "in_format",
+        "type": "nodetool.input.SelectInput",
+        "data": {
+          "name": "format",
+          "description": "Формат изображения",
+          "value": "9:16",
+          "options": ["9:16", "3:4", "1:1", "16:9", "4:3"],
+          "enum_type_name": ""
+        },
+        "ui_properties": {
+          "selected": false,
+          "position": { "x": 0, "y": 340 },
+          "zIndex": 0,
+          "width": 320,
+          "title": "3️⃣ Формат",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "in_shot_count",
+        "type": "nodetool.input.IntegerInput",
+        "data": {
+          "name": "shot_count",
+          "description": "Количество кадров (1-4)",
+          "value": 1,
+          "min": 1,
+          "max": 4
+        },
+        "ui_properties": {
+          "selected": false,
+          "position": { "x": 0, "y": 480 },
+          "zIndex": 0,
+          "width": 320,
+          "title": "4️⃣ Количество кадров",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "prompt_generator",
+        "type": "nodetool.text.Prompt",
+        "data": {
+          "prompt": "Ты профессиональный fashion-фотограф и арт-директор, специализирующийся на AI-фотосессиях.\n\nТема фотосессии: {{ theme }}\nСтиль: {{ style }}\nФормат: {{ format }}\nКоличество кадров: {{ shot_count }}\n\nСгенерируй детальное описание для AI-фотосессии. Для КАЖДОГО кадра (если их несколько) укажи:\n\n1. **SHOT_TYPE** — тип кадра (close-up face / medium shot по пояс / full body / 3/4 портрет)\n2. **POSE** — детальное описание позы: положение головы, направление взгляда, руки, корпус, ноги (если видны). Используй конкретику: \"голова слегка наклонена вправо\", \"одна рука поправляет волосы\", \"взгляд в объектив из-под ресниц\"\n3. **CLOTHING** — одежда и её детали: цвет, материал, фасон, как сидит, открытые участки тела\n4. **ACCESSORIES** — украшения, сумки, очки, букеты, реквизит\n5. **HAIR_MAKEUP** — причёска и макияж: укладка, объём, макияж (стрелки, губы, хайлайтер)\n6. **LOCATION** — локация и фон: где происходит съёмка, детали окружения\n7. **LIGHTING** — освещение: тип (golden hour / studio / flash / low-key), направление, тени\n8. **CAMERA** — камера и настройки: iPhone / Canon / Sony, фокусное расстояние, диафрагма, глубина резкости\n9. **ATMOSPHERE** — атмосфера и mood: тёплый/холодный, романтичный/драматичный, film grain, цветокоррекция\n\nВажные правила:\n- Описания должны быть на РУССКОМ языке для основных элементов, технические термины можно на английском\n- Каждый элемент — 1-3 предложения максимум\n- Конкретика > абстракция (\"красное мини-платье с открытыми плечами\" вместо \"платье\")\n- Если несколько кадров — они должны быть разными по позе/ракурсу, но в единой стилистике\n\nФормат ответа:\nДля каждого кадра пиши в формате:\n---КАДР N---\nSHOT_TYPE: ...\nPOSE: ...\nCLOTHING: ...\nACCESSORIES: ...\nHAIR_MAKEUP: ...\nLOCATION: ...\nLIGHTING: ...\nCAMERA: ...\nATMOSPHERE: ..."
+        },
+        "ui_properties": {
+          "selected": false,
+          "position": { "x": 400, "y": 0 },
+          "zIndex": 0,
+          "width": 400,
+          "height": 500,
+          "title": "5️⃣ Генерация деталей",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {
+          "theme": "весенняя фотосессия с букетом розовых тюльпанов на белой кровати",
+          "style": "lifestyle",
+          "format": "9:16",
+          "shot_count": "1"
+        },
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "llm_agent",
+        "type": "nodetool.agents.Agent",
+        "data": {
+          "model": {
+            "type": "language_model",
+            "provider": "openai",
+            "id": "gpt-5-mini",
+            "name": "GPT-5 mini",
+            "path": null,
+            "supported_tasks": []
+          },
+          "system": "Ты креативный арт-директор для AI-фотосессий. Твоя задача — генерировать детальные, визуально богатые описания для фотографий. Используй конкретные детали: цвета, текстуры, позы, освещение. Избегай абстракций. Каждое описание должно быть достаточно детальным, чтобы AI-модель генерации изображений могла создать именно то, что описано."
+        },
+        "ui_properties": {
+          "selected": false,
+          "position": { "x": 860, "y": 0 },
+          "zIndex": 0,
+          "width": 360,
+          "height": 400,
+          "title": "6️⃣ LLM: Генерация",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "prompt_assembler",
+        "type": "nodetool.text.Prompt",
+        "data": {
+          "prompt": "Собери финальный промпт для генерации AI-изображения.\n\nСгенерированные детали:\n{{ generated_details }}\n\nФормат: {{ format }}\n\nПравила сборки промпта:\n1. ВСЕГДА начинай с: \"СТРОГО сохранить внешность 1:1 — лицо, черты, пропорции, текстуру кожи, тон кожи, возраст, цвет и длину волос. Фото — эталон внешности.\"\n2. Укажи формат: \"Формат {{ format }}.\"\n3. Собери все элементы в связный текст, используя структуру:\n   - Тип кадра и базовая композиция\n   - Описание позы\n   - Одежда и аксессуары\n   - Причёска и макияж\n   - Локация и окружение\n   - Освещение\n   - Атмосфера и техническое\n4. ВСЕГДА заканчивай техническими терминами: \"Высокая детализация кожи, без пластиковой ретуши. Raw photo.\"\n\nЕсли несколько кадров — выведи каждый как отдельный промпт, разделяя их: \"\\n\\n---\\n\\n\"\n\nВыведи ТОЛЬКО финальный промпт(ы), без пояснений."
+        },
+        "ui_properties": {
+          "selected": false,
+          "position": { "x": 1280, "y": 0 },
+          "zIndex": 0,
+          "width": 400,
+          "height": 450,
+          "title": "7️⃣ Сборка промпта",
+          "selectable": true,
+          "bypassed": false
+        },
+        "dynamic_properties": {
+          "generated_details": "",
+          "format": "9:16"
+        },
+        "dynamic_outputs": {}
+      },
+      {
+        "id": "out_prompt",
+        "type": "nodetool.output.Output",
+        "data": {
+          "name": "final_prompt"
+        },
+        "ui_properties": {
+          "position": { "x": 1740, "y": 40 },
+          "zIndex": 0,
+          "width": 400,
+          "title": "📝 Готовый промпт",
+          "selectable": true
+        },
+        "dynamic_properties": {},
+        "dynamic_outputs": {}
+      }
+    ]
+  },
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "theme": {
+        "type": "string",
+        "default": "весенняя фотосессия с букетом розовых тюльпанов на белой кровати",
+        "label": "Тема фотосессии"
+      },
+      "style": {
+        "type": "string",
+        "enum": ["lifestyle", "editorial", "studio", "street", "romantic", "dramatic", "minimalist", "cottagecore"],
+        "default": "lifestyle",
+        "label": "Стиль"
+      },
+      "format": {
+        "type": "string",
+        "enum": ["9:16", "3:4", "1:1", "16:9", "4:3"],
+        "default": "9:16",
+        "label": "Формат"
+      },
+      "shot_count": {
+        "type": "integer",
+        "default": 1,
+        "minimum": 1,
+        "maximum": 4,
+        "label": "Количество кадров"
+      }
+    },
+    "required": ["theme", "style", "format", "shot_count"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "final_prompt": {
+        "type": "string",
+        "label": "Готовый промпт"
+      }
+    },
+    "required": ["final_prompt"]
+  },
+  "settings": {},
+  "package_name": "nodetool-base",
+  "path": null,
+  "run_mode": null,
+  "required_providers": null,
+  "required_models": null
+}
