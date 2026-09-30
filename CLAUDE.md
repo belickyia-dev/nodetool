@@ -353,7 +353,7 @@ ssh pi "curl -s http://localhost:7777/health"
 ssh pi "docker service logs nodetool_app --since 5m -f"
 
 # Внешний URL (после настройки DNS)
-curl -s https://nodetool.postchain.online/health
+curl -s https://nodetool.tarotgobot.online/health
 ```
 
 **Откат при проблемах:**

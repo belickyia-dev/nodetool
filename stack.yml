@@ -1,0 +1,74 @@
+# NodeTool Stack for Docker Swarm (PI)
+# Deploy: git push gitlab main → CI auto-deploys
+
+networks:
+  proxy:
+    external: true
+  backend:
+    external: true
+  internal:
+    driver: overlay
+
+volumes:
+  nodetool-data:
+  nodetool-assets:
+
+services:
+  app:
+    image: nodetool:local
+    networks:
+      - proxy
+      - backend
+      - internal
+    environment:
+      - HOST=0.0.0.0
+      - PORT=7777
+      - NODETOOL_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - SECRETS_MASTER_KEY=${SECRETS_MASTER_KEY}
+      - NODETOOL_STORAGE_BACKEND=local
+      - ASSET_BUCKET=/workspace/assets
+      - STATIC_FOLDER=/app/web/dist
+      - NODETOOL_TRUST_LOCAL_NETWORKS=172.16.0.0/12,10.0.0.0/8,0.0.0.0/0
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - FAL_API_KEY=${FAL_API_KEY:-}
+      - KIE_API_KEY=${KIE_API_KEY:-}
+      - HF_TOKEN=${HF_TOKEN:-}
+    volumes:
+      - nodetool-data:/workspace
+      - nodetool-assets:/workspace/assets
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        order: stop-first
+      rollback_config:
+        parallelism: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 1G
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.nodetool.rule=Host(`nodetool.tarotgobot.online`)"
+        - "traefik.http.routers.nodetool.entrypoints=websecure"
+        - "traefik.http.routers.nodetool.tls.certresolver=letsencrypt"
+        - "traefik.http.routers.nodetool.middlewares=nodetool-auth"
+        - "traefik.http.middlewares.nodetool-auth.basicauth.users=admin:$$apr1$$g9N3QBtt$$lpGCU/EvbmevKhkuoG5xF."
+        - "traefik.http.services.nodetool.loadbalancer.server.port=7777"
+        - "traefik.docker.network=proxy"
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:7777/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s

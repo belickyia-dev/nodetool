@@ -70,7 +70,7 @@ deploy:
       exit 1
   environment:
     name: production
-    url: https://nodetool.postchain.online
+    url: https://nodetool.tarotgobot.online
 
 # ─────────────────────────────────────────────────────────────
 # Notifications
