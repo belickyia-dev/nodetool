@@ -1,0 +1,104 @@
+# NodeTool CI/CD for PI Server (Docker Swarm)
+# Trigger: push to main → build → deploy → notify
+
+stages:
+  - build
+  - deploy
+  - notify
+
+variables:
+  DEPLOY_PATH: /opt/apps/nodetool
+  STACK_NAME: nodetool
+  IMAGE_NAME: nodetool:local
+
+# ─────────────────────────────────────────────────────────────
+# Build
+# ─────────────────────────────────────────────────────────────
+build:
+  stage: build
+  tags:
+    - pi
+  only:
+    - main
+  script:
+    - cd $DEPLOY_PATH
+    - git fetch origin main
+    - git reset --hard origin/main
+    - |
+      echo "Building Docker image..."
+      docker build \
+        --build-arg GIT_COMMIT_HASH=${CI_COMMIT_SHORT_SHA} \
+        --build-arg BUILD_NUMBER=${CI_PIPELINE_IID} \
+        -t ${IMAGE_NAME} .
+    - docker image prune -f
+  timeout: 60 minutes
+
+# ─────────────────────────────────────────────────────────────
+# Deploy
+# ─────────────────────────────────────────────────────────────
+deploy:
+  stage: deploy
+  tags:
+    - pi
+  only:
+    - main
+  needs:
+    - build
+  script:
+    - cd $DEPLOY_PATH
+    - |
+      echo "Loading environment..."
+      export $(grep -v '^#' .env | xargs)
+    - |
+      echo "Deploying stack..."
+      docker stack deploy -c stack.yml ${STACK_NAME}
+    - |
+      echo "Waiting for service to be ready..."
+      sleep 10
+      docker service ls | grep ${STACK_NAME}
+    - |
+      echo "Health check..."
+      for i in 1 2 3 4 5; do
+        if curl -fs http://localhost:7777/health; then
+          echo "✅ Service is healthy"
+          exit 0
+        fi
+        echo "Waiting for health check... attempt $i"
+        sleep 10
+      done
+      echo "❌ Health check failed"
+      exit 1
+  environment:
+    name: production
+    url: https://nodetool.postchain.online
+
+# ─────────────────────────────────────────────────────────────
+# Notifications
+# ─────────────────────────────────────────────────────────────
+notify_success:
+  stage: notify
+  tags:
+    - pi
+  only:
+    - main
+  when: on_success
+  script:
+    - |
+      curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+        -d chat_id="${TELEGRAM_CHAT_ID}" \
+        -d parse_mode="HTML" \
+        -d text="✅ <b>nodetool deployed</b>%0A%0A📦 <code>${CI_COMMIT_SHORT_SHA}</code>%0A📝 ${CI_COMMIT_TITLE}%0A🔗 <a href=\"${CI_PIPELINE_URL}\">Pipeline</a>"
+
+notify_failure:
+  stage: notify
+  tags:
+    - pi
+  only:
+    - main
+  when: on_failure
+  script:
+    - |
+      curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+        -d chat_id="${TELEGRAM_CHAT_ID}" \
+        -d parse_mode="HTML" \
+        -d text="❌ <b>nodetool FAILED</b>%0A%0A📦 <code>${CI_COMMIT_SHORT_SHA}</code>%0A📝 ${CI_COMMIT_TITLE}%0A🔗 <a href=\"${CI_PIPELINE_URL}\">Pipeline</a>"
