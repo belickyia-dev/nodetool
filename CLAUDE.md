@@ -317,57 +317,55 @@ cat ~/.claude.json                         # для Claude Code
 
 ### Deploying to PI Server
 
-PI сервер запускает NodeTool из исходников через PM2. Деплой — ручной перенос файлов, без CI/CD.
+PI сервер запускает NodeTool через Docker Swarm. Деплой автоматический через GitLab CI.
 
-**Workflow:**
+**Автоматический деплой (GitLab CI):**
 
 ```bash
-# 1. Закоммитить и запушить изменения в main
-git push origin main
+# Push в main → автоматический build + deploy + Telegram notification
+git push gitlab main
 
-# 2. Подключиться к серверу и обновить код
-ssh pi "cd /opt/apps/nodetool && git pull"
-
-# 3. Пересобрать пакеты (обязательно после изменений в packages/)
-ssh pi "export PATH=\"\$HOME/.local/share/fnm/node-versions/v22.22.1/installation/bin:\$PATH\" && cd /opt/apps/nodetool && npm run build:packages"
-
-# 4. Перезапустить сервер
-ssh pi "export PATH=\"\$HOME/.local/share/fnm/node-versions/v22.22.1/installation/bin:\$PATH\" && cd /opt/apps/nodetool && pm2 restart nodetool"
+# Проверить статус pipeline
+glab ci status -R apps7733223/nodetool
 ```
 
-**One-liner деплой:**
+Pipeline stages:
+1. `build` — Docker build на PI runner (~15-20 min)
+2. `deploy` — `docker stack deploy` + health check
+3. `notify` — Telegram уведомление
+
+**Ручной деплой (если нужно):**
+
 ```bash
-ssh pi "cd /opt/apps/nodetool && git pull && export PATH=\"\$HOME/.local/share/fnm/node-versions/v22.22.1/installation/bin:\$PATH\" && npm run build:packages && pm2 restart nodetool"
+ssh pi "cd /opt/apps/nodetool && git pull && docker build -t nodetool:local . && docker stack deploy -c stack.yml nodetool"
 ```
 
-**Проверка после деплоя (ОБЯЗАТЕЛЬНО):**
+**Проверка после деплоя:**
 
 ```bash
-# 1. Проверить что сервер запустился
-ssh pi "curl -s http://localhost:7777/api/health"
-# Ожидаемый ответ: {"status":"ok"}
+# Статус сервиса
+ssh pi "docker service ls | grep nodetool"
 
-# 2. Проверить PM2 статус
-ssh pi "pm2 status"
-# nodetool должен быть online
+# Health check
+ssh pi "curl -s http://localhost:7777/health"
 
-# 3. Проверить логи на ошибки
-ssh pi "pm2 logs nodetool --lines 30"
+# Логи
+ssh pi "docker service logs nodetool_app --since 5m -f"
 
-# 4. Проверить доступность API через внешний URL
-curl -s https://api.nodetool.ai/api/health
-
-# 5. При проблемах — полные логи
-ssh pi "tail -100 /opt/apps/nodetool/logs/out.log"
-ssh pi "tail -100 /opt/apps/nodetool/logs/error.log"
+# Внешний URL (после настройки DNS)
+curl -s https://nodetool.postchain.online/health
 ```
 
 **Откат при проблемах:**
 ```bash
-ssh pi "cd /opt/apps/nodetool && git checkout HEAD~1 && npm run build:packages && pm2 restart nodetool"
+ssh pi "docker service update --rollback nodetool_app"
 ```
 
-**Environment variables:** `/opt/apps/nodetool/.env` (API ключи, секреты).
+**Конфигурация:**
+- Stack: `/opt/apps/nodetool/stack.yml`
+- Environment: `/opt/apps/nodetool/.env`
+- GitLab CI: `.gitlab-ci.yml`
+- Runner tag: `pi`
 
 ### nodetool run (DSL Workflows)
 
