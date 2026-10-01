@@ -22,8 +22,8 @@ build:
     - main
   script:
     - cd $DEPLOY_PATH
-    - git fetch origin main
-    - git reset --hard origin/main
+    - git fetch gitlab main
+    - git reset --hard gitlab/main
     - |
       echo "Building Docker image..."
       docker build \
