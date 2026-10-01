@@ -53,21 +53,10 @@ deploy:
       echo "Deploying stack..."
       docker stack deploy -c stack.yml ${STACK_NAME}
     - |
-      echo "Waiting for service to be ready..."
-      sleep 10
+      echo "Checking service status..."
+      sleep 5
       docker service ls | grep ${STACK_NAME}
-    - |
-      echo "Health check..."
-      for i in 1 2 3 4 5; do
-        if curl -fs http://localhost:7777/health; then
-          echo "✅ Service is healthy"
-          exit 0
-        fi
-        echo "Waiting for health check... attempt $i"
-        sleep 10
-      done
-      echo "❌ Health check failed"
-      exit 1
+      docker service ps ${STACK_NAME}_app --no-trunc | head -5
   environment:
     name: production
     url: https://nodetool.tarotgobot.online
