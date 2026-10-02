@@ -24,7 +24,6 @@ services:
       - HOST=0.0.0.0
       - PORT=7777
       - NODETOOL_ENV=production
-      - NODETOOL_LOG_LEVEL=debug
       - DB_PATH=/workspace/nodetool.db
       - SECRETS_MASTER_KEY=${SECRETS_MASTER_KEY}
       - NODETOOL_STORAGE_BACKEND=local
