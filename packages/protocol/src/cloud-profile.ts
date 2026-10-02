@@ -172,7 +172,8 @@ export const CLOUD_PROVIDER_IDS: readonly string[] = [
   "xai",
   "fal_ai",
   "kie",
-  "openrouter"
+  "openrouter",
+  "elevenlabs"
 ];
 
 /**

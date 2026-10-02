@@ -37,6 +37,7 @@ services:
       - KIE_API_KEY=${KIE_API_KEY:-}
       - HF_TOKEN=${HF_TOKEN:-}
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY:-}
     volumes:
       - nodetool-data:/workspace
       - nodetool-assets:/workspace/assets
