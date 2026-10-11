@@ -96,13 +96,8 @@ export const CLOUD_NODE_NAMESPACES: readonly string[] = [
   "lib.grid",
   "lib.audio", // DSP / effects (reverb, delay, EQ, …)
 
-  // — Provider node namespaces: the big LLM/multimodal labs + Fal + Kie —
-  "openai", // openai.text / .image / .audio / .agents
-  "gemini", // gemini.text / .image / .audio / .video
-  "mistral", // mistral.text / .vision / .embeddings
-  "xai", // xai.text / .image / .vision
-  "fal", // fal.* (hosted image/video/audio models)
-  "kie" // kie.* (hosted image/video/audio models)
+  // — Provider node namespaces: Fal only (OpenRouter provides LLM access) —
+  "fal" // fal.* (hosted image/video/audio models)
 ];
 
 /**
@@ -158,31 +153,23 @@ export const CLOUD_NODE_DENYLIST: readonly string[] = [
 ];
 
 /**
- * Provider ids exposed in the cloud product: the big foundation-model labs
- * plus Fal and Kie for media. Anthropic and Groq have no dedicated node
- * namespace — they reach users through the Agent / Chat / generator nodes via
- * the provider registry, so they live here only.
+ * Provider ids exposed in the cloud product: OpenRouter for LLM access,
+ * Fal for media generation, ElevenLabs for voice synthesis. All other
+ * providers (OpenAI, Anthropic, Gemini, etc.) are accessed through OpenRouter.
  */
 export const CLOUD_PROVIDER_IDS: readonly string[] = [
-  "openai",
-  "anthropic",
-  "gemini",
-  "groq",
-  "mistral",
-  "xai",
-  "fal_ai",
-  "kie",
   "openrouter",
+  "fal_ai",
   "elevenlabs"
 ];
 
 /**
  * Built-in node packs loaded under the cloud profile. `base` is required and
- * always loads; `fal` and `kie` are the only provider packs kept. Every other
+ * always loads; `fal` is the only media provider pack kept. Every other
  * provider pack (Replicate, Hugging Face, Together, MiniMax, Topaz, Reve,
- * AtlasCloud, ElevenLabs, Transformers.js) stays off.
+ * AtlasCloud, Kie, Transformers.js) stays off.
  */
-export const CLOUD_BUILTIN_PACK_IDS: readonly string[] = ["base", "fal", "kie"];
+export const CLOUD_BUILTIN_PACK_IDS: readonly string[] = ["base", "fal"];
 
 /**
  * Whether `nodeType` is offered in the cloud product. An explicit allowlist

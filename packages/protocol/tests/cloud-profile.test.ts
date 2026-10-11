@@ -38,7 +38,7 @@ describe("cloud profile activation", () => {
 });
 
 describe("isCloudNodeType", () => {
-  it("admits the creative core namespaces", () => {
+  it("admits the creative core namespaces plus Fal", () => {
     for (const nodeType of [
       "nodetool.image.TextToImage",
       "nodetool.audio.synth.Oscillator",
@@ -50,18 +50,13 @@ describe("isCloudNodeType", () => {
       "lib.image.warp.Offset",
       "lib.audio.Reverb",
       "lib.svg.Document",
-      "openai.image.CreateImage",
-      "gemini.video.TextToVideo",
-      "mistral.text.ChatComplete",
-      "xai.image.GenerateImage",
-      "fal.image.flux",
-      "kie.video.veo"
+      "fal.image.flux"
     ]) {
       expect(isCloudNodeType(nodeType)).toBe(true);
     }
   });
 
-  it("rejects the nerdy / out-of-scope namespaces", () => {
+  it("rejects the nerdy / out-of-scope namespaces and direct provider nodes", () => {
     for (const nodeType of [
       "lib.os.ListFiles",
       "lib.sqlite.Query",
@@ -82,7 +77,13 @@ describe("isCloudNodeType", () => {
       "transformers.TextGeneration",
       "replicate.something",
       "together.flux",
-      "minimax.TextToVideo"
+      "minimax.TextToVideo",
+      // Direct provider nodes removed in favor of OpenRouter
+      "openai.image.CreateImage",
+      "gemini.video.TextToVideo",
+      "mistral.text.ChatComplete",
+      "xai.image.GenerateImage",
+      "kie.video.veo"
     ]) {
       expect(isCloudNodeType(nodeType)).toBe(false);
     }
@@ -152,11 +153,11 @@ describe("code is node-level trimmed; text is whole-listed minus file I/O", () =
 });
 
 describe("cloud provider + pack allowlists", () => {
-  it("keeps the big labs plus Fal and Kie, drops the rest", () => {
-    for (const id of ["openai", "anthropic", "gemini", "mistral", "xai", "groq", "fal_ai", "kie", "openrouter", "elevenlabs"]) {
+  it("keeps OpenRouter, Fal and ElevenLabs only, drops the rest", () => {
+    for (const id of ["openrouter", "fal_ai", "elevenlabs"]) {
       expect(isCloudProvider(id)).toBe(true);
     }
-    for (const id of ["replicate", "together", "minimax", "topaz", "cohere", "ollama"]) {
+    for (const id of ["openai", "anthropic", "gemini", "mistral", "xai", "groq", "kie", "replicate", "together", "minimax", "topaz", "cohere", "ollama"]) {
       expect(isCloudProvider(id)).toBe(false);
     }
   });
