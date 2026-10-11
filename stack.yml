@@ -26,7 +26,7 @@ services:
       - NODETOOL_ENV=production
       - DB_PATH=/workspace/nodetool.db
       - SECRETS_MASTER_KEY=${SECRETS_MASTER_KEY}
-      - NODETOOL_STORAGE_BACKEND=local
+      - NODETOOL_STORAGE_BACKEND=file
       - ASSET_BUCKET=/workspace/assets
       - STATIC_FOLDER=/app/web/dist
       - NODETOOL_TRUST_LOCAL_NETWORKS=172.16.0.0/12,10.0.0.0/8,0.0.0.0/0
