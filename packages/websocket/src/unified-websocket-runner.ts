@@ -1864,7 +1864,11 @@ export class UnifiedWebSocketRunner {
   }
 
   async disconnect(): Promise<void> {
-    log.info("Client disconnected");
+    log.info("Client disconnected", {
+      activeJobsCount: this.activeJobs.size,
+      activeJobIds: Array.from(this.activeJobs.keys()),
+      stack: new Error("disconnect() call stack").stack
+    });
     this.stopHeartbeat();
     this.stopStatsBroadcast();
     this.unregisterObserver();

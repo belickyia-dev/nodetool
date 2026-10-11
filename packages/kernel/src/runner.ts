@@ -760,7 +760,10 @@ export class WorkflowRunner {
 
   cancel(): void {
     // Stryker disable next-line StringLiteral,ObjectLiteral: diagnostic log args only
-    log.info("Job cancelled", { jobId: this.jobId });
+    log.info("Job cancelled", {
+      jobId: this.jobId,
+      stack: new Error("cancel() call stack").stack
+    });
     // Latch the request so a cancel before run() survives _resetRunState. §17.
     this._cancelRequested = true;
     this._cancelled = true;
